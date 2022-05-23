@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import InventoryList from "./InventoryList"
 import InputSearch from "./InputSearch"
+import InventoryList from "./InventoryList"
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -22,12 +22,18 @@ function App() {
     });
   }
 
+  function generateMenu() {
+    let chosenGame = inventory[Math.floor(Math.random() * inventory.length)]
+    alert("You should play "+chosenGame+".")
+  }
+
   return (
     <div>
       <Header />
       <p>Tablekeeper is a web application currently in development to manage your board game nights with efficiency and a bit of flair!</p>
       <InputSearch onAdd={addGame}/>
       <div>
+        <h1>Board Game Inventory</h1> 
         <ul>
           {inventory.map((gameItem, index) => (
             <InventoryList
@@ -39,6 +45,7 @@ function App() {
           ))}
         </ul>
       </div>
+      <button onClick={generateMenu}>Generate Menu</button>
       <Footer />
     </div>
   );
