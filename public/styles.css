@@ -34,3 +34,7 @@ footer {
 footer p {
   color: #7952B3;
 }
+
+ul {
+  list-style: none;
+}

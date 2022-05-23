@@ -37,7 +37,6 @@ function App() {
               onChecked={removeGame}
             />
           ))}
-          <li></li>
         </ul>
       </div>
       <Footer />
