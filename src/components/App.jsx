@@ -4,7 +4,6 @@ import InventoryList from "./InventoryList"
 import Header from "./Header";
 import Footer from "./Footer";
 
-
 function App() {
   const [inventory, setInventory] = useState([]);
 
@@ -24,16 +23,22 @@ function App() {
 
   function generateMenu() {
     let chosenGame = inventory[Math.floor(Math.random() * inventory.length)]
-    alert("You should play "+chosenGame+".")
+    if (chosenGame === undefined) {
+      alert("You must add games before generating a menu.")
+    } else {
+      alert("You should play "+chosenGame+".")
+    }
   }
 
   return (
     <div>
       <Header />
-      <p>Tablekeeper is a web application currently in development to manage your board game nights with efficiency and a bit of flair!</p>
+      <div className="introduction">
+        <p>Tablekeeper is a web application currently in development to manage your board game nights with efficiency and a bit of flair!</p>
+      </div>
       <InputSearch onAdd={addGame}/>
-      <div>
-        <h1>Board Game Inventory</h1> 
+      <div className="inventory">
+        <h3>Inventory</h3> 
         <ul>
           {inventory.map((gameItem, index) => (
             <InventoryList
