@@ -13,13 +13,21 @@ function App() {
     });
   }
 
-  function removeGame(id) {
+  function resetMenu() {
     setInventory((prevInventory) => {
-      return prevInventory.filter((inventory, index) => {
-        return index !== id;
-      });
+      return [];
     });
   }
+
+  // I have temporarily removed the functionality for removing a single game from the list, this might be added back in later and so the code remains.
+
+  // function removeGame(id) {
+  //   setInventory((prevInventory) => {
+  //     return prevInventory.filter((inventory, index) => {
+  //       return index !== id;
+  //     });
+  //   });
+  // }
 
   function generateMenu() {
     let chosenGame = inventory[Math.floor(Math.random() * inventory.length)]
@@ -28,6 +36,12 @@ function App() {
     } else {
       alert("You should play "+chosenGame+".")
     }
+  }
+
+  function resetMenu() {
+    setInventory((prevInventory) => {
+      return [];
+    });
   }
 
   return (
@@ -45,12 +59,13 @@ function App() {
               key={index}
               id={index}
               text={gameItem}
-              onChecked={removeGame}
+              // onChecked={removeGame}
             />
           ))}
         </ul>
       </div>
       <button onClick={generateMenu}>Generate Menu</button>
+      <button onClick={resetMenu}>Reset Menu</button>
       <Footer />
     </div>
   );
