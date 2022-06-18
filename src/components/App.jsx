@@ -5,7 +5,8 @@ import Header from "./Header";
 import Footer from "./Footer";
 
 function App() {
-  const [inventory, setInventory] = useState([]);
+  const [inventory, setInventory] = useState(["7 Wonders", "Arcana", "Ascension", "Battlestar Galactica", "The Binding of Isaac: Four Souls", "Borogrove", "Cards Against Humanity", "Carnival", "Catan", "Chili Mafia", "Citadels", "Creature Clash!", "CULTivate", "Eminent Domain", "Gloomhaven", "Inhuman Conditions", "Iwari", "Kabuto Sumo", "Munchkin Cthulu", "Munchkin Critical Role", "Pandemic", "Parks", "Radlands", "Root", "Scythe", "Seasons", "Sefirot", "Steven Universe: Beach-A-Palooza Card Battling Game", "Tang Garden", "Tapeworm", "Tichu", "Tidal Blades: Heroes of the Reef", "Trails", "The Twelve Doctors", "Veiled Fate", "Volfyirion", "Wingspan", "Your Friend is Sad", "Zombie Dice"]);
+  let user = "Daniel";
 
   function addGame(inputText) {
     setInventory((prevInventory) => {
@@ -19,15 +20,15 @@ function App() {
     });
   }
 
-  // I have temporarily removed the functionality for removing a single game from the list, this might be added back in later and so the code remains.
+  // I have temporarily re-added the functionality for removing a single game from the list until feature is designed for voting on games to play and filtering for votes.
 
-  // function removeGame(id) {
-  //   setInventory((prevInventory) => {
-  //     return prevInventory.filter((inventory, index) => {
-  //       return index !== id;
-  //     });
-  //   });
-  // }
+  function removeGame(id) {
+    setInventory((prevInventory) => {
+      return prevInventory.filter((inventory, index) => {
+        return index !== id;
+      });
+    });
+  }
 
   function generateMenu() {
     let chosenGame = inventory[Math.floor(Math.random() * inventory.length)]
@@ -38,12 +39,6 @@ function App() {
     }
   }
 
-  function resetMenu() {
-    setInventory((prevInventory) => {
-      return [];
-    });
-  }
-
   return (
     <div>
       <Header />
@@ -52,14 +47,14 @@ function App() {
       </div>
       <InputSearch onAdd={addGame}/>
       <div className="inventory">
-        <h3>Inventory</h3> 
+        <h3>{user}'s Inventory</h3> 
         <ul>
           {inventory.map((gameItem, index) => (
             <InventoryList
               key={index}
               id={index}
               text={gameItem}
-              // onChecked={removeGame}
+              onChecked={removeGame}
             />
           ))}
         </ul>
