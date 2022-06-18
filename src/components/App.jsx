@@ -3,9 +3,10 @@ import InputSearch from "./InputSearch"
 import InventoryList from "./InventoryList"
 import Header from "./Header";
 import Footer from "./Footer";
+import * as Constants from "./constants";
 
 function App() {
-  const [inventory, setInventory] = useState(["7 Wonders", "Arcana", "Ascension", "Battlestar Galactica", "The Binding of Isaac: Four Souls", "Borogrove", "Cards Against Humanity", "Carnival", "Catan", "Chili Mafia", "Citadels", "Creature Clash!", "CULTivate", "Eminent Domain", "Gloomhaven", "Inhuman Conditions", "Iwari", "Kabuto Sumo", "Munchkin Cthulu", "Munchkin Critical Role", "Pandemic", "Parks", "Radlands", "Root", "Scythe", "Seasons", "Sefirot", "Steven Universe: Beach-A-Palooza Card Battling Game", "Tang Garden", "Tapeworm", "Tichu", "Tidal Blades: Heroes of the Reef", "Trails", "The Twelve Doctors", "Veiled Fate", "Volfyirion", "Wingspan", "Your Friend is Sad", "Zombie Dice"]);
+  const [inventory, setInventory] = useState(Constants.GAMELIST);
   let user = "Daniel";
 
   function addGame(inputText) {
@@ -14,11 +15,12 @@ function App() {
     });
   }
 
-  function resetMenu() {
+  function clearMenu() {
     setInventory((prevInventory) => {
       return [];
     });
   }
+
 
   // I have temporarily re-added the functionality for removing a single game from the list until feature is designed for voting on games to play and filtering for votes.
 
@@ -59,8 +61,10 @@ function App() {
           ))}
         </ul>
       </div>
-      <button onClick={generateMenu}>Generate Menu</button>
-      <button onClick={resetMenu}>Reset Menu</button>
+      <div>
+        <button onClick={generateMenu}>Generate Menu</button>
+        <button onClick={clearMenu}>Clear Menu</button>
+      </div>
       <Footer />
     </div>
   );
