@@ -21,7 +21,6 @@ function App() {
     });
   }
 
-
   // I have temporarily re-added the functionality for removing a single game from the list until feature is designed for voting on games to play and filtering for votes.
 
   function removeGame(id) {
@@ -34,10 +33,13 @@ function App() {
 
   function generateMenu() {
     let chosenGame = inventory[Math.floor(Math.random() * inventory.length)]
+    let chosenGameTwo = inventory[Math.floor(Math.random() * inventory.length)]
+    let chosenGameThree = inventory[Math.floor(Math.random() * inventory.length)]
+
     if (chosenGame === undefined) {
       alert("You must add games before generating a menu.")
     } else {
-      alert("You should play "+chosenGame+".")
+      alert("You should play "+chosenGame+", "+chosenGameTwo+", and "+chosenGameThree+".") // Requires additional functionality to eliminate duplicate results.
     }
   }
 
