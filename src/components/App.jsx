@@ -31,18 +31,34 @@ function App() {
     });
   }
 
-  function generateMenu() {
-    let chosenGame = inventory[Math.floor(Math.random() * inventory.length)]
-    let chosenGameTwo = inventory[Math.floor(Math.random() * inventory.length)]
-    let chosenGameThree = inventory[Math.floor(Math.random() * inventory.length)]
-
-    if (chosenGame === undefined) {
-      alert("You must add games before generating a menu.")
-    } else {
-      alert("You should play "+chosenGame+", "+chosenGameTwo+", and "+chosenGameThree+".") // Requires additional functionality to eliminate duplicate results.
-    }
+  function generateRandomIndex() {
+    return Math.floor(Math.random() * inventory.length)
   }
 
+  function generateMenu() {
+    const storage = {};
+    if (inventory.length === 0) {
+      alert("You must add games before generating a menu.")
+    } else {
+      let chosenGameOne = inventory[generateRandomIndex()]; 
+      let i = 0;
+      while (i < 3) {  
+        function generateUniqueGame(gameName) { 
+          if (storage[gameName]) {
+            generateUniqueGame(inventory[generateRandomIndex()]);
+          } else {
+            storage[gameName] = true; 
+            i++;
+          }
+        }
+        generateUniqueGame(inventory[generateRandomIndex()]);
+        console.log({i})
+      }
+      console.log(storage, Object.keys(storage))
+      alert("You should play "+Object.keys(storage)[0]+", "+Object.keys(storage)[1]+", and "+Object.keys(storage)[2]+".") 
+    }
+  }
+  
   return (
     <div>
       <Header />
