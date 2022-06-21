@@ -6,8 +6,9 @@ import Footer from "./Footer";
 import * as Constants from "./constants";
 
 function App() {
-  const [inventory, setInventory] = useState(Constants.GAMELIST);
-  let user = "Daniel";
+  const [inventory, setInventory] = useState(Constants.GAMELIST_MDM);
+
+  // FUNCTIONS FOR INVENTORY MANIPULATION 
 
   function addGame(inputText) {
     setInventory((prevInventory) => {
@@ -21,8 +22,6 @@ function App() {
     });
   }
 
-  // I have temporarily re-added the functionality for removing a single game from the list until feature is designed for voting on games to play and filtering for votes.
-
   function removeGame(id) {
     setInventory((prevInventory) => {
       return prevInventory.filter((inventory, index) => {
@@ -30,6 +29,8 @@ function App() {
       });
     });
   }
+
+  // FUNCTIONS FOR MENU GENERATION
 
   function generateRandomIndex() {
     return Math.floor(Math.random() * inventory.length)
@@ -42,7 +43,7 @@ function App() {
     } else {
       let chosenGameOne = inventory[generateRandomIndex()]; 
       let i = 0;
-      while (i < 3) {  
+      while (i < 4) {  
         function generateUniqueGame(gameName) { 
           if (storage[gameName]) {
             generateUniqueGame(inventory[generateRandomIndex()]);
@@ -55,7 +56,7 @@ function App() {
         console.log({i})
       }
       console.log(storage, Object.keys(storage))
-      alert("You should play "+Object.keys(storage)[0]+", "+Object.keys(storage)[1]+", and "+Object.keys(storage)[2]+".") 
+      alert("You should play "+Object.keys(storage)[0]+", "+Object.keys(storage)[1]+", "+Object.keys(storage)[2] +", and "+Object.keys(storage)[3]+".") 
     }
   }
   
@@ -67,7 +68,7 @@ function App() {
       </div>
       <InputSearch onAdd={addGame}/>
       <div className="inventory">
-        <h3>{user}'s Inventory</h3> 
+        <h3>Inventory</h3>
         <ul>
           {inventory.map((gameItem, index) => (
             <InventoryList
@@ -79,7 +80,7 @@ function App() {
           ))}
         </ul>
       </div>
-      <div>
+      <div class="menu-buttons">
         <button onClick={generateMenu}>Generate Menu</button>
         <button onClick={clearMenu}>Clear Menu</button>
       </div>
