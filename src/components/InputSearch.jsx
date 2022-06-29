@@ -11,7 +11,7 @@ function InputSearch(props) {
 
   // Note to Self: This handleClick is for the eventual inclusion of the BGG API. Need to figure out how to turn XML into JSON to grab values from the API before this can work as intended.
 
-  // Check out URL Encode when trying to implement this fully.
+  // Check out URL Encode when trying to implement this fully as spaces will not be the only issue when trying to convert names to a usable URL.
 
   // function handleClick(event) {
   //   const newValue = event.target.value

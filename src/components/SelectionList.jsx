@@ -1,10 +1,10 @@
 import React from "react";
 
-function InventoryList(props) {
+function SelectionList(props) {
   return (
     <div
       onClick={() => {
-        props.onChecked(props.text);
+        props.onDelete(props.id);
       }}
     >
       <li>{props.text}</li>
@@ -12,4 +12,4 @@ function InventoryList(props) {
   );
 }
 
-export default InventoryList;
+export default SelectionList;

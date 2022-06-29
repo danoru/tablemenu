@@ -43,11 +43,24 @@ footer p {
   margin-top: 10px;
 }
 
-.inventory{
+
+.container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.left-content {
+  width: 40vw;
+}
+
+.search {
+  margin: auto; /* This needs adjustment to match for other view sizes. */
+}
+
+.inventory {
   background-color: #E1E8EB;
   border: black solid 1px;
   border-radius: 3px;
-  width: 50%;
 }
 
 .inventory h3 {
@@ -61,10 +74,31 @@ footer p {
   list-style: none;
 }
 
-.search {
-  margin: 5px 0 10px 0;
+.arrows {
+  align-items: center;
+  display: flex;
+  font-size: 5rem;
 }
 
-.menu-buttons {
-  margin-bottom: 50px;
+.right-content {
+  display: flex;
+  flex-flow: column nowrap;
+  width: 40vw;
+}
+
+.selections {
+  background-color: #E1E8EB;
+  border: black solid 1px;
+  border-radius: 3px;
+}
+
+.selections h3 {
+  background-color: #343A40;
+  border: black solid 1px;
+  color: #FFC107;
+  text-align: center;
+}
+
+.selections ul {
+  list-style: none;
 }
