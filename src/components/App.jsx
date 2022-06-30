@@ -7,14 +7,31 @@ import Footer from "./Footer";
 import * as Constants from "./constants";
 
 function App() {
-  const [inventory, setInventory] = useState(Constants.GAMELIST_MDM);
+  const [inventory, setInventory] = useState(Constants.GAMELIST_GROUP);
   const [gameSelection, setGameSelection] = useState([]);
+  const [displayName, setDisplayName] = useState("Group Inventory")
 
   // FUNCTIONS FOR INVENTORY & SELECTION MANIPULATION 
 
+  function switchInventory() {
+    if (inventory === Constants.GAMELIST_GROUP) {
+      setDisplayName("MDM's Inventory")
+      setInventory(Constants.GAMELIST_MDM)
+      console.log("This should say MDM now.")
+    } else if (inventory === Constants.GAMELIST_MDM) {
+      setDisplayName("TAD's Inventory")
+      setInventory(Constants.GAMELIST_TAD)
+      console.log("This should say TAD now.")
+    } else if (inventory === Constants.GAMELIST_TAD) {
+      setDisplayName("Group Inventory")
+      setInventory(Constants.GAMELIST_GROUP)
+      console.log("This should say group now.")
+    }
+  };
+
   function addGame(inputText) {
-    setInventory((prevInventory) => {
-      return [...prevInventory, inputText];
+    setGameSelection((prevGameSelection) => {
+      return [...prevGameSelection, inputText];
     });
   }
 
@@ -77,9 +94,9 @@ function App() {
       </div>
       <div className="container">
         <div className="left-content">
-          <InputSearch onAdd={addGame}/>
+          <button onClick={switchInventory}>Switch Inventory</button>
           <div className="inventory">
-            <h3>Inventory</h3>
+            <h3>{displayName}</h3>
             <ul>
               {inventory.map((gameItem, index) => (
                 <InventoryList
@@ -96,7 +113,7 @@ function App() {
           <p>➔</p>
         </div>
         <div className="right-content">
-          <br></br> {/* This is temporary to test positioning. */}
+          <InputSearch onAdd={addGame}/>
           <div className="selections">
             <h3>Selections</h3>
             <ul>
@@ -116,7 +133,7 @@ function App() {
           </div>
         </div>
       </div>
-      <Footer />
+      {/* <Footer /> Footer has been removed temporarily because it is blocking readability. Will be reimplemented once styling is settled.*/}
     </div>
   );
 }

@@ -53,10 +53,6 @@ footer p {
   width: 40vw;
 }
 
-.search {
-  margin: auto; /* This needs adjustment to match for other view sizes. */
-}
-
 .inventory {
   background-color: #E1E8EB;
   border: black solid 1px;
