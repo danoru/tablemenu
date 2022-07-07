@@ -133,7 +133,7 @@ function App() {
           </div>
         </div>
       </div>
-      {/* <Footer /> Footer has been removed temporarily because it is blocking readability. Will be reimplemented once styling is settled.*/}
+      <Footer />
     </div>
   );
 }
