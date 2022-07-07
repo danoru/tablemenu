@@ -58,7 +58,6 @@ footer p {
   border: black solid 1px;
   border-radius: 3px;
   max-height: 80vh;
-  overflow: auto;
 }
 
 .inventory h3 {
@@ -68,8 +67,17 @@ footer p {
   text-align: center;
 }
 
-.inventory ul {
+.inventory-content {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.inventory-content ul {
   list-style: none;
+}
+
+li {
+  cursor:pointer;
 }
 
 .arrows {
@@ -89,6 +97,10 @@ footer p {
   border: black solid 1px;
   border-radius: 3px;
   max-height: 80vh;
+}
+
+.selections-content {
+  max-height: 70vh;
   overflow: auto;
 }
 

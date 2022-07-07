@@ -97,16 +97,18 @@ function App() {
           <button onClick={switchInventory}>Switch Inventory</button>
           <div className="inventory">
             <h3>{displayName}</h3>
-            <ul>
-              {inventory.map((gameItem, index) => (
-                <InventoryList
-                  key={index}
-                  id={index}
-                  text={gameItem}
-                  onChecked={selectGame}
-                />
-              ))}
-            </ul>
+            <div className="inventory-content">
+              <ul>
+                {inventory.map((gameItem, index) => (
+                  <InventoryList
+                    key={index}
+                    id={index}
+                    text={gameItem}
+                    onChecked={selectGame}
+                  />
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
         <div className="arrows">
@@ -116,16 +118,18 @@ function App() {
           <InputSearch onAdd={addGame}/>
           <div className="selections">
             <h3>Selections</h3>
-            <ul>
-              {gameSelection.map((selectedItem, index) => (
-                <SelectionList
-                  key={index}
-                  id={index}
-                  text={selectedItem}
-                  onDelete={removeGame}
-                />
-              ))}
-            </ul>
+            <div className="selections-content">
+              <ul>
+                {gameSelection.map((selectedItem, index) => (
+                  <SelectionList
+                    key={index}
+                    id={index}
+                    text={selectedItem}
+                    onDelete={removeGame}
+                  />
+                ))}
+              </ul>
+            </div>
           </div>
           <div className="menu-buttons">
             <button onClick={generateMenu}>Generate Menu</button>
