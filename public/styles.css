@@ -57,6 +57,8 @@ footer p {
   background-color: #E1E8EB;
   border: black solid 1px;
   border-radius: 3px;
+  max-height: 80vh;
+  overflow: auto;
 }
 
 .inventory h3 {
@@ -86,6 +88,8 @@ footer p {
   background-color: #E1E8EB;
   border: black solid 1px;
   border-radius: 3px;
+  max-height: 80vh;
+  overflow: auto;
 }
 
 .selections h3 {
