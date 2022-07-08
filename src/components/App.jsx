@@ -91,6 +91,9 @@ function App() {
       <Header />
       <div className="introduction">
         <p>Tablekeeper is a web application currently in development to manage your board game nights with efficiency and a bit of flair!</p>
+        <p><strong>How do I use Tablekeeper?</strong></p>
+        <p>It's easy! Select your inventory on the left and click on the games that you would like added to the <strong>Selections</strong> pool. Once you have at least four <em>unique</em> games selected, press the <strong>Generate Menu</strong> button to create a menu of games to play.</p>
+        <p>Duplicate items in the <strong>Selections</strong> pool will increase the item's chances of being selected, but will not be repeated in the final game menu. You can remove items from the Selections list by clicking on them or by clicking the <strong>Clear Menu</strong> button.</p>
       </div>
       <div className="container">
         <div className="left-content">

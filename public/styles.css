@@ -43,6 +43,9 @@ footer p {
   margin-top: 10px;
 }
 
+.introduction p {
+  padding: 10px 0;
+}
 
 .container {
   display: flex;
@@ -57,7 +60,7 @@ footer p {
   background-color: #E1E8EB;
   border: black solid 1px;
   border-radius: 3px;
-  max-height: 80vh;
+  max-height: 70vh;
 }
 
 .inventory h3 {
@@ -68,7 +71,7 @@ footer p {
 }
 
 .inventory-content {
-  max-height: 70vh;
+  max-height: 60vh;
   overflow: auto;
 }
 
@@ -96,11 +99,11 @@ li {
   background-color: #E1E8EB;
   border: black solid 1px;
   border-radius: 3px;
-  max-height: 80vh;
+  max-height: 70vh;
 }
 
 .selections-content {
-  max-height: 70vh;
+  max-height: 60vh;
   overflow: auto;
 }
 
