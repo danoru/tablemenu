@@ -1,0 +1,38 @@
+header {
+  background-color: #343A40;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+  margin: auto -16px;
+  padding: 16px 32px;
+}
+
+header h1 {
+  color: #FFC107;
+  font-weight: 200;
+}
+
+.navbar {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 80% auto auto;
+  align-items: flex-end;
+}
+
+a:link { 
+  text-decoration: none;
+  color: #FFC107;;
+}
+
+a:visited {
+  text-decoration: none;
+  color: #FFC107;;
+}
+
+a:hover { 
+  text-decoration: none;
+  color: #FFC107;;
+}
+
+a:active { 
+  text-decoration: none;
+  color: #FFC107;;
+}

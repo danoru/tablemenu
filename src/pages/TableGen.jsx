@@ -1,12 +1,10 @@
 import React, {useState} from "react";
-import InputSearch from "./InputSearch"
-import InventoryList from "./InventoryList"
-import SelectionList from "./SelectionList"
-import Header from "./Header";
-import Footer from "./Footer";
-import * as Constants from "./constants";
+import InputSearch from "../components/InputSearch"
+import InventoryList from "../components/InventoryList"
+import SelectionList from "../components/SelectionList"
+import * as Constants from "../components/constants";
 
-function App() {
+function TableGen() {
   const [inventory, setInventory] = useState(Constants.GAMELIST_GROUP);
   const [gameSelection, setGameSelection] = useState([]);
   const [displayName, setDisplayName] = useState("Group Inventory")
@@ -88,10 +86,9 @@ function App() {
   
   return (
     <div>
-      <Header />
       <div className="introduction">
-        <p>Tablekeeper is a web application currently in development to manage your board game nights with efficiency and a bit of flair!</p>
-        <p><strong>How do I use Tablekeeper?</strong></p>
+        <p>TableGen is a quick, simplified version of the Tablekeeper application.</p>
+        <p><strong>How do I use TableGen?</strong></p>
         <p>It's easy! Select your inventory on the left and click on the games that you would like added to the <strong>Selections</strong> pool. Once you have at least four <em>unique</em> games selected, press the <strong>Generate Menu</strong> button to create a menu of games to play.</p>
         <p>Duplicate items in the <strong>Selections</strong> pool will increase the item's chances of being selected, but will not be repeated in the final game menu. You can remove items from the Selections list by clicking on them or by clicking the <strong>Clear Menu</strong> button.</p>
       </div>
@@ -140,9 +137,8 @@ function App() {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }
 
-export default App;
+export default TableGen;
