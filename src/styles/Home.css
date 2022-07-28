@@ -1,0 +1,22 @@
+.home-container {
+  background-color: grey;
+  margin-left: 35vw;
+  margin-top: 10vh;
+  width: 30vw;
+}
+
+.home-container > div {
+ padding: 10px;
+}
+
+.room-code-form {
+  display: flex;
+}
+
+.room-code-form > div {
+  flex-direction: column;
+}
+
+.room-code-form > button {
+  background-color: red;
+}

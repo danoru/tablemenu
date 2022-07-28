@@ -1,11 +1,11 @@
 import React from "react";
-import { BrowserRouter, Route, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../styles/Header.css";
 
 function Header() {
   return (
     <header>
-      <ul class="navbar">
+      <ul className="navbar">
         <li>
           <Link to="/">
             <h1>Tablekeeper</h1>
