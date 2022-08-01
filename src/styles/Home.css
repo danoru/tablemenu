@@ -5,12 +5,18 @@
   width: 30vw;
 }
 
-.home-container > div {
+.home-container > * {
  padding: 10px;
+}
+
+.home-introduction > * {
+  padding: 5px;
 }
 
 .room-code-form {
   display: flex;
+  justify-content: center;
+  text-align: center;
 }
 
 .room-code-form > div {
@@ -19,4 +25,9 @@
 
 .room-code-form > button {
   background-color: red;
+}
+
+.home-redirect {
+  font-size: small;
+  font-style: italic;
 }
