@@ -15,15 +15,12 @@ function TableGen() {
     if (inventory === Constants.GAMELIST_GROUP) {
       setDisplayName("MDM's Inventory")
       setInventory(Constants.GAMELIST_MDM)
-      console.log("This should say MDM now.")
     } else if (inventory === Constants.GAMELIST_MDM) {
       setDisplayName("TAD's Inventory")
       setInventory(Constants.GAMELIST_TAD)
-      console.log("This should say TAD now.")
     } else if (inventory === Constants.GAMELIST_TAD) {
       setDisplayName("Group Inventory")
       setInventory(Constants.GAMELIST_GROUP)
-      console.log("This should say group now.")
     }
   };
 
