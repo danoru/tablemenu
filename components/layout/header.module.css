@@ -1,3 +1,4 @@
+
 .header {
   background-color: #343A40;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
@@ -17,22 +18,22 @@
   align-items: flex-end;
 }
 
-/* a:link { 
+.navbar a:link { 
   text-decoration: none;
   color: #FFC107;;
 }
 
-a:visited {
+.navbar a:visited {
   text-decoration: none;
   color: #FFC107;;
 }
 
-a:hover { 
+.navbar a:hover { 
   text-decoration: none;
   color: #FFC107;;
 }
 
-a:active { 
+.navbar a:active { 
   text-decoration: none;
   color: #FFC107;;
-} */
+}

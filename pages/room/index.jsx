@@ -1,8 +1,8 @@
 import { useState } from "react";
-import InputSearch from "../components/inventory/InputSearch";
-import InventoryList from "../components/inventory/InventoryList";
-import SelectionList from "../components/inventory/SelectionList";
-import * as Constants from "../helpers/constants";
+import InputSearch from "../../components/inventory/InputSearch";
+import InventoryList from "../../components/inventory/InventoryList";
+import SelectionList from "../../components/inventory/SelectionList";
+import * as Constants from "../../helpers/constants";
 
 function TableGen() {
   const [inventory, setInventory] = useState(Constants.GAMELIST_GROUP);

@@ -1,23 +1,22 @@
 import Link from "next/link";
-
 import classes from "./header.module.css";
 
 function Header() {
   return (
     <header className={classes.header}>
-      <div className={classes.navbar}>
+      <div>
         <div>
           <Link href="/">
             <h1>Tablekeeper</h1>
           </Link>
         </div>
         <nav>
-          <ul>
+          <ul className={classes.navbar}>
             <li>
-              <Link href="/Login">Login</Link>
+              <Link href="/login">Login</Link>
             </li>
             <li>
-              <Link href="/TableGen">TableGen</Link>
+              <Link href="/tablegen">TableGen</Link>
             </li>
           </ul>
         </nav>
