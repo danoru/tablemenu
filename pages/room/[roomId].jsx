@@ -2,25 +2,25 @@ import { useState } from "react";
 import InputSearch from "../../components/inventory/InputSearch";
 import InventoryList from "../../components/inventory/InventoryList";
 import SelectionList from "../../components/inventory/SelectionList";
-import * as Constants from "../../helpers/constants";
+import * as Gamelists from "../../data/gamelists";
 
 function TableGen() {
-  const [inventory, setInventory] = useState(Constants.GAMELIST_GROUP);
+  const [inventory, setInventory] = useState(Gamelists.GAMELIST_GROUP);
   const [gameSelection, setGameSelection] = useState([]);
   const [displayName, setDisplayName] = useState("Group Inventory");
 
   // FUNCTIONS FOR INVENTORY & SELECTION MANIPULATION
 
   function switchInventory() {
-    if (inventory === Constants.GAMELIST_GROUP) {
+    if (inventory === Gamelists.GAMELIST_GROUP) {
       setDisplayName("MDM's Inventory");
-      setInventory(Constants.GAMELIST_MDM);
-    } else if (inventory === Constants.GAMELIST_MDM) {
+      setInventory(Gamelists.GAMELIST_MDM);
+    } else if (inventory === Gamelists.GAMELIST_MDM) {
       setDisplayName("TAD's Inventory");
-      setInventory(Constants.GAMELIST_TAD);
-    } else if (inventory === Constants.GAMELIST_TAD) {
+      setInventory(Gamelists.GAMELIST_TAD);
+    } else if (inventory === Gamelists.GAMELIST_TAD) {
       setDisplayName("Group Inventory");
-      setInventory(Constants.GAMELIST_GROUP);
+      setInventory(Gamelists.GAMELIST_GROUP);
     }
   }
 
