@@ -1,0 +1,146 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: sans-serif;
+}
+
+body {
+  background: #E1E8EB;
+  padding: 0 16px;
+}
+
+footer {
+  background-color: #343A40;
+  bottom: 0;
+  height: 2.5rem;
+  margin: auto -16px;
+  position: fixed;
+  text-align: center;
+  width: 100%;
+}
+
+footer p {
+  color: #FFC107;
+}
+
+.introduction{
+  margin-top: 10px;
+}
+
+.introduction p {
+  padding: 10px 0;
+}
+
+.container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.left-content {
+  width: 40vw;
+}
+
+.inventory {
+  background-color: #E1E8EB;
+  border: black solid 1px;
+  border-radius: 3px;
+  max-height: 70vh;
+}
+
+.inventory h3 {
+  background-color: #343A40;
+  border: black solid 1px;
+  color: #FFC107;
+  text-align: center;
+}
+
+.inventory-content {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.inventory-content ul {
+  list-style: none;
+}
+
+li {
+  cursor:pointer;
+}
+
+.arrows {
+  align-items: center;
+  display: flex;
+  font-size: 5rem;
+}
+
+.right-content {
+  display: flex;
+  flex-flow: column nowrap;
+  width: 40vw;
+}
+
+.selections {
+  background-color: #E1E8EB;
+  border: black solid 1px;
+  border-radius: 3px;
+  max-height: 70vh;
+}
+
+.selections-content {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.selections h3 {
+  background-color: #343A40;
+  border: black solid 1px;
+  color: #FFC107;
+  text-align: center;
+}
+
+.selections ul {
+  list-style: none;
+}
+
+header {
+  background-color: #343A40;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+  margin: auto -16px;
+  padding: 0 32px 16px 32px;
+}
+
+header h1 {
+  color: #FFC107;
+  font-weight: 200;
+}
+
+.navbar {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 80% auto auto;
+  align-items: flex-end;
+}
+
+a:link { 
+  text-decoration: none;
+  color: #FFC107;;
+}
+
+a:visited {
+  text-decoration: none;
+  color: #FFC107;;
+}
+
+a:hover { 
+  text-decoration: none;
+  color: #FFC107;;
+}
+
+a:active { 
+  text-decoration: none;
+  color: #FFC107;;
+}
