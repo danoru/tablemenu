@@ -6,7 +6,7 @@ import * as Gamelists from "../src/data/gamelists";
 
 function TableGen() {
   const [inventory, setInventory] = useState(Gamelists.GAMELIST_GROUP);
-  const [gameSelection, setGameSelection] = useState([]);
+  const [gameSelection, setGameSelection] = useState<string[]>([]);
   const [displayName, setDisplayName] = useState("Group Inventory");
 
   // FUNCTIONS FOR INVENTORY & SELECTION MANIPULATION
@@ -24,13 +24,13 @@ function TableGen() {
     }
   }
 
-  function addGame(inputText) {
+  function addGame(inputText: string) {
     setGameSelection((prevGameSelection) => {
       return [...prevGameSelection, inputText];
     });
   }
 
-  function selectGame(gameItem) {
+  function selectGame(gameItem: string) {
     setGameSelection((prevGameSelection) => {
       return [...prevGameSelection, gameItem];
     });
@@ -43,7 +43,7 @@ function TableGen() {
     });
   }
 
-  function removeGame(id) {
+  function removeGame(id: number) {
     setGameSelection((prevGameSelection) => {
       return prevGameSelection.filter((gameSelection, index) => {
         return index !== id;
@@ -58,21 +58,24 @@ function TableGen() {
   }
 
   function generateMenu() {
-    const storage = {};
+    const storage: any = {};
+    let i = 0;
+
+    function generateUniqueGame(gameName: any) {
+      if (storage[gameName]) {
+        generateUniqueGame(gameSelection[generateRandomIndex()]);
+      } else {
+        storage[gameName] = true;
+        i++;
+      }
+    }
+
     if (gameSelection.length === 0) {
       alert("You must add games before generating a menu.");
     } else {
       let chosenGameOne = gameSelection[generateRandomIndex()];
-      let i = 0;
+
       while (i < 4) {
-        function generateUniqueGame(gameName) {
-          if (storage[gameName]) {
-            generateUniqueGame(gameSelection[generateRandomIndex()]);
-          } else {
-            storage[gameName] = true;
-            i++;
-          }
-        }
         generateUniqueGame(gameSelection[generateRandomIndex()]);
         console.log({ i });
       }
