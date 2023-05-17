@@ -3,12 +3,9 @@ import Head from "next/head";
 import classes from "./index.module.css";
 
 function HomePage() {
-  let tableRoomCode = "";
-
   function submitRoomCode() {
-    tableRoomCode = document.getElementById("room-code").innerHTML;
-
-    if (tableRoomCode === "ABCDE") {
+    const tableRoomCode = document.getElementById("roomCode")!.innerHTML;
+    if (tableRoomCode == "ABCDE") {
       alert(
         "Your room code " +
           tableRoomCode +
