@@ -1,5 +1,9 @@
 import { useRouter } from "next/router";
-import * as Gamelists from "../../../data/gamelists";
+import {
+  GAMELIST_GROUP,
+  GAMELIST_MDM,
+  GAMELIST_TAD,
+} from "../../../src/data/gamelists";
 
 function ProfilePage() {
   const router = useRouter();
@@ -7,11 +11,11 @@ function ProfilePage() {
 
   const userInventoryCheck = () => {
     if (userId === "Danoru") {
-      return Gamelists.GAMELIST_MDM;
+      return GAMELIST_MDM;
     } else if (userId === "Tommy") {
-      return Gamelists.GAMELIST_TAD;
+      return GAMELIST_TAD;
     } else {
-      return Gamelists.GAMELIST_GROUP;
+      return GAMELIST_GROUP;
     }
   };
 

@@ -1,10 +1,10 @@
 import { useState } from "react";
 // import axios from "axios";
 
-function InputSearch(props) {
+function InputSearch(props: any) {
   const [inputText, setInputText] = useState("");
 
-  function handleChange(event) {
+  function handleChange(event: any) {
     const newValue = event.target.value;
     setInputText(newValue);
   }

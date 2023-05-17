@@ -1,4 +1,4 @@
-function InventoryList(props) {
+function InventoryList(props: any) {
   return (
     <div
       onClick={() => {

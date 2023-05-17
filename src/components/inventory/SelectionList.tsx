@@ -1,4 +1,4 @@
-function SelectionList(props) {
+function SelectionList(props: any) {
   return (
     <div
       onClick={() => {
