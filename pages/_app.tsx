@@ -1,6 +1,6 @@
 import Head from "next/head";
 
-import Layout from "../src/components/layout/layout";
+import Layout from "../src/components/layout/Layout";
 
 import "../src/styles/global.css";
 
