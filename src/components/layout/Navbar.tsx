@@ -1,6 +1,6 @@
 import * as React from "react";
 import AppBar from "@mui/material/AppBar";
-import Avatar from "@mui/material/Avatar";
+// import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -10,14 +10,22 @@ import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Toolbar from "@mui/material/Toolbar";
-import Tooltip from "@mui/material/Tooltip";
+// import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
 let isLoggedIn = false;
-const pages: any = [{ key: 1, link: "/tablegen", text: "TableGen" }];
-const settings: any = isLoggedIn
-  ? ["Profile", "Account", "Dashboard", "Logout"]
-  : [{ key: 1, link: "/login", text: "Login" }];
+const pages: any = isLoggedIn
+  ? [{ key: 1, link: "/tablegen", text: "TableGen" }]
+  : [
+      { key: 1, link: "/tablegen", text: "TableGen" },
+      { key: 2, link: "/join", text: "Join" },
+      { key: 3, link: "login", text: "Login" },
+    ];
+
+const settings: any = [
+  { key: 1, link: "/profile", text: "Profile" },
+  { key: 2, link: "/login", text: "Logout" },
+];
 
 function Navbar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
@@ -46,23 +54,6 @@ function Navbar() {
     <AppBar position="static" sx={{ backgroundColor: "#343A40" }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
-              fontWeight: 700,
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            Tablekeeper
-          </Typography>
-
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
               size="large"
@@ -101,24 +92,16 @@ function Navbar() {
               ))}
             </Menu>
           </Box>
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href=""
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            LOGO
-          </Typography>
+          <Box sx={{ display: "flex", flexGrow: 1, mr: 2 }}>
+            <Link href="/">
+              <img
+                src="/images/logo.svg"
+                width="100px"
+                height="100px"
+                alt="Tablekeeper"
+              />
+            </Link>
+          </Box>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page: any) => (
               <Button
@@ -131,7 +114,7 @@ function Navbar() {
             ))}
           </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
+          {/* <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
@@ -161,7 +144,7 @@ function Navbar() {
                 </MenuItem>
               ))}
             </Menu>
-          </Box>
+          </Box> */}
         </Toolbar>
       </Container>
     </AppBar>
