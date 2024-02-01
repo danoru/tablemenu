@@ -51,7 +51,14 @@ function Navbar() {
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#343A40" }}>
+    <AppBar
+      position="static"
+      sx={{
+        backgroundColor: "#343A40",
+        height: { xs: "9vh", md: "8vh" },
+        width: "100vw",
+      }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -102,7 +109,12 @@ function Navbar() {
               />
             </Link>
           </Box>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: { xs: "none", md: "flex" },
+            }}
+          >
             {pages.map((page: any) => (
               <Button
                 key={page.key}
