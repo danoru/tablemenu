@@ -1,0 +1,69 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("POSTGRES_URL_NON_POOLING")
+  extensions = [citext(schema: "public")]
+}
+
+model Following {
+  userId          Int
+  followingUserId Int
+  addedAt         DateTime  @default(now())
+  users           Users  @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([userId, followingUserId])
+}
+
+model Games {
+  id          Int         @id @default(autoincrement())
+  addedAt     DateTime    @default(now())
+  name        String      
+  description String?
+  imageUrl    String?
+  minPlayers  Int
+  maxPlayers  Int
+  playtime    Int         
+  complexity  Float?      
+  categories  String[]    
+  users       UserGames[] @relation("UserGames") 
+}
+
+model Users {
+  id            Int         @id @default(autoincrement())
+  username      String      @unique @db.Citext
+  password      String
+  firstName     String?
+  lastName      String?
+  email         String?
+  location      String?
+  website       String?
+  bio           String?
+  image         String?
+  badge         Badge       @default(USER)
+  joinDate      DateTime    @default(now())
+  collection    UserGames[] @relation("UserGames") 
+  following     Following[]
+}
+
+model UserGames {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  gameId    Int
+  addedAt   DateTime @default(now())
+  notes     String?  // User-specific notes for the game
+  user      Users    @relation("UserGames", fields: [userId], references: [id])
+  game      Games    @relation("UserGames", fields: [gameId], references: [id])
+
+  @@unique([userId, gameId])
+}
+
+enum Badge {
+  ADMIN
+  PATRON
+  USER
+}

@@ -2,29 +2,43 @@
   "name": "tablemenu",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@emotion/react": "^11.11.0",
-    "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.11.16",
-    "@mui/material": "^5.13.1",
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.2.0",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^0.27.2",
-    "next": "^12.3.1",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
-    "react-router-dom": "^6.3.0",
-    "typescript": "^5.0.4",
-    "web-vitals": "^2.1.4",
-    "xml-js": "^1.6.11"
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
+  "dependencies": {
+    "@emotion/cache": "latest",
+    "@emotion/react": "latest",
+    "@emotion/server": "latest",
+    "@emotion/styled": "latest",
+    "@mui/icons-material": "latest",
+    "@mui/material": "latest",
+    "@mui/material-nextjs": "latest",
+    "@mui/x-date-pickers": "^7.10.0",
+    "@prisma/client": "^5.15.0",
+    "bcrypt": "^5.1.1",
+    "decimal.js": "^10.4.3",
+    "formik": "^2.4.6",
+    "moment": "^2.30.1",
+    "next": "^14.0.0",
+    "next-auth": "^4.24.7",
+    "next-superjson-plugin": "^0.6.3",
+    "prisma": "^6.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "superjson": "^2.2.2",
+    "yup": "^1.4.0"
+  },
   "devDependencies": {
-    "@types/node": "20.1.7"
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "latest",
+    "eslint-config-next": "^15.0.0",
+    "prisma": "^6.2.1",
+    "ts-node": "^10.9.2",
+    "typescript": "latest"
   }
 }

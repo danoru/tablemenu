@@ -1,10 +1,10 @@
-import LoginForm from "../src/components/account/LoginForm";
+import RegistrationForm from "../src/components/account/RegistrationForm";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { getServerSession } from "next-auth";
 import { GetServerSideProps } from "next";
 
-function LoginPage() {
-  return <LoginForm />;
+function RegisterPage() {
+  return <RegistrationForm />;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -23,4 +23,5 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {},
   };
 };
-export default LoginPage;
+
+export default RegisterPage;
