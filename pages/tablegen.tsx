@@ -1,13 +1,14 @@
-import { useState } from "react";
+import React from "react";
+
 import InputSearch from "../src/components/inventory/InputSearch";
 import InventoryList from "../src/components/inventory/InventoryList";
 import SelectionList from "../src/components/inventory/SelectionList";
 import * as Gamelists from "../src/data/gamelists";
 
 function TableGen() {
-  const [inventory, setInventory] = useState(Gamelists.GAMELIST_GROUP);
-  const [gameSelection, setGameSelection] = useState<string[]>([]);
-  const [displayName, setDisplayName] = useState("Group Inventory");
+  const [inventory, setInventory] = React.useState(Gamelists.GAMELIST_GROUP);
+  const [gameSelection, setGameSelection] = React.useState<string[]>([]);
+  const [displayName, setDisplayName] = React.useState("Group Inventory");
 
   // FUNCTIONS FOR INVENTORY & SELECTION MANIPULATION
 
@@ -97,26 +98,21 @@ function TableGen() {
   return (
     <div>
       <div className="introduction">
-        <p>
-          TableGen is a quick, simplified version of the Tablekeeper
-          application.
-        </p>
+        <p>TableGen is a quick, simplified version of the Tablekeeper application.</p>
         <p>
           <strong>How do I use TableGen?</strong>
         </p>
         <p>
-          It's easy! Select your inventory on the left and click on the games
-          that you would like added to the <strong>Selections</strong> pool.
-          Once you have at least four <em>unique</em> games selected, press the{" "}
-          <strong>Generate Menu</strong> button to create a menu of games to
-          play.
+          It's easy! Select your inventory on the left and click on the games that you would like
+          added to the <strong>Selections</strong> pool. Once you have at least four <em>unique</em>{" "}
+          games selected, press the <strong>Generate Menu</strong> button to create a menu of games
+          to play.
         </p>
         <p>
-          Duplicate items in the <strong>Selections</strong> pool will increase
-          the item's chances of being selected, but will not be repeated in the
-          final game menu. You can remove items from the Selections list by
-          clicking on them or by clicking the <strong>Clear Menu</strong>{" "}
-          button.
+          Duplicate items in the <strong>Selections</strong> pool will increase the item's chances
+          of being selected, but will not be repeated in the final game menu. You can remove items
+          from the Selections list by clicking on them or by clicking the{" "}
+          <strong>Clear Menu</strong> button.
         </p>
       </div>
       <div className="container">
@@ -127,12 +123,7 @@ function TableGen() {
             <div className="inventory-content">
               <ul>
                 {inventory.map((gameItem, index) => (
-                  <InventoryList
-                    key={index}
-                    id={index}
-                    text={gameItem}
-                    onChecked={selectGame}
-                  />
+                  <InventoryList key={index} id={index} text={gameItem} onChecked={selectGame} />
                 ))}
               </ul>
             </div>
@@ -148,12 +139,7 @@ function TableGen() {
             <div className="selections-content">
               <ul>
                 {gameSelection.map((selectedItem, index) => (
-                  <SelectionList
-                    key={index}
-                    id={index}
-                    text={selectedItem}
-                    onDelete={removeGame}
-                  />
+                  <SelectionList key={index} id={index} text={selectedItem} onDelete={removeGame} />
                 ))}
               </ul>
             </div>

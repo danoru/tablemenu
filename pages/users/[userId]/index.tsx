@@ -1,9 +1,6 @@
 import { useRouter } from "next/router";
-import {
-  GAMELIST_GROUP,
-  GAMELIST_MDM,
-  GAMELIST_TAD,
-} from "../../../src/data/gamelists";
+
+import { GAMELIST_GROUP, GAMELIST_MDM, GAMELIST_TAD } from "../../../src/data/gamelists";
 
 function ProfilePage() {
   const router = useRouter();

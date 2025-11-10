@@ -1,17 +1,17 @@
-import * as React from "react";
+import MenuIcon from "@mui/icons-material/Menu";
 import AppBar from "@mui/material/AppBar";
 // import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import IconButton from "@mui/material/IconButton";
-import Link from "next/link";
 import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Toolbar from "@mui/material/Toolbar";
 // import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import Link from "next/link";
+import * as React from "react";
 
 let isLoggedIn = false;
 const pages: any = isLoggedIn
@@ -28,12 +28,8 @@ const settings: any = [
 ];
 
 function Navbar() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-    null
-  );
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  );
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -63,32 +59,32 @@ function Navbar() {
         <Toolbar disableGutters>
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
-              size="large"
-              aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
-              onClick={handleOpenNavMenu}
+              aria-label="account of current user"
               color="inherit"
+              size="large"
+              onClick={handleOpenNavMenu}
             >
               <MenuIcon />
             </IconButton>
             <Menu
-              id="menu-appbar"
+              keepMounted
               anchorEl={anchorElNav}
               anchorOrigin={{
                 vertical: "bottom",
                 horizontal: "left",
               }}
-              keepMounted
+              id="menu-appbar"
+              open={Boolean(anchorElNav)}
+              sx={{
+                display: { xs: "block", md: "none" },
+              }}
               transformOrigin={{
                 vertical: "top",
                 horizontal: "left",
               }}
-              open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: "block", md: "none" },
-              }}
             >
               {pages.map((page: any) => (
                 <MenuItem key={page.key} onClick={handleCloseNavMenu}>
@@ -101,25 +97,20 @@ function Navbar() {
           </Box>
           <Box sx={{ display: "flex", flexGrow: 1, mr: 2 }}>
             <Link href="/">
-              <img
-                src="/images/logo.svg"
-                width="100px"
-                height="100px"
-                alt="Tablekeeper"
-              />
+              <img alt="Tablekeeper" height="100px" src="/images/logo.svg" width="100px" />
             </Link>
           </Box>
           <Box
             sx={{
-              flexGrow: 1,
               display: { xs: "none", md: "flex" },
+              flexGrow: 1,
             }}
           >
             {pages.map((page: any) => (
               <Button
                 key={page.key}
-                onClick={handleCloseNavMenu}
                 sx={{ my: 2, color: "white", display: "block" }}
+                onClick={handleCloseNavMenu}
               >
                 <Link href={page.link}>{page.text}</Link>
               </Button>

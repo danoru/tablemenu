@@ -1,5 +1,6 @@
-import prisma from "../../../src/data/db";
 import { NextApiRequest, NextApiResponse } from "next";
+
+import prisma from "../../../src/data/db";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { username } = req.query;
@@ -16,8 +17,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   if (req.method === "PUT") {
-    const { username, firstName, lastName, email, location, website, bio } =
-      req.body;
+    const { username, firstName, lastName, email, location, website, bio } = req.body;
 
     try {
       const updatedUser = await prisma.users.update({
@@ -30,9 +30,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
   } else {
     res.setHeader("Allow", ["GET", "PUT"]);
-    return res
-      .status(405)
-      .json({ error: `Method ${req.method} is not allowed.` });
+    return res.status(405).json({ error: `Method ${req.method} is not allowed.` });
   }
 }
 

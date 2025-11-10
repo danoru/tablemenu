@@ -22,12 +22,7 @@ function InputSearch(props: any) {
 
   return (
     <div className="search">
-      <input
-        onChange={handleChange}
-        type="text"
-        placeholder="Add Board Games"
-        value={inputText}
-      />
+      <input placeholder="Add Board Games" type="text" value={inputText} onChange={handleChange} />
       <button
         onClick={() => {
           props.onAdd(inputText);

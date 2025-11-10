@@ -1,15 +1,7 @@
 /** @type {import('next').NextConfig} */
-
 const nextConfig = {
   experimental: {
-    swcPlugins: [
-      [
-        "next-superjson-plugin",
-        {
-          excluded: [],
-        },
-      ],
-    ],
+    esmExternals: "loose",
   },
   images: {
     remotePatterns: [
@@ -19,6 +11,6 @@ const nextConfig = {
       },
     ],
   },
-  transpilePackages: ["@mui/x-charts"],
 };
+
 module.exports = nextConfig;

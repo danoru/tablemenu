@@ -12,9 +12,7 @@ function HomePage() {
           "matches. If this were working, you'd be passed through now."
       );
     } else {
-      alert(
-        "Your room code did not match. Please contact your host and try again."
-      );
+      alert("Your room code did not match. Please contact your host and try again.");
     }
   }
 
@@ -22,26 +20,26 @@ function HomePage() {
     <div className={classes.home}>
       <Head>
         <title>Tablekeeper</title>
-        <meta name="description" content="Find yourself a seat at the table!" />
+        <meta content="Find yourself a seat at the table!" name="description" />
       </Head>
       <div className={classes.homeContainer}>
         <div className={classes.homeIntroduction}>
           <h1>Welcome to Tablekeeper!</h1>
           <p>
-            Tablekeeper is a web application currently in development to manage
-            your board game nights with efficiency and a bit of flair.
+            Tablekeeper is a web application currently in development to manage your board game
+            nights with efficiency and a bit of flair.
           </p>
           <p>
-            If you are a <strong>first-time host</strong>, please create an
-            account and start by creating your board game library.
+            If you are a <strong>first-time host</strong>, please create an account and start by
+            creating your board game library.
           </p>
           <p>
-            If you are a <strong>returning host</strong>, please log in to see
-            your board game library.
+            If you are a <strong>returning host</strong>, please log in to see your board game
+            library.
           </p>
           <p>
-            If you are a <strong>guest</strong>, please contact your host for
-            your room code to enter below.
+            If you are a <strong>guest</strong>, please contact your host for your room code to
+            enter below.
           </p>
         </div>
         <div className={classes.roomCodeForm}>
@@ -52,17 +50,13 @@ function HomePage() {
             <div>
               <input
                 className={classes.roomCodeInput}
-                type="text"
                 name="roomCode"
                 placeholder="Enter Room Code"
+                type="text"
               ></input>
             </div>
             <div>
-              <button
-                className={classes.roomCodeButton}
-                onClick={submitRoomCode}
-                type="submit"
-              >
+              <button className={classes.roomCodeButton} type="submit" onClick={submitRoomCode}>
                 Find Your Table
               </button>
             </div>
@@ -70,8 +64,7 @@ function HomePage() {
         </div>
         <div className={classes.homeRedirect}>
           <p>
-            If you'd like to make use of the previous functionality, please
-            visit the TableGen page.
+            If you'd like to make use of the previous functionality, please visit the TableGen page.
           </p>
         </div>
       </div>

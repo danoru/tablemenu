@@ -1,7 +1,9 @@
-import RegistrationForm from "../src/components/account/RegistrationForm";
-import { authOptions } from "./api/auth/[...nextauth]";
-import { getServerSession } from "next-auth";
 import { GetServerSideProps } from "next";
+import { getServerSession } from "next-auth";
+
+import RegistrationForm from "../src/components/account/RegistrationForm";
+
+import { authOptions } from "./api/auth/[...nextauth]";
 
 function RegisterPage() {
   return <RegistrationForm />;
