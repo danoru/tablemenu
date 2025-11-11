@@ -1,14 +1,35 @@
+import type { ReactNode } from "react";
+import Box from "@mui/material/Box";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 
-function Layout(props: any) {
-  return (
-    <>
-      <Navbar />
-      <main>{props.children}</main>
-      <Footer />
-    </>
-  );
+interface LayoutProps {
+  children: ReactNode;
 }
 
-export default Layout;
+export default function Layout({ children }: LayoutProps) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <Navbar />
+
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {children}
+      </Box>
+
+      <Footer />
+    </Box>
+  );
+}
