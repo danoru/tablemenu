@@ -11,7 +11,7 @@ import * as superjson from "superjson";
 
 import Layout from "../src/components/layout/Layout";
 import createEmotionCache from "../src/createEmotionCache";
-import theme from "../src/theme";
+import theme from "../src/styles/theme";
 
 const clientSideEmotionCache = createEmotionCache();
 

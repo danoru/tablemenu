@@ -5,65 +5,124 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  url        = env("DATABASE_URL")
+  url        = env("POSTGRES_PRISMA_URL")
   directUrl  = env("POSTGRES_URL_NON_POOLING")
   extensions = [citext(schema: "public")]
+}
+
+model Users {
+  id           Int               @id @default(autoincrement())
+  username     String            @unique @db.Citext
+  password     String
+  firstName    String?
+  lastName     String?
+  email        String?
+  location     String?
+  website      String?
+  bio          String?
+  image        String?
+  badge        Badge             @default(USER)
+  joinDate     DateTime          @default(now())
+  following    Following[]
+  invitedRooms RoomInvites[]
+  hostedRooms  Rooms[]           @relation("HostRooms")
+  ratings      UserGameRatings[]
+  collection   UserGames[]       @relation("UserGames")
 }
 
 model Following {
   userId          Int
   followingUserId Int
-  addedAt         DateTime  @default(now())
-  users           Users  @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  addedAt         DateTime @default(now())
+  users           Users    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([userId, followingUserId])
 }
 
 model Games {
-  id          Int         @id @default(autoincrement())
-  addedAt     DateTime    @default(now())
-  name        String      
+  id          Int                   @id @default(autoincrement())
+  addedAt     DateTime              @default(now())
+  name        String
   description String?
   imageUrl    String?
   minPlayers  Int
   maxPlayers  Int
-  playtime    Int         
-  complexity  Float?      
-  categories  String[]    
-  users       UserGames[] @relation("UserGames") 
-}
-
-model Users {
-  id            Int         @id @default(autoincrement())
-  username      String      @unique @db.Citext
-  password      String
-  firstName     String?
-  lastName      String?
-  email         String?
-  location      String?
-  website       String?
-  bio           String?
-  image         String?
-  badge         Badge       @default(USER)
-  joinDate      DateTime    @default(now())
-  collection    UserGames[] @relation("UserGames") 
-  following     Following[]
+  playtime    Int
+  complexity  Float?
+  categories  String[]
+  bggRating   Float?
+  roomGames   RoomGameSuggestions[]
+  ratings     UserGameRatings[]
+  users       UserGames[]           @relation("UserGames")
 }
 
 model UserGames {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  gameId    Int
-  addedAt   DateTime @default(now())
-  notes     String?  // User-specific notes for the game
-  user      Users    @relation("UserGames", fields: [userId], references: [id])
-  game      Games    @relation("UserGames", fields: [gameId], references: [id])
+  id      Int      @id @default(autoincrement())
+  userId  Int
+  gameId  Int
+  addedAt DateTime @default(now())
+  notes   String?
+  game    Games    @relation("UserGames", fields: [gameId], references: [id])
+  user    Users    @relation("UserGames", fields: [userId], references: [id])
 
   @@unique([userId, gameId])
+}
+
+model UserGameRatings {
+  id      Int      @id @default(autoincrement())
+  userId  Int
+  gameId  Int
+  rating  Int
+  ratedAt DateTime @default(now())
+  game    Games    @relation(fields: [gameId], references: [id])
+  user    Users    @relation(fields: [userId], references: [id])
+
+  @@unique([userId, gameId])
+}
+
+model Rooms {
+  id          Int                   @id @default(autoincrement())
+  name        String
+  description String?
+  hostId      Int
+  createdAt   DateTime              @default(now())
+  isActive    Boolean               @default(true)
+  gameSuggs   RoomGameSuggestions[]
+  invites     RoomInvites[]
+  host        Users                 @relation("HostRooms", fields: [hostId], references: [id])
+}
+
+model RoomInvites {
+  id        Int          @id @default(autoincrement())
+  roomId    Int
+  userId    Int
+  status    InviteStatus @default(PENDING)
+  invitedAt DateTime     @default(now())
+  room      Rooms        @relation(fields: [roomId], references: [id])
+  user      Users        @relation(fields: [userId], references: [id])
+
+  @@unique([roomId, userId])
+}
+
+model RoomGameSuggestions {
+  id          Int      @id @default(autoincrement())
+  roomId      Int
+  gameId      Int
+  suggestedBy Int?
+  rating      Float?
+  createdAt   DateTime @default(now())
+  game        Games    @relation(fields: [gameId], references: [id])
+  room        Rooms    @relation(fields: [roomId], references: [id])
 }
 
 enum Badge {
   ADMIN
   PATRON
   USER
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
