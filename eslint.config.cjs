@@ -5,8 +5,10 @@ const tsParser = require("@typescript-eslint/parser");
 
 module.exports = [
   {
-    files: ["**/*.ts", "**/*.tsx"],
     ignores: [".next/", "node_modules/", "dist/", "build/"],
+  },
+  {
+    files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {

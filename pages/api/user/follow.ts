@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+
 import prisma from "../../../src/data/db";
 
 interface FollowRequestBody {

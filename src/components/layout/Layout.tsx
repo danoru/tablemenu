@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
+import type { ReactNode } from "react";
+
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 
@@ -7,7 +8,7 @@ interface LayoutProps {
   children: ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
+function Layout({ children }: LayoutProps) {
   return (
     <Box
       sx={{
@@ -33,3 +34,5 @@ export default function Layout({ children }: LayoutProps) {
     </Box>
   );
 }
+
+export default Layout;
