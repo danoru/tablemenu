@@ -1,56 +1,67 @@
 import MenuIcon from "@mui/icons-material/Menu";
-import AppBar from "@mui/material/AppBar";
-// import Avatar from "@mui/material/Avatar";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
-import IconButton from "@mui/material/IconButton";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Toolbar from "@mui/material/Toolbar";
-// import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  IconButton,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 
-let isLoggedIn = false;
-const pages: any = isLoggedIn
-  ? [{ key: 1, link: "/tablegen", text: "TableGen" }]
-  : [
-      { key: 1, link: "/tablegen", text: "TableGen" },
-      { key: 2, link: "/join", text: "Join" },
-      { key: 3, link: "login", text: "Login" },
+function getPages(session: any) {
+  if (session) {
+    return [
+      {
+        id: 1,
+        title: session.user.username,
+        link: `/users/${session.user.username}`,
+      },
+      { id: 2, title: "TableGen", link: "/tablegen" },
+      { id: 3, title: "Users", link: "/users" },
+      { id: 4, title: "Logout", link: "/api/auth/signout" },
     ];
-
-const settings: any = [
-  { key: 1, link: "/profile", text: "Profile" },
-  { key: 2, link: "/login", text: "Logout" },
-];
+  } else {
+    return [
+      { id: 1, title: "Login", link: "/login" },
+      { id: 2, title: "Create Account", link: "/register" },
+      { id: 3, title: "TableGen", link: "/tablegen" },
+      { id: 4, title: "Users", link: "/users" },
+    ];
+  }
+}
 
 function Navbar() {
+  const theme = useTheme();
+  const { data: session, status } = useSession();
+  const pages = getPages(session);
+
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
   };
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+  if (status === "loading") {
+    return null;
+  }
 
   return (
     <AppBar
       position="static"
       sx={{
-        backgroundColor: "#343A40",
+        backgroundColor: theme.palette.primary.main,
         height: { xs: "9vh", md: "8vh" },
         width: "100vw",
       }}
@@ -86,10 +97,10 @@ function Navbar() {
               }}
               onClose={handleCloseNavMenu}
             >
-              {pages.map((page: any) => (
-                <MenuItem key={page.key} onClick={handleCloseNavMenu}>
+              {pages.map((page) => (
+                <MenuItem key={page.id} onClick={handleCloseNavMenu}>
                   <Typography textAlign="center">
-                    <Link href={page.link}>{page.text}</Link>
+                    <Link href={page.link}>{page.title}</Link>
                   </Typography>
                 </MenuItem>
               ))}
@@ -97,7 +108,7 @@ function Navbar() {
           </Box>
           <Box sx={{ display: "flex", flexGrow: 1, mr: 2 }}>
             <Link href="/">
-              <img alt="Tablekeeper" height="100px" src="/images/logo.svg" width="100px" />
+              <Image alt="Tablekeeper" height={100} src="/images/logo.svg" width={100} />
             </Link>
           </Box>
           <Box
@@ -106,48 +117,17 @@ function Navbar() {
               flexGrow: 1,
             }}
           >
-            {pages.map((page: any) => (
-              <Button
-                key={page.key}
-                sx={{ my: 2, color: "white", display: "block" }}
-                onClick={handleCloseNavMenu}
-              >
-                <Link href={page.link}>{page.text}</Link>
+            {pages.map((page) => (
+              <Button key={page.id} onClick={handleCloseNavMenu}>
+                <Link
+                  href={page.link}
+                  style={{ color: theme.palette.secondary.main, textDecoration: "none" }}
+                >
+                  {page.title}
+                </Link>
               </Button>
             ))}
           </Box>
-
-          {/* <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting: any) => (
-                <MenuItem key={setting.key} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">
-                    <Link href={setting.link}>{setting.text}</Link>
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box> */}
         </Toolbar>
       </Container>
     </AppBar>
