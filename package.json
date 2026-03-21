@@ -1,5 +1,20 @@
 {
+  "name": "tablemenu",
+  "version": "0.1.0",
   "author": "Daniel Mendez Perdomo",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "postinstall": "prisma generate",
+    "test": "pnpm run lint && pnpm run test:format && pnpm run test:types",
+    "test:format": "pnpm run format:check",
+    "test:types": "tsc --noEmit"
+  },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
@@ -15,14 +30,18 @@
     "fast-xml-parser": "^5.5.8",
     "formik": "^2.4.9",
     "moment": "^2.30.1",
-    "next": "^16.0.0",
+    "next": "16.2.1",
     "next-auth": "^4.24.13",
     "next-superjson-plugin": "^0.6.3",
     "prisma": "^6.19.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "superjson": "^2.2.5",
-    "yup": "^1.7.1"
+    "yup": "^1.7.1",
+    "sharp": "^0.34.1",
+    "nanoid": "^5.1.5",
+    "clsx": "^2.1.1",
+    "use-debounce": "^10.0.4"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -33,7 +52,7 @@
     "@types/react-dom": "^19.2.2",
     "@typescript-eslint/parser": "^8.46.0",
     "eslint": "9.37.0",
-    "eslint-config-next": "15.5.4",
+    "eslint-config-next": "16.2.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-deprecation": "^3.0.0",
     "eslint-plugin-import": "^2.32.0",
@@ -54,20 +73,5 @@
     "*.{json,md,css}": [
       "prettier --write"
     ]
-  },
-  "name": "tablemenu",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "postinstall": "prisma generate",
-    "test": "pnpm run lint && pnpm run test:format && pnpm run test:types",
-    "test:format": "pnpm run format:check",
-    "test:types": "tsc --noEmit"
   }
 }
