@@ -1,17 +1,16 @@
+import createEmotionCache from "@/createEmotionCache";
+import Layout from "@components/layout/Layout";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import theme from "@styles/theme";
 import { Decimal } from "decimal.js";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { SessionProvider } from "next-auth/react";
 import * as superjson from "superjson";
-
-import Layout from "../src/components/layout/Layout";
-import createEmotionCache from "../src/createEmotionCache";
-import theme from "../src/styles/theme";
 
 const clientSideEmotionCache = createEmotionCache();
 

@@ -1,3 +1,5 @@
+import { authOptions } from "@api/auth/[...nextauth]";
+import { MOCK_USER_LIBRARY } from "@data/mockGameData";
 import EditIcon from "@mui/icons-material/Edit";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import LinkIcon from "@mui/icons-material/Link";
@@ -12,9 +14,6 @@ import { useRouter } from "next/router";
 import React from "react";
 import superjson from "superjson";
 import type { Users } from "@prisma/client";
-
-import { authOptions } from "../api/auth/[...nextauth]";
-import { MOCK_USER_LIBRARY } from "../../src/data/mockGameData";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -549,7 +548,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const currentUserId = session ? Number((session.user as any).id) : null;
   const currentUsername = session ? (session.user as any).username : null;
 
-  const { default: prisma } = await import("../../src/data/db");
+  const { default: prisma } = await import("@data/db");
 
   const user = await prisma.users.findUnique({
     where: { username },

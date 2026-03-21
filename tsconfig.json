@@ -1,12 +1,21 @@
 {
   "compilerOptions": {
     "allowJs": false,
+    "baseUrl": ".",
     "isolatedModules": true,
     "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "bundler",
     "noEmit": true,
     "resolveJsonModule": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@pages/*": ["pages/*"],
+      "@api/*": ["pages/api/*"],
+      "@components/*": ["src/components/*"],
+      "@data/*": ["src/data/*"],
+      "@styles/*": ["src/styles/*"]
+    },
     "skipLibCheck": true,
     "strict": true,
     "target": "es2020",

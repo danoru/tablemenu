@@ -1,8 +1,7 @@
+import { authOptions } from "@api/auth/[...nextauth]";
+import prisma from "@data/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
-
-import prisma from "../../../src/data/db";
-import { authOptions } from "../auth/[...nextauth]";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

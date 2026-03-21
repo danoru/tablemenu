@@ -1,6 +1,5 @@
+import prisma from "@data/db";
 import { NextApiRequest, NextApiResponse } from "next";
-
-import prisma from "../../../src/data/db";
 
 const SAFE_USER_SELECT = {
   id: true,

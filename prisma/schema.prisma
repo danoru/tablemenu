@@ -39,8 +39,6 @@ model Users {
   image        String?
   badge        Badge                 @default(USER)
   joinDate     DateTime              @default(now())
-
-  // Relations
   following        Following[]             @relation("Follower")
   followedBy       Following[]             @relation("Following")
   invitedRooms     RoomInvites[]
@@ -121,6 +119,7 @@ model UserGameRatings {
 model Rooms {
   id          Int      @id @default(autoincrement())
   name        String
+  code        String  @unique
   description String?
   hostId      Int
   createdAt   DateTime @default(now())

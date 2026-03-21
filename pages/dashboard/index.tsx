@@ -1,3 +1,5 @@
+import { authOptions } from "@api/auth/[...nextauth]";
+import { MOCK_USER_LIBRARY } from "@data/mockGameData";
 import CasinoIcon from "@mui/icons-material/Casino";
 import GroupsIcon from "@mui/icons-material/Groups";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
@@ -8,9 +10,6 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
-
-import { authOptions } from "../api/auth/[...nextauth]";
-import { MOCK_USER_LIBRARY } from "../../src/data/mockGameData";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

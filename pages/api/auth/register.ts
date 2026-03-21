@@ -1,7 +1,7 @@
 import { hash } from "bcrypt";
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as yup from "yup";
-import prisma from "../../../src/data/db";
+import prisma from "@data/db";
 
 const schema = yup.object({
   username: yup

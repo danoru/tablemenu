@@ -1,3 +1,5 @@
+import { authOptions } from "@api/auth/[...nextauth]";
+import { MOCK_USER_LIBRARY, MOCK_SEARCH_POOL, MockGame } from "@data/mockGameData";
 import AddIcon from "@mui/icons-material/Add";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CloseIcon from "@mui/icons-material/Close";
@@ -18,15 +20,15 @@ import {
   Typography,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
+import { GetServerSideProps } from "next";
+import { getServerSession } from "next-auth";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import React from "react";
-
-import { MOCK_SEARCH_POOL, MOCK_USER_LIBRARY, MockGame } from "../../../../src/data/mockGameData";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const GOLD = "#e8c97a";
-const GOLD_DIM = "rgba(232,201,122,0.4)";
 const AMBER = "#c8962a";
 const AMBER_HOVER = "#dba535";
 const GREEN_BRIGHT = "#5ec97a";
@@ -43,7 +45,6 @@ const FONT_SANS = "'DM Sans', sans-serif";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Generate a stable muted colour from a game name for placeholder art */
 function gameColour(name: string): string {
   const palette = [
     "rgba(34,85,48,0.5)",
@@ -58,7 +59,6 @@ function gameColour(name: string): string {
   return palette[Math.abs(hash) % palette.length];
 }
 
-/** First letter(s) of a title for placeholder art */
 function initials(name: string): string {
   const words = name.split(" ").filter(Boolean);
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
@@ -66,7 +66,7 @@ function initials(name: string): string {
 }
 
 function weightedPick(games: MockGame[]): MockGame {
-  const total = games.reduce((s, g) => s + 1, 0);
+  const total = games.length;
   let rand = Math.random() * total;
   for (const g of games) {
     rand -= 1;
@@ -75,7 +75,7 @@ function weightedPick(games: MockGame[]): MockGame {
   return games[games.length - 1];
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Game art placeholder ─────────────────────────────────────────────────────
 
 function GameArt({ game, size = 120 }: { game: MockGame; size?: number }) {
   if (game.imageUrl) {
@@ -118,6 +118,8 @@ function GameArt({ game, size = 120 }: { game: MockGame; size?: number }) {
   );
 }
 
+// ─── Game card ────────────────────────────────────────────────────────────────
+
 function GameCard({ game }: { game: MockGame }) {
   return (
     <Box
@@ -129,11 +131,7 @@ function GameCard({ game }: { game: MockGame }) {
         display: "flex",
         flexDirection: "column",
         transition: "border-color 0.2s, transform 0.2s",
-        cursor: "default",
-        "&:hover": {
-          borderColor: BORDER_MED,
-          transform: "translateY(-2px)",
-        },
+        "&:hover": { borderColor: BORDER_MED, transform: "translateY(-2px)" },
       }}
     >
       <GameArt game={game} size={120} />
@@ -164,7 +162,7 @@ function GameCard({ game }: { game: MockGame }) {
   );
 }
 
-// ─── Slide transition for modals ─────────────────────────────────────────────
+// ─── Slide transition ─────────────────────────────────────────────────────────
 
 const SlideUp = React.forwardRef(function SlideUp(
   props: TransitionProps & { children: React.ReactElement },
@@ -173,7 +171,7 @@ const SlideUp = React.forwardRef(function SlideUp(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-// ─── Add Game Modal ───────────────────────────────────────────────────────────
+// ─── Add Game modal ───────────────────────────────────────────────────────────
 
 function AddGameModal({
   open,
@@ -221,7 +219,6 @@ function AddGameModal({
       }}
     >
       <DialogContent sx={{ padding: "28px" }}>
-        {/* Header */}
         <Box
           sx={{
             display: "flex",
@@ -235,16 +232,11 @@ function AddGameModal({
           >
             Add a game
           </Typography>
-          <IconButton
-            onClick={handleClose}
-            size="small"
-            sx={{ color: TEXT_DIM, "&:hover": { color: TEXT } }}
-          >
+          <IconButton onClick={handleClose} size="small" sx={{ color: TEXT_DIM }}>
             <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
 
-        {/* Search input */}
         <OutlinedInput
           autoFocus
           fullWidth
@@ -271,7 +263,6 @@ function AddGameModal({
           }}
         />
 
-        {/* Empty state */}
         {query.trim() === "" && (
           <Box sx={{ textAlign: "center", py: "32px" }}>
             <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT }}>
@@ -291,7 +282,6 @@ function AddGameModal({
           </Box>
         )}
 
-        {/* No results */}
         {query.trim() !== "" && results.length === 0 && (
           <Box sx={{ textAlign: "center", py: "32px" }}>
             <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT }}>
@@ -300,7 +290,6 @@ function AddGameModal({
           </Box>
         )}
 
-        {/* Results */}
         {results.length > 0 && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             {results.map((game, i) => {
@@ -316,8 +305,7 @@ function AddGameModal({
                     borderRadius: "8px",
                     background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
                     border: `1px solid ${isAdded ? "rgba(94,201,122,0.2)" : "transparent"}`,
-                    transition: "all 0.15s",
-                    "&:hover": { background: "rgba(180,140,60,0.06)", borderColor: BORDER },
+                    "&:hover": { background: "rgba(180,140,60,0.06)" },
                   }}
                 >
                   <GameArt game={game} size={40} />
@@ -373,7 +361,7 @@ function AddGameModal({
   );
 }
 
-// ─── Quick Gen Modal ──────────────────────────────────────────────────────────
+// ─── Quick Gen modal ──────────────────────────────────────────────────────────
 
 const TIME_OPTIONS = [
   { label: "Any", min: 0, max: Infinity },
@@ -384,6 +372,25 @@ const TIME_OPTIONS = [
 ];
 
 const PLAYER_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8];
+
+function chipSx(active: boolean) {
+  return {
+    fontFamily: FONT_SANS,
+    fontSize: "13px",
+    fontWeight: active ? 500 : 400,
+    height: "32px",
+    background: active ? "rgba(200,150,42,0.2)" : "rgba(255,255,255,0.04)",
+    border: `1px solid ${active ? AMBER : BORDER}`,
+    color: active ? GOLD : TEXT_DIM,
+    cursor: "pointer",
+    transition: "all 0.15s",
+    "&:hover": {
+      background: active ? "rgba(200,150,42,0.3)" : "rgba(255,255,255,0.07)",
+      borderColor: AMBER,
+    },
+    "& .MuiChip-label": { padding: "0 10px" },
+  };
+}
 
 function QuickGenModal({
   open,
@@ -410,7 +417,7 @@ function QuickGenModal({
     });
   }
 
-  async function spin() {
+  function spin() {
     const pool = getPool();
     if (pool.length === 0) {
       setNoResults(true);
@@ -422,20 +429,15 @@ function QuickGenModal({
     setResult(null);
 
     let flashes = 0;
-    const maxFlashes = 12;
     const interval = setInterval(() => {
       setResult(pool[Math.floor(Math.random() * pool.length)]);
       flashes++;
-      if (flashes >= maxFlashes) {
+      if (flashes >= 12) {
         clearInterval(interval);
         setResult(weightedPick(pool));
         setSpinning(false);
       }
     }, 80);
-  }
-
-  function reroll() {
-    spin();
   }
 
   function handleClose() {
@@ -466,7 +468,6 @@ function QuickGenModal({
         },
       }}
     >
-      {/* Ambient glow behind result */}
       <Box
         sx={{
           position: "absolute",
@@ -479,9 +480,7 @@ function QuickGenModal({
           pointerEvents: "none",
         }}
       />
-
       <DialogContent sx={{ padding: "28px", position: "relative" }}>
-        {/* Header */}
         <Box
           sx={{
             display: "flex",
@@ -502,16 +501,11 @@ function QuickGenModal({
               {pool.length} game{pool.length !== 1 ? "s" : ""} in pool
             </Typography>
           </Box>
-          <IconButton
-            onClick={handleClose}
-            size="small"
-            sx={{ color: TEXT_DIM, "&:hover": { color: TEXT } }}
-          >
+          <IconButton onClick={handleClose} size="small" sx={{ color: TEXT_DIM }}>
             <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
 
-        {/* Player count filter */}
         <Typography
           sx={{
             fontFamily: FONT_SANS,
@@ -537,7 +531,6 @@ function QuickGenModal({
           ))}
         </Box>
 
-        {/* Time budget filter */}
         <Typography
           sx={{
             fontFamily: FONT_SANS,
@@ -564,7 +557,6 @@ function QuickGenModal({
 
         <Divider sx={{ borderColor: BORDER, mb: "28px" }} />
 
-        {/* Result area */}
         <Box
           sx={{
             minHeight: "160px",
@@ -587,15 +579,13 @@ function QuickGenModal({
               Set your filters and spin
             </Typography>
           )}
-
           {noResults && (
             <Typography
               sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: "rgba(220,100,100,0.8)" }}
             >
-              No games match those filters. Try adjusting them.
+              No games match those filters.
             </Typography>
           )}
-
           {(result || spinning) && (
             <Box
               sx={{
@@ -615,7 +605,6 @@ function QuickGenModal({
                   fontWeight: 700,
                   color: spinning ? TEXT_DIM : GOLD,
                   textAlign: "center",
-                  transition: "color 0.15s",
                   maxWidth: "320px",
                 }}
               >
@@ -636,7 +625,6 @@ function QuickGenModal({
           )}
         </Box>
 
-        {/* Action buttons */}
         <Box sx={{ display: "flex", gap: "10px", mt: "24px" }}>
           <Button
             fullWidth
@@ -662,7 +650,7 @@ function QuickGenModal({
           </Button>
           {result && !spinning && (
             <Button
-              onClick={reroll}
+              onClick={spin}
               startIcon={<ShuffleIcon />}
               sx={{
                 background: "transparent",
@@ -687,28 +675,17 @@ function QuickGenModal({
   );
 }
 
-function chipSx(active: boolean) {
-  return {
-    fontFamily: FONT_SANS,
-    fontSize: "13px",
-    fontWeight: active ? 500 : 400,
-    height: "32px",
-    background: active ? "rgba(200,150,42,0.2)" : "rgba(255,255,255,0.04)",
-    border: `1px solid ${active ? AMBER : BORDER}`,
-    color: active ? GOLD : TEXT_DIM,
-    cursor: "pointer",
-    transition: "all 0.15s",
-    "&:hover": {
-      background: active ? "rgba(200,150,42,0.3)" : "rgba(255,255,255,0.07)",
-      borderColor: AMBER,
-    },
-    "& .MuiChip-label": { padding: "0 10px" },
-  };
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface Props {
+  profileUsername: string;
+  isSelf: boolean;
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function LibraryPage() {
+export default function UserLibraryPage({ profileUsername, isSelf }: Props) {
+  const router = useRouter();
   const [library, setLibrary] = React.useState<MockGame[]>(MOCK_USER_LIBRARY);
   const [search, setSearch] = React.useState("");
   const [addOpen, setAddOpen] = React.useState(false);
@@ -730,11 +707,10 @@ export default function LibraryPage() {
   return (
     <>
       <Head>
-        <title>My Library — Tablekeeper</title>
+        <title>{profileUsername}'s Library — Tablekeeper</title>
       </Head>
 
       <Box sx={{ background: BG, minHeight: "100vh", position: "relative" }}>
-        {/* Ambient glow */}
         <Box
           sx={{
             position: "fixed",
@@ -758,7 +734,26 @@ export default function LibraryPage() {
             padding: { xs: "24px 16px", md: "40px 32px" },
           }}
         >
-          {/* Page header */}
+          {/* Back link */}
+          <Typography
+            onClick={() => router.push(`/users/${profileUsername}`)}
+            sx={{
+              fontFamily: FONT_SANS,
+              fontSize: "12px",
+              fontWeight: 500,
+              color: TEXT_FAINT,
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+              mb: "20px",
+              cursor: "pointer",
+              "&:hover": { color: TEXT_DIM },
+              display: "inline-block",
+            }}
+          >
+            ← {profileUsername}'s profile
+          </Typography>
+
+          {/* Header */}
           <Box
             sx={{
               display: "flex",
@@ -773,14 +768,14 @@ export default function LibraryPage() {
               <Typography
                 sx={{
                   fontFamily: FONT_SERIF,
-                  fontSize: { xs: "32px", md: "40px" },
+                  fontSize: { xs: "30px", md: "38px" },
                   fontWeight: 900,
                   color: TEXT,
                   lineHeight: 1.1,
                   letterSpacing: "-0.5px",
                 }}
               >
-                My Library
+                {isSelf ? "My Library" : `${profileUsername}'s Library`}
               </Typography>
               <Typography
                 sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_FAINT, mt: "4px" }}
@@ -808,32 +803,36 @@ export default function LibraryPage() {
               >
                 Quick Gen
               </Button>
-              <Button
-                onClick={() => setAddOpen(true)}
-                startIcon={<AddIcon />}
-                sx={{
-                  background: AMBER,
-                  borderRadius: "8px",
-                  color: "#0f0c08",
-                  fontFamily: FONT_SANS,
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  padding: "9px 18px",
-                  textTransform: "none",
-                  "&:hover": { background: AMBER_HOVER },
-                }}
-              >
-                Add game
-              </Button>
+
+              {/* Only show Add button to library owner */}
+              {isSelf && (
+                <Button
+                  onClick={() => setAddOpen(true)}
+                  startIcon={<AddIcon />}
+                  sx={{
+                    background: AMBER,
+                    borderRadius: "8px",
+                    color: "#0f0c08",
+                    fontFamily: FONT_SANS,
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    padding: "9px 18px",
+                    textTransform: "none",
+                    "&:hover": { background: AMBER_HOVER },
+                  }}
+                >
+                  Add game
+                </Button>
+              )}
             </Box>
           </Box>
 
-          {/* Search bar */}
+          {/* Search */}
           <OutlinedInput
             fullWidth
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search your library…"
+            placeholder={isSelf ? "Search your library…" : `Search ${profileUsername}'s library…`}
             startAdornment={
               <InputAdornment position="start">
                 <SearchIcon sx={{ color: TEXT_FAINT, fontSize: "18px" }} />
@@ -864,7 +863,7 @@ export default function LibraryPage() {
               <Typography
                 sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_FAINT, mt: "8px" }}
               >
-                Try a different search or add it to your library
+                {isSelf ? "Try a different search or add a new game" : "Try a different search"}
               </Typography>
             </Box>
           )}
@@ -890,9 +889,35 @@ export default function LibraryPage() {
         </Box>
       </Box>
 
-      <AddGameModal open={addOpen} onClose={() => setAddOpen(false)} onAdd={handleAddGame} />
+      {isSelf && (
+        <AddGameModal open={addOpen} onClose={() => setAddOpen(false)} onAdd={handleAddGame} />
+      )}
 
       <QuickGenModal open={quickGenOpen} onClose={() => setQuickGenOpen(false)} library={library} />
     </>
   );
 }
+
+// ─── Server-side props ────────────────────────────────────────────────────────
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { username } = context.params as { username: string };
+  const session = await getServerSession(context.req, context.res, authOptions);
+  const currentUsername = session ? (session.user as any).username : null;
+
+  // Verify the profile user exists
+  const { default: prisma } = await import("@data/db");
+  const user = await prisma.users.findUnique({
+    where: { username },
+    select: { id: true },
+  });
+
+  if (!user) return { notFound: true };
+
+  return {
+    props: {
+      profileUsername: username,
+      isSelf: currentUsername === username,
+    },
+  };
+};

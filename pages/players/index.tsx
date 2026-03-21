@@ -1,3 +1,5 @@
+import { authOptions } from "@api/auth/[...nextauth]";
+import { getAllUsers } from "@data/users";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import SearchIcon from "@mui/icons-material/Search";
@@ -18,9 +20,6 @@ import { useRouter } from "next/router";
 import React from "react";
 import superjson from "superjson";
 import type { Users } from "@prisma/client";
-
-import { authOptions } from "../api/auth/[...nextauth]";
-import { getAllUsers } from "../../src/data/users";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -433,7 +432,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
   let initialFollowing: number[] = [];
   if (currentUserId) {
-    const { default: prisma } = await import("../../src/data/db");
+    const { default: prisma } = await import("@data/db");
     const rows = await prisma.following.findMany({
       where: { userId: currentUserId },
       select: { followingUserId: true },
