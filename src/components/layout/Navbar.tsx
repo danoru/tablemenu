@@ -1,136 +1,302 @@
 import MenuIcon from "@mui/icons-material/Menu";
-import {
-  AppBar,
-  Box,
-  Button,
-  Container,
-  IconButton,
-  Menu,
-  MenuItem,
-  Toolbar,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { useSession } from "next-auth/react";
+import { Box, Button, Container, Divider, IconButton, Menu, MenuItem } from "@mui/material";
+import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import * as React from "react";
 
-function getPages(session: any) {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface NavPage {
+  id: number;
+  title: string;
+  link?: string;
+  action?: () => void;
+  variant?: "default" | "primary" | "muted";
+}
+
+// ─── Nav link builder ────────────────────────────────────────────────────────
+
+function getPages(session: any, onSignOut: () => void): NavPage[] {
   if (session) {
     return [
       {
         id: 1,
-        title: session.user.username,
-        link: `/users/${session.user.username}`,
+        title: session.user?.username,
+        link: `/players/${session.user?.username}`,
+        variant: "muted",
       },
-      { id: 2, title: "TableGen", link: "/tablegen" },
-      { id: 3, title: "Users", link: "/users" },
-      { id: 4, title: "Logout", link: "/api/auth/signout" },
-    ];
-  } else {
-    return [
-      { id: 1, title: "Login", link: "/login" },
-      { id: 2, title: "Create Account", link: "/register" },
-      { id: 3, title: "TableGen", link: "/tablegen" },
-      { id: 4, title: "Users", link: "/users" },
+      { id: 2, title: "Players", link: "/players" },
+      { id: 3, title: "Sign out", action: onSignOut, variant: "muted" },
     ];
   }
+
+  return [
+    { id: 1, title: "Players", link: "/players" },
+    { id: 2, title: "Sign in", link: "/login", variant: "default" },
+    { id: 3, title: "Create account", link: "/register", variant: "primary" },
+  ];
 }
 
-function Navbar() {
-  const theme = useTheme();
-  const { data: session, status } = useSession();
-  const pages = getPages(session);
+// ─── Shared style tokens ──────────────────────────────────────────────────────
 
+const NAV_BG = "#0f0c08";
+const NAV_BORDER = "rgba(180,140,60,0.15)";
+const GOLD = "#e8c97a";
+const GOLD_FADED = "rgba(232,201,122,0.4)";
+const TEXT_DIM = "rgba(232,223,200,0.55)";
+const TEXT_LIGHT = "#c8b880";
+const AMBER = "#c8962a";
+const AMBER_HOVER = "#dba535";
+const FONT_SANS = "'DM Sans', sans-serif";
+const FONT_SERIF = "'Playfair Display', serif";
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export default function Navbar() {
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
-  if (status === "loading") {
-    return null;
+  function handleSignOut() {
+    signOut({ callbackUrl: "/" });
   }
 
+  const pages = getPages(session, handleSignOut);
+
+  function handleOpenNavMenu(event: React.MouseEvent<HTMLElement>) {
+    setAnchorElNav(event.currentTarget);
+  }
+
+  function handleCloseNavMenu() {
+    setAnchorElNav(null);
+  }
+
+  function handlePageClick(page: NavPage) {
+    handleCloseNavMenu();
+    if (page.action) {
+      page.action();
+    } else if (page.link) {
+      router.push(page.link);
+    }
+  }
+
+  if (status === "loading") return null;
+
   return (
-    <AppBar
-      position="static"
+    <Box
+      component="nav"
       sx={{
-        backgroundColor: theme.palette.primary.main,
-        height: { xs: "9vh", md: "8vh" },
-        width: "100vw",
+        backgroundColor: NAV_BG,
+        borderBottom: `1px solid ${NAV_BORDER}`,
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+        width: "100%",
       }}
     >
       <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              aria-label="account of current user"
-              color="inherit"
-              size="large"
-              onClick={handleOpenNavMenu}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              keepMounted
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              id="menu-appbar"
-              open={Boolean(anchorElNav)}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: { xs: "60px", md: "64px" },
+            gap: 2,
+          }}
+        >
+          {/* ── Logo ─────────────────────────────────────────────────────── */}
+          <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+            <Box
               sx={{
-                display: { xs: "block", md: "none" },
+                position: "relative",
+                width: 36,
+                height: 36,
+                mr: 1,
+                flexShrink: 0,
               }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              onClose={handleCloseNavMenu}
             >
-              {pages.map((page) => (
-                <MenuItem key={page.id} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">
-                    <Link href={page.link}>{page.title}</Link>
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <Box sx={{ display: "flex", flexGrow: 1, mr: 2 }}>
-            <Link href="/">
-              <Image alt="Tablekeeper" height={100} src="/images/logo.svg" width={100} />
-            </Link>
-          </Box>
+              <Image
+                alt="Tablekeeper"
+                src="/images/logo.svg"
+                fill
+                style={{ objectFit: "contain" }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+            </Box>
+            <Box
+              sx={{
+                fontFamily: FONT_SERIF,
+                fontSize: "20px",
+                fontWeight: 900,
+                color: GOLD,
+                letterSpacing: "-0.3px",
+                lineHeight: 1,
+              }}
+            >
+              Table
+              <Box component="span" sx={{ color: GOLD_FADED, fontWeight: 700 }}>
+                keeper
+              </Box>
+            </Box>
+          </Link>
+
+          {/* ── Desktop nav ───────────────────────────────────────────────── */}
           <Box
             sx={{
               display: { xs: "none", md: "flex" },
-              flexGrow: 1,
+              alignItems: "center",
+              gap: "4px",
             }}
           >
-            {pages.map((page) => (
-              <Button key={page.id} onClick={handleCloseNavMenu}>
-                <Link
-                  href={page.link}
-                  style={{ color: theme.palette.secondary.main, textDecoration: "none" }}
+            {pages.map((page) => {
+              if (page.variant === "primary") {
+                return (
+                  <Button
+                    key={page.id}
+                    onClick={() => handlePageClick(page)}
+                    sx={{
+                      background: AMBER,
+                      borderRadius: "6px",
+                      color: "#0f0c08",
+                      fontFamily: FONT_SANS,
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      letterSpacing: "0.3px",
+                      ml: "4px",
+                      padding: "7px 18px",
+                      textTransform: "none",
+                      "&:hover": { background: AMBER_HOVER },
+                    }}
+                  >
+                    {page.title}
+                  </Button>
+                );
+              }
+
+              if (page.variant === "muted") {
+                return (
+                  <Button
+                    key={page.id}
+                    onClick={() => handlePageClick(page)}
+                    sx={{
+                      background: "transparent",
+                      borderRadius: "6px",
+                      color: TEXT_DIM,
+                      fontFamily: FONT_SANS,
+                      fontSize: "13px",
+                      fontWeight: 400,
+                      padding: "7px 14px",
+                      textTransform: "none",
+                      "&:hover": {
+                        background: "rgba(255,255,255,0.04)",
+                        color: TEXT_LIGHT,
+                      },
+                    }}
+                  >
+                    {page.title}
+                  </Button>
+                );
+              }
+
+              return (
+                <Button
+                  key={page.id}
+                  onClick={() => handlePageClick(page)}
+                  sx={{
+                    background: "transparent",
+                    border: page.variant === "default" ? "1px solid rgba(180,140,60,0.3)" : "none",
+                    borderRadius: "6px",
+                    color: page.variant === "default" ? TEXT_LIGHT : TEXT_DIM,
+                    fontFamily: FONT_SANS,
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    padding: "7px 16px",
+                    textTransform: "none",
+                    "&:hover": {
+                      background:
+                        page.variant === "default"
+                          ? "rgba(180,140,60,0.1)"
+                          : "rgba(255,255,255,0.04)",
+                      borderColor: "rgba(180,140,60,0.5)",
+                      color: TEXT_LIGHT,
+                    },
+                  }}
                 >
                   {page.title}
-                </Link>
-              </Button>
-            ))}
+                </Button>
+              );
+            })}
           </Box>
-        </Toolbar>
+
+          {/* ── Mobile hamburger ─────────────────────────────────────────── */}
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <IconButton
+              aria-controls="mobile-nav-menu"
+              aria-haspopup="true"
+              aria-label="Open navigation menu"
+              onClick={handleOpenNavMenu}
+              sx={{
+                color: TEXT_LIGHT,
+                "&:hover": { background: "rgba(255,255,255,0.06)" },
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+
+            <Menu
+              keepMounted
+              anchorEl={anchorElNav}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              id="mobile-nav-menu"
+              open={Boolean(anchorElNav)}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+              onClose={handleCloseNavMenu}
+              sx={{
+                "& .MuiPaper-root": {
+                  backgroundColor: "#1a1610",
+                  border: `1px solid ${NAV_BORDER}`,
+                  borderRadius: "10px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                  minWidth: "200px",
+                  mt: "8px",
+                },
+              }}
+            >
+              {pages.map((page, index) => {
+                const isLast = index === pages.length - 1;
+                const isPrimary = page.variant === "primary";
+
+                return (
+                  <Box key={page.id}>
+                    {!session && index === 2 && (
+                      <Divider sx={{ borderColor: NAV_BORDER, my: "4px" }} />
+                    )}
+                    <MenuItem
+                      onClick={() => handlePageClick(page)}
+                      sx={{
+                        fontFamily: FONT_SANS,
+                        fontSize: "14px",
+                        fontWeight: isPrimary ? 500 : 400,
+                        color: isPrimary ? AMBER : page.variant === "muted" ? TEXT_DIM : TEXT_LIGHT,
+                        padding: "10px 20px",
+                        "&:hover": {
+                          background: "rgba(180,140,60,0.08)",
+                        },
+                      }}
+                    >
+                      {page.title}
+                    </MenuItem>
+                  </Box>
+                );
+              })}
+            </Menu>
+          </Box>
+        </Box>
       </Container>
-    </AppBar>
+    </Box>
   );
 }
-export default Navbar;

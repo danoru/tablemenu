@@ -1,11 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth/next";
 
 import prisma from "../../../src/data/db";
+import { authOptions } from "../auth/[...nextauth]";
 
 interface FollowRequestBody {
   action: "follow" | "unfollow";
   followingUserId: number;
-  userId: number;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -13,17 +14,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: "Method not allowed." });
   }
 
-  const { action, followingUserId, userId } = req.body as FollowRequestBody;
+  const session = await getServerSession(req, res, authOptions);
+  if (!session?.user) {
+    return res.status(401).json({ error: "Not authenticated." });
+  }
+
+  const userId = Number((session.user as any).id);
+  const { action, followingUserId } = req.body as FollowRequestBody;
+
+  if (!followingUserId || isNaN(Number(followingUserId))) {
+    return res.status(400).json({ error: "Invalid followingUserId." });
+  }
+
+  if (userId === Number(followingUserId)) {
+    return res.status(400).json({ error: "You cannot follow yourself." });
+  }
 
   try {
     if (action === "follow") {
       await prisma.following.create({
         data: {
-          followingUserId,
+          followingUserId: Number(followingUserId),
           userId,
         },
       });
-
       return res.status(200).json({ message: "Successfully followed user." });
     }
 
@@ -31,12 +45,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await prisma.following.delete({
         where: {
           userId_followingUserId: {
-            followingUserId,
+            followingUserId: Number(followingUserId),
             userId,
           },
         },
       });
-
       return res.status(200).json({ message: "Successfully unfollowed user." });
     }
 
@@ -44,7 +57,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: "Failed to update follow status." });
-  } finally {
-    await prisma.$disconnect();
   }
 }
