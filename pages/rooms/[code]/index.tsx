@@ -792,6 +792,30 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
               >
                 Spin
               </Button>
+
+              {isHost && (
+                <Button
+                  onClick={() => router.push(`/rooms/${code}/settings`)}
+                  sx={{
+                    background: "transparent",
+                    border: `1px solid ${BORDER_MED}`,
+                    borderRadius: "8px",
+                    color: TEXT_DIM,
+                    fontFamily: FONT_SANS,
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    padding: "9px 14px",
+                    textTransform: "none",
+                    "&:hover": {
+                      background: "rgba(180,140,60,0.08)",
+                      color: TEXT,
+                      borderColor: AMBER,
+                    },
+                  }}
+                >
+                  Settings
+                </Button>
+              )}
             </Box>
           </Box>
 

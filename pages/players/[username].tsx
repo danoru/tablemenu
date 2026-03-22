@@ -336,7 +336,7 @@ export default function UserProfilePage({
                 {isSelf ? (
                   <Button
                     startIcon={<EditIcon sx={{ fontSize: "14px !important" }} />}
-                    onClick={() => router.push(`/players/${profileUser.username}/edit`)}
+                    onClick={() => router.push(`/players/${profileUser.username}/settings`)}
                     sx={{
                       background: "transparent",
                       border: `1px solid ${BORDER_MED}`,

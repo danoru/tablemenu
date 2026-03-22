@@ -24,11 +24,41 @@ enum InviteStatus {
   DECLINED
 }
 
+enum RoomType {
+  CASUAL      // Temporary — auto-expires after inactivity
+  RECURRING   // Persistent — reopened each session, retains members & pool
+  VENUE       // Public-facing account
+}
+
+enum RoomVisibility {
+  PUBLIC       // Anyone with the code can join
+  LINK_ONLY    // Requires signed URL (future)
+  INVITE_ONLY  // Host must approve each join request
+}
+
+enum SessionStatus {
+  SCHEDULED  // Planned but not yet open
+  ACTIVE     // Currently in progress
+  CLOSED     // Night is over
+}
+
+enum AchievementCategory {
+  LIBRARY     // Collection size / wishlist
+  GEOGRAPHY   // Country / region diversity
+  CATEGORY    // BGG game categories
+  MECHANIC    // BGG game mechanics
+  COMPLEXITY  // Weight-based
+  RATINGS     // Star ratings given
+  SOCIAL      // Rooms, members, hosting
+  PLAY        // Logged play sessions
+  STREAK      // Consecutive hosting weeks
+}
+
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 model Users {
-  id           Int                   @id @default(autoincrement())
-  username     String                @unique @db.Citext
+  id           Int     @id @default(autoincrement())
+  username     String  @unique @db.Citext
   password     String
   firstName    String?
   lastName     String?
@@ -37,8 +67,9 @@ model Users {
   website      String?
   bio          String?
   image        String?
-  badge        Badge                 @default(USER)
-  joinDate     DateTime              @default(now())
+  badge        Badge   @default(USER)
+  joinDate     DateTime @default(now())
+
   following        Following[]             @relation("Follower")
   followedBy       Following[]             @relation("Following")
   invitedRooms     RoomInvites[]
@@ -47,16 +78,20 @@ model Users {
   collection       UserGames[]             @relation("UserGames")
   roomVotes        RoomGameVotes[]
   gameSuggestions  RoomGameSuggestions[]   @relation("SuggestedByUser")
+  achievements     UserAchievements[]
+  gameSessions     GameSessionPlayers[]
+  hostedSessions   RoomSessions[]          @relation("SessionHost")
 }
 
-// ─── Social Graph ─────────────────────────────────────────────────────────────
+// ─── Social graph ─────────────────────────────────────────────────────────────
 
 model Following {
   userId          Int
   followingUserId Int
   addedAt         DateTime @default(now())
-  user            Users    @relation("Follower",  fields: [userId],          references: [id], onDelete: Cascade)
-  following       Users    @relation("Following", fields: [followingUserId], references: [id], onDelete: Cascade)
+
+  user      Users @relation("Follower",  fields: [userId],          references: [id], onDelete: Cascade)
+  following Users @relation("Following", fields: [followingUserId], references: [id], onDelete: Cascade)
 
   @@id([userId, followingUserId])
 }
@@ -64,27 +99,52 @@ model Following {
 // ─── Games ────────────────────────────────────────────────────────────────────
 
 model Games {
-  id            Int       @id @default(autoincrement())
-  addedAt       DateTime  @default(now())
-  bggId         Int?      @unique
-  name          String
-  description   String?
-  imageUrl      String?
-  minPlaytime   Int
-  maxPlaytime   Int
-  minPlayers    Int
-  maxPlayers    Int
-  complexity    Float?
-  categories    String[]
-  bggRating     Float?
+  id          Int      @id @default(autoincrement())
+  addedAt     DateTime @default(now())
+
+  // BGG identity
+  bggId       Int?     @unique
+
+  name        String
+  description String?
+  imageUrl    String?
+
+  minPlaytime Int
+  maxPlaytime Int
+  minPlayers  Int
+  maxPlayers  Int
+
+  // BGG 1–5 weight scale
+  complexity  Float?
+
+  // BGG community average (0–10)
+  bggRating   Float?
+
+  // Year published — useful for achievements and display
+  yearPublished Int?
+
+  // BGG link arrays — stored denormalized for query performance.
+  // These feed achievement checks without requiring joins.
+  categories  String[]  // boardgamecategory link values
+  mechanics   String[]  // boardgamemechanic link values
+  designers   String[]  // boardgamedesigner link values
+  publishers  String[]  // boardgamepublisher link values
+
+  // Country/region tags extracted from boardgamefamily links
+  // e.g. ["Germany", "Scandinavia"] — used for geography achievements
+  countries   String[]
+
   bggLastSynced DateTime?
-  roomGames     RoomGameSuggestions[]
-  roomVotes     RoomGameVotes[]
-  ratings       UserGameRatings[]
-  users         UserGames[]           @relation("UserGames")
+
+  roomGames         RoomGameSuggestions[]
+  roomVotes         RoomGameVotes[]
+  roomPermanent     RoomPermanentGames[]
+  ratings           UserGameRatings[]
+  users             UserGames[]             @relation("UserGames")
+  sessionGames      GameSessionGames[]
 }
 
-// ─── User Library ─────────────────────────────────────────────────────────────
+// ─── User library ─────────────────────────────────────────────────────────────
 
 model UserGames {
   id      Int      @id @default(autoincrement())
@@ -92,22 +152,32 @@ model UserGames {
   gameId  Int
   addedAt DateTime @default(now())
   notes   String?
+
+  // Quick Gen weight — default 1, recommended cap 5
   weight  Int      @default(1)
+
+  // Wishlist flag — game is wanted but not yet owned
+  isWishlist Boolean @default(false)
+
   game    Games    @relation("UserGames", fields: [gameId], references: [id], onDelete: Cascade)
   user    Users    @relation("UserGames", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, gameId])
 }
 
-// ─── User Game Ratings ────────────────────────────────────────────────────────
+// ─── User game ratings ────────────────────────────────────────────────────────
 
 model UserGameRatings {
   id      Int      @id @default(autoincrement())
   userId  Int
   gameId  Int
+
+  // 1–5 star scale, enforced by check constraint
   stars   Int      @db.SmallInt
+
   review  String?
   ratedAt DateTime @default(now())
+
   game    Games    @relation(fields: [gameId], references: [id], onDelete: Cascade)
   user    Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -117,22 +187,36 @@ model UserGameRatings {
 // ─── Rooms ────────────────────────────────────────────────────────────────────
 
 model Rooms {
-  id          Int      @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   name        String
-  code        String  @unique
   description String?
   hostId      Int
-  createdAt   DateTime @default(now())
-  isActive    Boolean  @default(true)
+  createdAt   DateTime       @default(now())
+  isActive    Boolean        @default(true)
+  code        String         @unique
+
+  // Room behaviour model
+  type        RoomType       @default(CASUAL)
+  visibility  RoomVisibility @default(PUBLIC)
+
+  // CASUAL rooms auto-expire. NULL = never expires (RECURRING / VENUE).
+  expiresAt   DateTime?
+
+  // Timestamp of the most recent session open — used for streak tracking
+  lastOpenedAt DateTime?
+
   playerCount Int?
   timeBudget  Int?
-  gameSuggs   RoomGameSuggestions[]
-  invites     RoomInvites[]
-  votes       RoomGameVotes[]
-  host        Users                 @relation("HostRooms", fields: [hostId], references: [id])
+
+  host              Users                 @relation("HostRooms", fields: [hostId], references: [id])
+  gameSuggs         RoomGameSuggestions[]
+  invites           RoomInvites[]
+  votes             RoomGameVotes[]
+  permanentGames    RoomPermanentGames[]
+  sessions          RoomSessions[]
 }
 
-// ─── Room Invites ─────────────────────────────────────────────────────────────
+// ─── Room invites ─────────────────────────────────────────────────────────────
 
 model RoomInvites {
   id        Int          @id @default(autoincrement())
@@ -140,39 +224,169 @@ model RoomInvites {
   userId    Int
   status    InviteStatus @default(PENDING)
   invitedAt DateTime     @default(now())
+
   room      Rooms        @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user      Users        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, userId])
 }
 
-// ─── Room Game Suggestions ────────────────────────────────────────────────────
+// ─── Room permanent game pool (RECURRING rooms only) ─────────────────────────
+// Games that are always available in the room's pool across all sessions.
+// Members still flag "bringing tonight" per-session via RoomGameSuggestions.
+
+model RoomPermanentGames {
+  id      Int      @id @default(autoincrement())
+  roomId  Int
+  gameId  Int
+  addedBy Int
+  addedAt DateTime @default(now())
+
+  room    Rooms    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  game    Games    @relation(fields: [gameId], references: [id])
+
+  @@unique([roomId, gameId])
+}
+
+// ─── Room sessions ────────────────────────────────────────────────────────────
+// Each time a RECURRING room is "opened for tonight" a new session is created.
+// CASUAL rooms have exactly one session (their entire lifespan).
+// Sessions are the unit that maps to "nights hosted" in stats.
+
+model RoomSessions {
+  id          Int           @id @default(autoincrement())
+  roomId      Int
+  hostId      Int
+  status      SessionStatus @default(SCHEDULED)
+  scheduledFor DateTime?    // Optional — for planned nights
+  openedAt    DateTime?     // Set when host clicks "Open tonight"
+  closedAt    DateTime?     // Set when host closes the session
+  playerCount Int?          // Actual headcount that night (may differ from room default)
+  notes       String?       // Host's notes for this session
+
+  room        Rooms         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  host        Users         @relation("SessionHost", fields: [hostId], references: [id])
+  gamePlayed  GameSessions[]
+}
+
+// ─── Room game suggestions (per-session bringing list) ────────────────────────
 
 model RoomGameSuggestions {
   id          Int      @id @default(autoincrement())
   roomId      Int
   gameId      Int
   createdAt   DateTime @default(now())
+
   suggestedBy   Int?
   suggestedUser Users?  @relation("SuggestedByUser", fields: [suggestedBy], references: [id], onDelete: SetNull)
+
   game        Games    @relation(fields: [gameId], references: [id], onDelete: Cascade)
   room        Rooms    @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, gameId])
 }
 
-// ─── Room Game Votes ──────────────────────────────────────────────────────────
+// ─── Room game votes ──────────────────────────────────────────────────────────
 
 model RoomGameVotes {
   id         Int      @id @default(autoincrement())
   roomId     Int
   gameId     Int
   userId     Int
-  interested Boolean  
+  interested Boolean
   votedAt    DateTime @default(now())
+
   room       Rooms    @relation(fields: [roomId], references: [id], onDelete: Cascade)
   game       Games    @relation(fields: [gameId], references: [id], onDelete: Cascade)
   user       Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, gameId, userId])
+}
+
+// ─── Game sessions (play history) ────────────────────────────────────────────
+// Records that a specific game was played on a specific night.
+// Can be standalone (no room) or linked to a RoomSession.
+
+model GameSessions {
+  id          Int       @id @default(autoincrement())
+  playedAt    DateTime  @default(now())
+  durationMin Int?      // Actual play time in minutes
+  notes       String?
+
+  // Optional link to a room session
+  roomSessionId Int?
+  roomSession   RoomSessions? @relation(fields: [roomSessionId], references: [id], onDelete: SetNull)
+
+  games       GameSessionGames[]
+  players     GameSessionPlayers[]
+}
+
+// ─── Games played in a session (many-to-many) ─────────────────────────────────
+
+model GameSessionGames {
+  id            Int          @id @default(autoincrement())
+  gameSessionId Int
+  gameId        Int
+
+  gameSession   GameSessions @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+  game          Games        @relation(fields: [gameId],        references: [id])
+
+  @@unique([gameSessionId, gameId])
+}
+
+// ─── Players in a session ────────────────────────────────────────────────────
+
+model GameSessionPlayers {
+  id            Int          @id @default(autoincrement())
+  gameSessionId Int
+  userId        Int
+  won           Boolean?     // NULL = not tracked, true = winner, false = did not win
+
+  gameSession   GameSessions @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+  user          Users        @relation(fields: [userId],        references: [id])
+
+  @@unique([gameSessionId, userId])
+}
+
+// ─── Achievements ─────────────────────────────────────────────────────────────
+// Static definition of every achievement. Seeded once, never changes per-user.
+
+model Achievements {
+  id          Int                 @id @default(autoincrement())
+  key         String              @unique  // e.g. "COLLECTOR_25" — used in code
+  name        String                       // Display name
+  description String                       // What the user did to earn it
+  category    AchievementCategory
+  icon        String                       // Emoji or icon key
+  points      Int                 @default(10)
+
+  // Threshold value for tiered achievements (e.g. 10, 25, 50 for library size)
+  // NULL for one-off achievements
+  threshold   Int?
+
+  // Whether this achievement is secret until earned
+  isSecret    Boolean             @default(false)
+
+  // Ordering within its category for display
+  sortOrder   Int                 @default(0)
+
+  users       UserAchievements[]
+}
+
+// ─── User achievements (earned) ───────────────────────────────────────────────
+
+model UserAchievements {
+  id            Int          @id @default(autoincrement())
+  userId        Int
+  achievementId Int
+  earnedAt      DateTime     @default(now())
+
+  // Progress toward the achievement for tiered ones (e.g. 17/25 games)
+  // NULL for one-off achievements
+  progress      Int?
+
+  user          Users        @relation(fields: [userId],        references: [id], onDelete: Cascade)
+  achievement   Achievements @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
 }

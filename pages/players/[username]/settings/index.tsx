@@ -240,11 +240,6 @@ export default function EditProfilePage({ username, initial }: Props) {
               >
                 {username}
               </Typography>
-              <Typography
-                sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT, mt: "2px" }}
-              >
-                Avatar upload coming soon
-              </Typography>
             </Box>
           </Box>
 

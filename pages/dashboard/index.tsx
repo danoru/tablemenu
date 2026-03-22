@@ -152,10 +152,19 @@ function SectionHeader({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 interface DashboardProps {
+  activeRooms: {
+    id: number;
+    name: string;
+    code: string;
+    type: string;
+    playerCount: number | null;
+    createdAt: string;
+  }[];
+  nightsHosted: number;
   username: string;
 }
 
-export default function DashboardPage({ username }: DashboardProps) {
+export default function DashboardPage({ activeRooms, nightsHosted, username }: DashboardProps) {
   const router = useRouter();
 
   const library = MOCK_USER_LIBRARY;
@@ -163,9 +172,9 @@ export default function DashboardPage({ username }: DashboardProps) {
 
   const stats = {
     gamesOwned: library.length,
-    nightsHosted: 0,
+    nightsHosted: nightsHosted,
     following: 0,
-    activeRooms: 0,
+    activeRooms: activeRooms.length,
   };
 
   return (
@@ -402,60 +411,128 @@ export default function DashboardPage({ username }: DashboardProps) {
             </Box>
 
             {/* Active rooms */}
-            <Box>
-              <SectionHeader
-                title="Your rooms"
-                action="Create a room"
-                onAction={() => router.push("/rooms/new")}
-              />
-              <Box
-                sx={{
-                  background: BG_CARD,
-                  border: `1px solid ${BORDER}`,
-                  borderRadius: "12px",
-                  padding: "40px 24px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  minHeight: "220px",
-                  gap: "12px",
-                }}
-              >
-                <MeetingRoomIcon sx={{ fontSize: "32px", color: TEXT_FAINT }} />
-                <Typography
+            <Box
+              sx={{
+                background: BG_CARD,
+                border: `1px solid ${BORDER}`,
+                borderRadius: "12px",
+                overflow: "hidden",
+              }}
+            >
+              {activeRooms.length === 0 ? (
+                <Box
                   sx={{
-                    fontFamily: FONT_SANS,
-                    fontSize: "14px",
-                    color: TEXT_FAINT,
-                    textAlign: "center",
+                    padding: "40px 24px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "12px",
                   }}
                 >
-                  No active rooms
-                </Typography>
-                <Button
-                  onClick={() => router.push("/rooms/new")}
-                  sx={{
-                    background: "transparent",
-                    border: `1px solid ${BORDER_MED}`,
-                    borderRadius: "8px",
-                    color: TEXT_DIM,
-                    fontFamily: FONT_SANS,
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    padding: "8px 18px",
-                    textTransform: "none",
-                    mt: "4px",
-                    "&:hover": {
-                      background: "rgba(180,140,60,0.08)",
-                      color: TEXT,
-                      borderColor: AMBER,
-                    },
-                  }}
-                >
-                  Host a game night
-                </Button>
-              </Box>
+                  <MeetingRoomIcon sx={{ fontSize: "32px", color: TEXT_FAINT }} />
+                  <Typography
+                    sx={{
+                      fontFamily: FONT_SANS,
+                      fontSize: "14px",
+                      color: TEXT_FAINT,
+                      textAlign: "center",
+                    }}
+                  >
+                    No active rooms
+                  </Typography>
+                  <Button
+                    onClick={() => router.push("/rooms/new")}
+                    sx={{
+                      background: "transparent",
+                      border: `1px solid ${BORDER_MED}`,
+                      borderRadius: "8px",
+                      color: TEXT_DIM,
+                      fontFamily: FONT_SANS,
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      padding: "8px 18px",
+                      textTransform: "none",
+                      mt: "4px",
+                      "&:hover": {
+                        background: "rgba(180,140,60,0.08)",
+                        color: TEXT,
+                        borderColor: AMBER,
+                      },
+                    }}
+                  >
+                    Host a game night
+                  </Button>
+                </Box>
+              ) : (
+                activeRooms.map((room, i) => (
+                  <Box key={room.id}>
+                    <Box
+                      onClick={() => router.push(`/rooms/${room.code}`)}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "14px",
+                        padding: "14px 18px",
+                        cursor: "pointer",
+                        "&:hover": { background: "rgba(255,255,255,0.025)" },
+                      }}
+                    >
+                      <MeetingRoomIcon
+                        sx={{ fontSize: "18px", color: TEXT_FAINT, flexShrink: 0 }}
+                      />
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          sx={{
+                            fontFamily: FONT_SANS,
+                            fontSize: "14px",
+                            fontWeight: 500,
+                            color: TEXT,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {room.name}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontFamily: FONT_SANS,
+                            fontSize: "12px",
+                            color: TEXT_FAINT,
+                            mt: "1px",
+                          }}
+                        >
+                          {room.code}
+                          {room.playerCount ? ` · ${room.playerCount} players` : ""}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          fontFamily: FONT_SANS,
+                          fontSize: "10px",
+                          fontWeight: 500,
+                          letterSpacing: "0.8px",
+                          textTransform: "uppercase",
+                          color: room.type === "RECURRING" ? "#5ec97a" : TEXT_FAINT,
+                          background:
+                            room.type === "RECURRING"
+                              ? "rgba(34,85,48,0.3)"
+                              : "rgba(255,255,255,0.05)",
+                          border: `1px solid ${room.type === "RECURRING" ? "rgba(60,160,80,0.25)" : BORDER}`,
+                          padding: "2px 8px",
+                          borderRadius: "10px",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {room.type === "RECURRING" ? "Recurring" : "Casual"}
+                      </Box>
+                    </Box>
+                    {i < activeRooms.length - 1 && (
+                      <Divider sx={{ borderColor: BORDER, mx: "18px" }} />
+                    )}
+                  </Box>
+                ))
+              )}
             </Box>
           </Box>
 
@@ -520,16 +597,30 @@ export default function DashboardPage({ username }: DashboardProps) {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
+  if (!session?.user) return { redirect: { destination: "/login", permanent: false } };
 
-  if (!session?.user) {
-    return {
-      redirect: { destination: "/login", permanent: false },
-    };
-  }
+  const userId = Number((session.user as any).id);
+  const username = (session.user as any).username ?? "Player";
+
+  const { default: prisma } = await import("@data/db");
+
+  const [activeRooms, sessionCount] = await Promise.all([
+    prisma.rooms.findMany({
+      where: { hostId: userId, isActive: true },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, name: true, code: true, type: true, playerCount: true, createdAt: true },
+    }),
+    prisma.roomSessions.count({ where: { hostId: userId, status: "CLOSED" } }),
+  ]);
 
   return {
     props: {
-      username: (session.user as any).username ?? "Player",
+      username,
+      activeRooms: activeRooms.map((r) => ({
+        ...r,
+        createdAt: r.createdAt.toISOString(),
+      })),
+      nightsHosted: sessionCount,
     },
   };
 };
