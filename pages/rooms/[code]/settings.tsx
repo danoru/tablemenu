@@ -22,7 +22,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import * as Yup from "yup";
 
-import { authOptions } from "@api/auth/[...nextauth]";
+import { authOptions } from "@/lib/authOptions";
 import prisma from "@data/db";
 
 // ─── Constants ────────────────────────────────────────────────────────────────

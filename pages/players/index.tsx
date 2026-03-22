@@ -1,4 +1,4 @@
-import { authOptions } from "@api/auth/[...nextauth]";
+import { authOptions } from "@/lib/authOptions";
 import { getAllUsers } from "@data/users";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";

@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "@api/auth/[...nextauth]";
+import { authOptions } from "@/lib/authOptions";
 import prisma from "@data/db";
 import { checkAchievements } from "@/services/achievements";
 

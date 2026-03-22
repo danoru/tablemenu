@@ -1,4 +1,4 @@
-import { authOptions } from "@api/auth/[...nextauth]";
+import { authOptions } from "@/lib/authOptions";
 import prisma from "@data/db";
 import { customAlphabet } from "nanoid";
 import type { NextApiRequest, NextApiResponse } from "next";

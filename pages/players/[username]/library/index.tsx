@@ -1,4 +1,4 @@
-import { authOptions } from "@api/auth/[...nextauth]";
+import { authOptions } from "@/lib/authOptions";
 import { MOCK_USER_LIBRARY, MOCK_SEARCH_POOL, MockGame } from "@data/mockGameData";
 import AddIcon from "@mui/icons-material/Add";
 import CasinoIcon from "@mui/icons-material/Casino";

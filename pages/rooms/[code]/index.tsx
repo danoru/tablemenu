@@ -1,4 +1,4 @@
-import { authOptions } from "@api/auth/[...nextauth]";
+import { authOptions } from "@/lib/authOptions";
 import type { RoomData, RoomMember, RoomSuggestion } from "@api/rooms/[code]/index";
 import { MOCK_USER_LIBRARY } from "@data/mockGameData";
 import CasinoIcon from "@mui/icons-material/Casino";

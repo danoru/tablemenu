@@ -1,4 +1,4 @@
-import { authOptions } from "@api/auth/[...nextauth]";
+import { authOptions } from "@/lib/authOptions";
 import { MOCK_USER_LIBRARY } from "@data/mockGameData";
 import EditIcon from "@mui/icons-material/Edit";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
