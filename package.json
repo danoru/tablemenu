@@ -11,9 +11,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "postinstall": "prisma generate",
-    "prisma": {
-      "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
-    },
     "test": "pnpm run lint && pnpm run test:format && pnpm run test:types",
     "test:format": "pnpm run format:check",
     "test:types": "tsc --noEmit"
@@ -76,5 +73,8 @@
     "*.{json,md,css}": [
       "prettier --write"
     ]
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   }
 }
