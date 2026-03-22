@@ -1,4 +1,4 @@
-import { hash } from "bcrypt";
+import { hash } from "bcryptjs";
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as yup from "yup";
 import prisma from "@data/db";
