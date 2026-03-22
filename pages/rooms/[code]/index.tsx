@@ -1,11 +1,15 @@
 import { authOptions } from "@api/auth/[...nextauth]";
-import type { RoomData, RoomSuggestion } from "@api/rooms/[code]/index";
+import type { RoomData, RoomMember, RoomSuggestion } from "@api/rooms/[code]/index";
 import { MOCK_USER_LIBRARY } from "@data/mockGameData";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CheckIcon from "@mui/icons-material/Check";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import NightlifeIcon from "@mui/icons-material/Nightlife";
+import SettingsIcon from "@mui/icons-material/Settings";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
@@ -13,12 +17,15 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   Dialog,
   DialogContent,
   Divider,
+  FormControlLabel,
   IconButton,
+  OutlinedInput,
   Slide,
   Snackbar,
   Tooltip,
@@ -83,7 +90,6 @@ function avatarColour(name: string): string {
   return palette[Math.abs(hash) % palette.length];
 }
 
-// Weighted pick — games with more "interested" votes are more likely to be picked
 function weightedPick(suggestions: RoomSuggestion[]): RoomSuggestion {
   const weighted = suggestions.flatMap((s) => {
     const weight = Math.max(1, s.interestedCount - s.vetoCount + 1);
@@ -101,7 +107,7 @@ const SlideUp = React.forwardRef(function SlideUp(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-// ─── Quick Gen modal (room-aware) ─────────────────────────────────────────────
+// ─── Quick Gen Modal ──────────────────────────────────────────────────────────
 
 function RoomQuickGenModal({
   open,
@@ -114,20 +120,16 @@ function RoomQuickGenModal({
 }) {
   const [spinning, setSpinning] = React.useState(false);
   const [result, setResult] = React.useState<RoomSuggestion | null>(null);
-
-  // Only use games that at least one person is bringing
   const pool = suggestions.filter((s) => s.bringing && s.vetoCount === 0);
 
   function spin() {
     if (pool.length === 0) return;
     setSpinning(true);
     setResult(null);
-
     let flashes = 0;
     const interval = setInterval(() => {
       setResult(pool[Math.floor(Math.random() * pool.length)]);
-      flashes++;
-      if (flashes >= 14) {
+      if (++flashes >= 14) {
         clearInterval(interval);
         setResult(weightedPick(pool));
         setSpinning(false);
@@ -186,17 +188,14 @@ function RoomQuickGenModal({
         <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT, mb: "32px" }}>
           Weighted by votes · {pool.length} game{pool.length !== 1 ? "s" : ""} in the pool
         </Typography>
-
-        {pool.length === 0 && (
+        {pool.length === 0 ? (
           <Box sx={{ textAlign: "center", py: "32px" }}>
             <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_FAINT }}>
               No games in the pool yet. Have members mark what they're bringing and cast votes
               first.
             </Typography>
           </Box>
-        )}
-
-        {pool.length > 0 && (
+        ) : (
           <>
             <Box
               sx={{
@@ -301,7 +300,6 @@ function RoomQuickGenModal({
                 </Box>
               )}
             </Box>
-
             <Box sx={{ display: "flex", gap: "10px" }}>
               <Button
                 fullWidth
@@ -359,7 +357,378 @@ function RoomQuickGenModal({
   );
 }
 
-// ─── Game suggestion row ──────────────────────────────────────────────────────
+// ─── Log Games Modal ──────────────────────────────────────────────────────────
+
+function LogGamesModal({
+  open,
+  onClose,
+  suggestions,
+  members,
+  code,
+  onLogged,
+}: {
+  open: boolean;
+  onClose: () => void;
+  suggestions: RoomSuggestion[];
+  members: RoomMember[];
+  code: string;
+  onLogged: () => void;
+}) {
+  const acceptedMembers = members.filter((m) => m.status === "ACCEPTED");
+
+  const [selectedGame, setSelectedGame] = React.useState<RoomSuggestion | null>(null);
+  const [selectedPlayers, setSelectedPlayers] = React.useState<number[]>(
+    acceptedMembers.map((m) => m.userId)
+  );
+  const [winnerIds, setWinnerIds] = React.useState<number[]>([]);
+  const [duration, setDuration] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [snackbar, setSnackbar] = React.useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({ open: false, message: "", severity: "success" });
+
+  function handleClose() {
+    setSelectedGame(null);
+    setSelectedPlayers(acceptedMembers.map((m) => m.userId));
+    setWinnerIds([]);
+    setDuration("");
+    setSubmitting(false);
+    onClose();
+  }
+
+  function togglePlayer(userId: number) {
+    setSelectedPlayers((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
+    setWinnerIds((prev) => prev.filter((id) => id !== userId));
+  }
+
+  function toggleWinner(userId: number) {
+    setWinnerIds((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
+  }
+
+  async function handleLog() {
+    if (!selectedGame) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/rooms/${code}/session/log`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          games: [
+            {
+              gameId: selectedGame.gameId,
+              durationMin: duration ? Number(duration) : null,
+              playerIds: selectedPlayers,
+              winnerIds,
+            },
+          ],
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSnackbar({ open: true, message: "Game logged!", severity: "success" });
+        setTimeout(() => {
+          onLogged();
+          handleClose();
+        }, 1000);
+      } else {
+        setSnackbar({
+          open: true,
+          message: data.error ?? "Failed to log game.",
+          severity: "error",
+        });
+      }
+    } catch {
+      setSnackbar({ open: true, message: "Something went wrong.", severity: "error" });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      TransitionComponent={SlideUp}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{
+        sx: {
+          background: BG_ELEVATED,
+          border: `1px solid ${BORDER_MED}`,
+          borderRadius: "14px",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+        },
+      }}
+    >
+      <DialogContent sx={{ padding: "28px" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: "24px",
+          }}
+        >
+          <Typography
+            sx={{ fontFamily: FONT_SERIF, fontSize: "22px", fontWeight: 700, color: TEXT }}
+          >
+            Log a game
+          </Typography>
+          <IconButton onClick={handleClose} size="small" sx={{ color: TEXT_DIM }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+
+        {/* Game picker */}
+        <Typography
+          sx={{
+            fontFamily: FONT_SANS,
+            fontSize: "11px",
+            fontWeight: 500,
+            color: TEXT_FAINT,
+            letterSpacing: "1px",
+            textTransform: "uppercase",
+            mb: "10px",
+          }}
+        >
+          Which game?
+        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "6px", mb: "24px" }}>
+          {suggestions.length === 0 ? (
+            <Typography
+              sx={{
+                fontFamily: FONT_SANS,
+                fontSize: "13px",
+                color: TEXT_FAINT,
+                fontStyle: "italic",
+              }}
+            >
+              No games in the pool yet.
+            </Typography>
+          ) : (
+            suggestions.map((s) => (
+              <Box
+                key={s.gameId}
+                onClick={() => setSelectedGame(s)}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  padding: "10px 14px",
+                  borderRadius: "8px",
+                  background:
+                    selectedGame?.gameId === s.gameId
+                      ? "rgba(200,150,42,0.15)"
+                      : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${selectedGame?.gameId === s.gameId ? AMBER : BORDER}`,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  "&:hover": { borderColor: BORDER_MED },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "6px",
+                    background: gameColour(s.name),
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: FONT_SERIF,
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      color: "rgba(232,223,200,0.5)",
+                      userSelect: "none",
+                    }}
+                  >
+                    {initials(s.name)}
+                  </Typography>
+                </Box>
+                <Typography
+                  sx={{
+                    fontFamily: FONT_SANS,
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    color: selectedGame?.gameId === s.gameId ? TEXT : TEXT_DIM,
+                    flex: 1,
+                  }}
+                >
+                  {s.name}
+                </Typography>
+                {selectedGame?.gameId === s.gameId && (
+                  <CheckCircleIcon sx={{ fontSize: "16px", color: AMBER }} />
+                )}
+              </Box>
+            ))
+          )}
+        </Box>
+
+        {/* Duration */}
+        <Typography
+          sx={{
+            fontFamily: FONT_SANS,
+            fontSize: "11px",
+            fontWeight: 500,
+            color: TEXT_FAINT,
+            letterSpacing: "1px",
+            textTransform: "uppercase",
+            mb: "10px",
+          }}
+        >
+          How long? (minutes, optional)
+        </Typography>
+        <OutlinedInput
+          value={duration}
+          onChange={(e) => setDuration(e.target.value.replace(/\D/g, ""))}
+          placeholder="e.g. 75"
+          inputProps={{ inputMode: "numeric" }}
+          sx={{
+            fontFamily: FONT_SANS,
+            fontSize: "14px",
+            color: TEXT,
+            mb: "24px",
+            width: "140px",
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
+            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: AMBER },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: AMBER,
+              borderWidth: "1px",
+            },
+            "& input::placeholder": { color: TEXT_FAINT },
+          }}
+        />
+
+        {/* Players */}
+        <Typography
+          sx={{
+            fontFamily: FONT_SANS,
+            fontSize: "11px",
+            fontWeight: 500,
+            color: TEXT_FAINT,
+            letterSpacing: "1px",
+            textTransform: "uppercase",
+            mb: "10px",
+          }}
+        >
+          Who played?
+        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", mb: "24px" }}>
+          {acceptedMembers.map((member) => (
+            <Box
+              key={member.userId}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "8px 12px",
+                borderRadius: "8px",
+                background: selectedPlayers.includes(member.userId)
+                  ? "rgba(255,255,255,0.04)"
+                  : "transparent",
+                border: `1px solid ${selectedPlayers.includes(member.userId) ? BORDER : "transparent"}`,
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedPlayers.includes(member.userId)}
+                    onChange={() => togglePlayer(member.userId)}
+                    size="small"
+                    sx={{
+                      color: BORDER_MED,
+                      "&.Mui-checked": { color: AMBER },
+                      padding: "4px 8px",
+                    }}
+                  />
+                }
+                label={
+                  <Typography
+                    sx={{
+                      fontFamily: FONT_SANS,
+                      fontSize: "14px",
+                      color: selectedPlayers.includes(member.userId) ? TEXT : TEXT_DIM,
+                    }}
+                  >
+                    {member.username}
+                  </Typography>
+                }
+                sx={{ margin: 0 }}
+              />
+              {selectedPlayers.includes(member.userId) && (
+                <Tooltip title="Mark as winner" placement="left">
+                  <IconButton
+                    onClick={() => toggleWinner(member.userId)}
+                    size="small"
+                    sx={{
+                      color: winnerIds.includes(member.userId) ? GOLD : TEXT_FAINT,
+                      background: winnerIds.includes(member.userId)
+                        ? "rgba(232,201,122,0.15)"
+                        : "transparent",
+                      border: `1px solid ${winnerIds.includes(member.userId) ? "rgba(232,201,122,0.3)" : "transparent"}`,
+                      borderRadius: "6px",
+                      "&:hover": { color: GOLD },
+                    }}
+                  >
+                    <EmojiEventsIcon sx={{ fontSize: "15px" }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
+          ))}
+        </Box>
+
+        <Button
+          fullWidth
+          onClick={handleLog}
+          disabled={!selectedGame || submitting}
+          sx={{
+            background: AMBER,
+            borderRadius: "8px",
+            color: "#0f0c08",
+            fontFamily: FONT_SANS,
+            fontSize: "15px",
+            fontWeight: 500,
+            padding: "12px",
+            textTransform: "none",
+            "&:hover": { background: AMBER_HOVER },
+            "&.Mui-disabled": { background: "rgba(200,150,42,0.35)", color: "rgba(15,12,8,0.5)" },
+          }}
+        >
+          {submitting ? (
+            <CircularProgress size={20} sx={{ color: "rgba(15,12,8,0.5)" }} />
+          ) : (
+            "Log game"
+          )}
+        </Button>
+      </DialogContent>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbar.severity} sx={{ fontFamily: FONT_SANS }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Dialog>
+  );
+}
+
+// ─── Suggestion row ───────────────────────────────────────────────────────────
 
 function SuggestionRow({
   suggestion,
@@ -393,7 +762,6 @@ function SuggestionRow({
         mb: "8px",
       }}
     >
-      {/* Art */}
       <Box
         sx={{
           width: "44px",
@@ -418,8 +786,6 @@ function SuggestionRow({
           {initials(suggestion.name)}
         </Typography>
       </Box>
-
-      {/* Name + meta */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
           sx={{
@@ -445,8 +811,6 @@ function SuggestionRow({
           </Typography>
         </Box>
       </Box>
-
-      {/* Vote counts */}
       <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
         <Box
           sx={{
@@ -483,10 +847,7 @@ function SuggestionRow({
           </Typography>
         </Box>
       </Box>
-
-      {/* Actions */}
       <Box sx={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-        {/* Bring toggle */}
         <Tooltip title={isBringing ? "Remove from tonight" : "I'm bringing this"} placement="top">
           <IconButton
             onClick={() => onToggleBring(suggestion.gameId)}
@@ -505,8 +866,6 @@ function SuggestionRow({
             <DirectionsWalkIcon sx={{ fontSize: "16px" }} />
           </IconButton>
         </Tooltip>
-
-        {/* Vote interested */}
         <Tooltip title="I want to play this" placement="top">
           <IconButton
             onClick={() => onVote(suggestion.gameId, true)}
@@ -524,8 +883,6 @@ function SuggestionRow({
             <ThumbUpIcon sx={{ fontSize: "16px" }} />
           </IconButton>
         </Tooltip>
-
-        {/* Vote veto */}
         <Tooltip title="I'd rather not play this" placement="top">
           <IconButton
             onClick={() => onVote(suggestion.gameId, false)}
@@ -564,8 +921,13 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
 
   const [room, setRoom] = React.useState<RoomData>(initialRoom);
   const [quickGenOpen, setQuickGenOpen] = React.useState(false);
+  const [logOpen, setLogOpen] = React.useState(false);
   const [loadingGameId, setLoadingGameId] = React.useState<number | null>(null);
   const [copied, setCopied] = React.useState(false);
+  const [activeSessionId, setActiveSessionId] = React.useState<number | null>(
+    initialRoom.activeSessionId ?? null
+  );
+  const [sessionLoading, setSessionLoading] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState<{
     open: boolean;
     message: string;
@@ -582,24 +944,21 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
         const data = await res.json();
         if (res.ok && data.room) setRoom(data.room);
       } catch {
-        /* silent — stale data is fine */
+        /* silent */
       }
     }, 5000);
     return () => clearInterval(interval);
   }, [code]);
 
-  // ── Copy room code ─────────────────────────────────────────────────────────
   function handleCopyCode() {
     navigator.clipboard.writeText(room.code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
-  // ── Library games not yet in room ─────────────────────────────────────────
   const suggestedGameIds = new Set(room.suggestions.map((s) => s.gameId));
   const myLibrary = MOCK_USER_LIBRARY.filter((g) => !suggestedGameIds.has(g.id));
 
-  // ── Toggle bring ──────────────────────────────────────────────────────────
   async function handleToggleBring(gameId: number) {
     setLoadingGameId(gameId);
     try {
@@ -609,9 +968,7 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
         body: JSON.stringify({ type: "bring", gameId }),
       });
       if (res.ok) {
-        // Optimistic refresh
-        const poll = await fetch(`/api/rooms/${code}`);
-        const data = await poll.json();
+        const data = await (await fetch(`/api/rooms/${code}`)).json();
         if (data.room) setRoom(data.room);
       }
     } catch {
@@ -621,7 +978,6 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
     }
   }
 
-  // ── Vote ──────────────────────────────────────────────────────────────────
   async function handleVote(gameId: number, interested: boolean) {
     setLoadingGameId(gameId);
     try {
@@ -631,8 +987,7 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
         body: JSON.stringify({ type: "vote", gameId, interested }),
       });
       if (res.ok) {
-        const poll = await fetch(`/api/rooms/${code}`);
-        const data = await poll.json();
+        const data = await (await fetch(`/api/rooms/${code}`)).json();
         if (data.room) setRoom(data.room);
       }
     } catch {
@@ -642,7 +997,6 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
     }
   }
 
-  // ── Add game from library ─────────────────────────────────────────────────
   async function handleAddFromLibrary(gameId: number) {
     setLoadingGameId(gameId);
     try {
@@ -652,14 +1006,67 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
         body: JSON.stringify({ type: "bring", gameId }),
       });
       if (res.ok) {
-        const poll = await fetch(`/api/rooms/${code}`);
-        const data = await poll.json();
+        const data = await (await fetch(`/api/rooms/${code}`)).json();
         if (data.room) setRoom(data.room);
       }
     } catch {
       setSnackbar({ open: true, message: "Failed to add game.", severity: "error" });
     } finally {
       setLoadingGameId(null);
+    }
+  }
+
+  async function handleOpenSession() {
+    setSessionLoading(true);
+    try {
+      const res = await fetch(`/api/rooms/${code}/session/open`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerCount: room.playerCount }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActiveSessionId(data.sessionId);
+        setSnackbar({ open: true, message: "Tonight's session is open!", severity: "success" });
+      } else {
+        setSnackbar({
+          open: true,
+          message: data.error ?? "Failed to open session.",
+          severity: "error",
+        });
+      }
+    } catch {
+      setSnackbar({ open: true, message: "Something went wrong.", severity: "error" });
+    } finally {
+      setSessionLoading(false);
+    }
+  }
+
+  async function handleCloseSession() {
+    setSessionLoading(true);
+    try {
+      const res = await fetch(`/api/rooms/${code}/session/close`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clearSession: true }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActiveSessionId(null);
+        setSnackbar({ open: true, message: "Session closed. Good night!", severity: "success" });
+        const pollData = await (await fetch(`/api/rooms/${code}`)).json();
+        if (pollData.room) setRoom(pollData.room);
+      } else {
+        setSnackbar({
+          open: true,
+          message: data.error ?? "Failed to close session.",
+          severity: "error",
+        });
+      }
+    } catch {
+      setSnackbar({ open: true, message: "Something went wrong.", severity: "error" });
+    } finally {
+      setSessionLoading(false);
     }
   }
 
@@ -693,7 +1100,7 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
             padding: { xs: "24px 16px", md: "40px 32px" },
           }}
         >
-          {/* ── Room header ──────────────────────────────────────────────── */}
+          {/* ── Room header ───────────────────────────────────────────────── */}
           <Box
             sx={{
               display: "flex",
@@ -741,7 +1148,6 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
             </Box>
 
             <Box sx={{ display: "flex", gap: "10px", flexShrink: 0, flexWrap: "wrap" }}>
-              {/* Room code */}
               <Box
                 onClick={handleCopyCode}
                 sx={{
@@ -749,11 +1155,10 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
                   alignItems: "center",
                   gap: "8px",
                   background: "rgba(180,110,30,0.15)",
-                  border: `1px solid rgba(180,140,60,0.3)`,
+                  border: "1px solid rgba(180,140,60,0.3)",
                   borderRadius: "8px",
                   padding: "8px 14px",
                   cursor: "pointer",
-                  transition: "all 0.15s",
                   "&:hover": { background: "rgba(180,110,30,0.25)" },
                 }}
               >
@@ -774,7 +1179,6 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
                   <ContentCopyIcon sx={{ fontSize: "14px", color: GOLD_FADED }} />
                 )}
               </Box>
-
               <Button
                 onClick={() => setQuickGenOpen(true)}
                 startIcon={<CasinoIcon />}
@@ -792,10 +1196,10 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
               >
                 Spin
               </Button>
-
               {isHost && (
                 <Button
                   onClick={() => router.push(`/rooms/${code}/settings`)}
+                  startIcon={<SettingsIcon sx={{ fontSize: "16px !important" }} />}
                   sx={{
                     background: "transparent",
                     border: `1px solid ${BORDER_MED}`,
@@ -818,6 +1222,159 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
               )}
             </Box>
           </Box>
+
+          {/* ── Session banner ────────────────────────────────────────────── */}
+          {isHost && (
+            <Box
+              sx={{
+                background: activeSessionId ? "rgba(34,85,48,0.18)" : "rgba(180,110,30,0.1)",
+                border: `1px solid ${activeSessionId ? "rgba(60,160,80,0.3)" : "rgba(180,140,60,0.2)"}`,
+                borderRadius: "12px",
+                padding: "18px 24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "12px",
+                mb: "24px",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                {activeSessionId ? (
+                  <>
+                    <Box
+                      sx={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        background: GREEN_BRIGHT,
+                        "@keyframes pulse": { "0%,100%": { opacity: 1 }, "50%": { opacity: 0.3 } },
+                        animation: "pulse 2s infinite",
+                      }}
+                    />
+                    <Box>
+                      <Typography
+                        sx={{
+                          fontFamily: FONT_SANS,
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          color: TEXT,
+                        }}
+                      >
+                        Session is live
+                      </Typography>
+                      <Typography
+                        sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT }}
+                      >
+                        Log games and close when you're done for the night.
+                      </Typography>
+                    </Box>
+                  </>
+                ) : (
+                  <>
+                    <NightlifeIcon sx={{ color: TEXT_FAINT, fontSize: "20px" }} />
+                    <Box>
+                      <Typography
+                        sx={{
+                          fontFamily: FONT_SANS,
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          color: TEXT,
+                        }}
+                      >
+                        Ready to play?
+                      </Typography>
+                      <Typography
+                        sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT }}
+                      >
+                        Open tonight's session to start tracking this game night.
+                      </Typography>
+                    </Box>
+                  </>
+                )}
+              </Box>
+              <Box sx={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {activeSessionId ? (
+                  <>
+                    <Button
+                      onClick={() => setLogOpen(true)}
+                      startIcon={<EmojiEventsIcon />}
+                      sx={{
+                        background: "rgba(34,85,48,0.3)",
+                        border: "1px solid rgba(60,160,80,0.35)",
+                        borderRadius: "8px",
+                        color: GREEN_BRIGHT,
+                        fontFamily: FONT_SANS,
+                        fontSize: "13px",
+                        fontWeight: 500,
+                        padding: "8px 16px",
+                        textTransform: "none",
+                        "&:hover": { background: "rgba(34,85,48,0.5)" },
+                      }}
+                    >
+                      Log games
+                    </Button>
+                    <Button
+                      onClick={handleCloseSession}
+                      disabled={sessionLoading}
+                      startIcon={<CheckCircleIcon />}
+                      sx={{
+                        background: "transparent",
+                        border: `1px solid ${BORDER_MED}`,
+                        borderRadius: "8px",
+                        color: TEXT_DIM,
+                        fontFamily: FONT_SANS,
+                        fontSize: "13px",
+                        fontWeight: 500,
+                        padding: "8px 16px",
+                        textTransform: "none",
+                        "&:hover": {
+                          background: "rgba(180,140,60,0.08)",
+                          color: TEXT,
+                          borderColor: AMBER,
+                        },
+                      }}
+                    >
+                      {sessionLoading ? (
+                        <CircularProgress size={14} sx={{ color: "inherit" }} />
+                      ) : (
+                        "Close session"
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    onClick={handleOpenSession}
+                    disabled={sessionLoading}
+                    startIcon={
+                      sessionLoading ? (
+                        <CircularProgress size={14} sx={{ color: "#0f0c08" }} />
+                      ) : (
+                        <NightlifeIcon />
+                      )
+                    }
+                    sx={{
+                      background: AMBER,
+                      borderRadius: "8px",
+                      color: "#0f0c08",
+                      fontFamily: FONT_SANS,
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      padding: "8px 18px",
+                      textTransform: "none",
+                      "&:hover": { background: AMBER_HOVER },
+                      "&.Mui-disabled": {
+                        background: "rgba(200,150,42,0.35)",
+                        color: "rgba(15,12,8,0.5)",
+                      },
+                    }}
+                  >
+                    Open tonight
+                  </Button>
+                )}
+              </Box>
+            </Box>
+          )}
 
           {/* ── Two column layout ─────────────────────────────────────────── */}
           <Box
@@ -869,7 +1426,6 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
                 ))
               )}
 
-              {/* Add from my library */}
               {myLibrary.length > 0 && (
                 <Box sx={{ mt: "28px" }}>
                   <Divider sx={{ borderColor: BORDER, mb: "20px" }} />
@@ -943,7 +1499,7 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
                           size="small"
                           sx={{
                             background: "rgba(180,110,30,0.15)",
-                            border: `1px solid rgba(180,140,60,0.25)`,
+                            border: "1px solid rgba(180,140,60,0.25)",
                             borderRadius: "6px",
                             color: GOLD_FADED,
                             fontFamily: FONT_SANS,
@@ -1060,11 +1616,10 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
                   ))}
               </Box>
 
-              {/* Join instructions */}
               <Box
                 sx={{
                   background: "rgba(180,110,30,0.08)",
-                  border: `1px solid rgba(180,140,60,0.18)`,
+                  border: "1px solid rgba(180,140,60,0.18)",
                   borderRadius: "10px",
                   padding: "16px",
                 }}
@@ -1128,10 +1683,20 @@ export default function RoomPage({ initialRoom, currentUserId, username }: Props
         </Box>
       </Box>
 
+      {/* ── Modals ────────────────────────────────────────────────────────── */}
       <RoomQuickGenModal
         open={quickGenOpen}
         onClose={() => setQuickGenOpen(false)}
         suggestions={room.suggestions}
+      />
+
+      <LogGamesModal
+        open={logOpen}
+        onClose={() => setLogOpen(false)}
+        suggestions={room.suggestions}
+        members={room.members}
+        code={code}
+        onLogged={() => setLogOpen(false)}
       />
 
       <Snackbar
@@ -1154,51 +1719,38 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { code } = context.params as { code: string };
   const session = await getServerSession(context.req, context.res, authOptions);
 
-  if (!session?.user) {
+  if (!session?.user)
     return { redirect: { destination: `/login?next=/rooms/${code}`, permanent: false } };
-  }
 
   const currentUserId = Number((session.user as any).id);
   const username = (session.user as any).username ?? "";
 
   const { default: prisma } = await import("@data/db");
 
-  const room = await prisma.rooms.findUnique({
+  const queryArgs = {
     where: { code: code.toUpperCase() },
     include: {
       host: { select: { id: true, username: true } },
       invites: { include: { user: { select: { id: true, username: true } } } },
       gameSuggs: { include: { game: true } },
       votes: true,
+      sessions: { where: { status: "ACTIVE" as const }, select: { id: true }, take: 1 },
     },
-  });
+  } as const;
 
+  let room = await prisma.rooms.findUnique(queryArgs);
   if (!room) return { notFound: true };
 
-  // Auto-join if authenticated user isn't already a member
   const isMember = room.invites.some((inv) => inv.userId === currentUserId);
   if (!isMember) {
     await prisma.roomInvites.create({
       data: { roomId: room.id, userId: currentUserId, status: "ACCEPTED" },
     });
-    // Refresh after join
-    const updated = await prisma.rooms.findUnique({
-      where: { code: code.toUpperCase() },
-      include: {
-        host: { select: { id: true, username: true } },
-        invites: { include: { user: { select: { id: true, username: true } } } },
-        gameSuggs: { include: { game: true } },
-        votes: true,
-      },
-    });
-    if (updated) {
-      const initialRoom = buildRoomData(updated, currentUserId);
-      return { props: { initialRoom, currentUserId, username } };
-    }
+    room = await prisma.rooms.findUnique(queryArgs);
+    if (!room) return { notFound: true };
   }
 
-  const initialRoom = buildRoomData(room, currentUserId);
-  return { props: { initialRoom, currentUserId, username } };
+  return { props: { initialRoom: buildRoomData(room, currentUserId), currentUserId, username } };
 };
 
 // ─── Room data builder ────────────────────────────────────────────────────────
@@ -1215,7 +1767,6 @@ function buildRoomData(room: any, currentUserId: number): RoomData {
     const interestedCount = gameVotes.filter((v: any) => v.interested).length;
     const vetoCount = gameVotes.filter((v: any) => !v.interested).length;
     const myVoteRecord = gameVotes.find((v: any) => v.userId === currentUserId);
-
     return {
       gameId: sugg.game.id,
       name: sugg.game.name,
@@ -1242,6 +1793,7 @@ function buildRoomData(room: any, currentUserId: number): RoomData {
     isActive: room.isActive,
     hostId: room.host.id,
     hostUsername: room.host.username,
+    activeSessionId: room.sessions?.[0]?.id ?? null,
     members,
     suggestions,
   };

@@ -1,5 +1,6 @@
 import { authOptions } from "@api/auth/[...nextauth]";
 import prisma from "@data/db";
+import { checkAchievements } from "@/services/achievements";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 
@@ -108,6 +109,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const userGame = await prisma.userGames.create({
       data: { userId, gameId: game.id },
     });
+
+    await checkAchievements(userId, { event: "GAME_ADDED" });
 
     return res.status(201).json({
       userGameId: userGame.id,

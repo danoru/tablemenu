@@ -39,6 +39,7 @@ export interface RoomData {
   isActive: boolean;
   hostId: number;
   hostUsername: string;
+  activeSessionId: number | null;
   members: RoomMember[];
   suggestions: RoomSuggestion[];
 }
@@ -68,16 +69,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       where: { code: code.toUpperCase() },
       include: {
         host: { select: { id: true, username: true } },
-        invites: {
-          include: { user: { select: { id: true, username: true } } },
-        },
-        gameSuggs: {
-          include: {
-            game: true,
-            room: false,
-          },
-        },
+        invites: { include: { user: { select: { id: true, username: true } } } },
+        gameSuggs: { include: { game: true, room: false } },
         votes: true,
+        sessions: { where: { status: "ACTIVE" }, select: { id: true }, take: 1 }, // ← add this
       },
     });
 
@@ -125,6 +120,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       isActive: room.isActive,
       hostId: room.host.id,
       hostUsername: room.host.username,
+      activeSessionId: room.sessions?.[0]?.id ?? null,
       members,
       suggestions,
     };
