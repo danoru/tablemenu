@@ -1,5 +1,4 @@
 import { authOptions } from "@/lib/authOptions";
-import { MOCK_USER_LIBRARY } from "@data/mockGameData";
 import CasinoIcon from "@mui/icons-material/Casino";
 import GroupsIcon from "@mui/icons-material/Groups";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
@@ -10,6 +9,8 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
+import { LibraryGame } from "@pages/api/games/library";
+import { getUserLibrary } from "@/data/games";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -160,14 +161,19 @@ interface DashboardProps {
     playerCount: number | null;
     createdAt: string;
   }[];
+  library: LibraryGame[];
   nightsHosted: number;
   username: string;
 }
 
-export default function DashboardPage({ activeRooms, nightsHosted, username }: DashboardProps) {
+export default function DashboardPage({
+  activeRooms,
+  library,
+  nightsHosted,
+  username,
+}: DashboardProps) {
   const router = useRouter();
 
-  const library = MOCK_USER_LIBRARY;
   const recentGames = library.slice(0, 5);
 
   const stats = {
@@ -352,7 +358,7 @@ export default function DashboardPage({ activeRooms, nightsHosted, username }: D
                 }}
               >
                 {recentGames.map((game, i) => (
-                  <Box key={game.id}>
+                  <Box key={game.gameId}>
                     <Box
                       sx={{
                         display: "flex",
@@ -613,14 +619,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     prisma.roomSessions.count({ where: { hostId: userId, status: "CLOSED" } }),
   ]);
 
+  const library = await getUserLibrary(userId);
+
   return {
     props: {
-      username,
       activeRooms: activeRooms.map((r) => ({
         ...r,
         createdAt: r.createdAt.toISOString(),
       })),
+      library,
       nightsHosted: sessionCount,
+      username,
     },
   };
 };

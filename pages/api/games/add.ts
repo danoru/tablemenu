@@ -18,6 +18,10 @@ interface AddGameBody {
   complexity?: number | null;
   bggRating?: number | null;
   categories?: string[];
+  mechanics: string[];
+  designers: string[];
+  publishers: string[];
+  countries: string[];
 }
 
 interface ApiResponse {
@@ -39,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(401).json({ error: "Not authenticated" });
   }
 
-  const userId = (session.user as any).id as number;
+  const userId = Number((session.user as any).id);
 
   const {
     bggId,
@@ -53,6 +57,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     complexity,
     bggRating,
     categories,
+    mechanics,
+    designers,
+    publishers,
+    countries,
   } = req.body as AddGameBody;
 
   if (!name || minPlayers == null || maxPlayers == null) {
@@ -76,6 +84,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         bggRating,
         categories: categories ?? [],
         bggLastSynced: new Date(),
+        mechanics,
+        designers,
+        publishers,
+        countries,
       },
       create: {
         bggId: bggId ?? null,
@@ -90,6 +102,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         bggRating: bggRating ?? null,
         categories: categories ?? [],
         bggLastSynced: bggId ? new Date() : null,
+        mechanics,
+        designers,
+        publishers,
+        countries,
       },
     });
 

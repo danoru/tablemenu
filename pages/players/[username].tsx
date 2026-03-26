@@ -1,5 +1,4 @@
 import { authOptions } from "@/lib/authOptions";
-import { MOCK_USER_LIBRARY } from "@data/mockGameData";
 import EditIcon from "@mui/icons-material/Edit";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import LinkIcon from "@mui/icons-material/Link";
@@ -14,6 +13,8 @@ import { useRouter } from "next/router";
 import React from "react";
 import superjson from "superjson";
 import type { Users } from "@prisma/client";
+import { LibraryGame } from "@pages/api/games/library";
+import { getUserLibrary } from "@/data/games";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -100,6 +101,7 @@ interface Props {
   isFollowing: boolean;
   followerCount: number;
   followingCount: number;
+  library: LibraryGame[];
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -110,13 +112,14 @@ export default function UserProfilePage({
   isFollowing: initialIsFollowing,
   followerCount: initialFollowerCount,
   followingCount,
+  library,
 }: Props) {
   const router = useRouter();
   const [isFollowing, setIsFollowing] = React.useState(initialIsFollowing);
   const [followerCount, setFollowerCount] = React.useState(initialFollowerCount);
   const [followLoading, setFollowLoading] = React.useState(false);
 
-  const libraryPreview = MOCK_USER_LIBRARY.slice(0, 6);
+  const libraryPreview = library.slice(0, 6);
 
   async function handleFollow() {
     setFollowLoading(true);
@@ -408,7 +411,7 @@ export default function UserProfilePage({
             <Box sx={{ display: "flex", gap: "32px" }}>
               <StatPill value={followerCount} label="followers" />
               <StatPill value={followingCount} label="following" />
-              <StatPill value={MOCK_USER_LIBRARY.length} label="games owned" />
+              <StatPill value={library.length} label="games owned" />
             </Box>
           </Box>
 
@@ -443,7 +446,7 @@ export default function UserProfilePage({
                   transition: "color 0.15s",
                 }}
               >
-                View all {MOCK_USER_LIBRARY.length} games →
+                View all {library.length} games →
               </Typography>
             </Box>
 
@@ -457,7 +460,7 @@ export default function UserProfilePage({
             >
               {libraryPreview.map((game) => (
                 <Box
-                  key={game.id}
+                  key={game.gameId}
                   onClick={() => router.push(`/players/${profileUser.username}/library`)}
                   sx={{
                     background: BG_CARD,
@@ -577,6 +580,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { notFound: true };
   }
 
+  const library = await getUserLibrary(user.id);
+
   let isFollowing = false;
   if (currentUserId && currentUserId !== user.id) {
     const follow = await prisma.following.findUnique({
@@ -598,6 +603,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     isFollowing,
     followerCount: _count.followedBy,
     followingCount: _count.following,
+    library,
   });
 
   return {

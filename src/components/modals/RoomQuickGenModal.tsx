@@ -1,0 +1,314 @@
+import CasinoIcon from "@mui/icons-material/Casino";
+import CloseIcon from "@mui/icons-material/Close";
+import ShuffleIcon from "@mui/icons-material/Shuffle";
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  IconButton,
+  Slide,
+  Typography,
+} from "@mui/material";
+import { TransitionProps } from "@mui/material/transitions";
+import { RoomSuggestion } from "@pages/api/rooms/[code]";
+import React from "react";
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const GOLD = "#e8c97a";
+const AMBER = "#c8962a";
+const AMBER_HOVER = "#dba535";
+const GREEN_BRIGHT = "#5ec97a";
+const BG_ELEVATED = "#221e14";
+const BORDER = "rgba(180,140,60,0.15)";
+const BORDER_MED = "rgba(180,140,60,0.28)";
+const TEXT = "#f0e6cc";
+const TEXT_DIM = "rgba(232,223,200,0.55)";
+const TEXT_FAINT = "rgba(232,223,200,0.28)";
+const FONT_SERIF = "'Playfair Display', serif";
+const FONT_SANS = "'DM Sans', sans-serif";
+
+function gameColour(name: string): string {
+  const palette = [
+    "rgba(34,85,48,0.5)",
+    "rgba(100,60,20,0.5)",
+    "rgba(60,40,80,0.5)",
+    "rgba(20,60,90,0.5)",
+    "rgba(90,30,30,0.5)",
+    "rgba(40,70,60,0.5)",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return palette[Math.abs(hash) % palette.length];
+}
+
+function initials(name: string): string {
+  const words = name.split(" ").filter(Boolean);
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+}
+
+function weightedPick(suggestions: RoomSuggestion[]): RoomSuggestion {
+  const weighted = suggestions.flatMap((s) => {
+    const weight = Math.max(1, s.interestedCount - s.vetoCount + 1);
+    return Array(weight).fill(s);
+  });
+  return weighted[Math.floor(Math.random() * weighted.length)];
+}
+const SlideUp = React.forwardRef(function SlideUp(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+export default function RoomQuickGenModal({
+  open,
+  onClose,
+  suggestions,
+}: {
+  open: boolean;
+  onClose: () => void;
+  suggestions: RoomSuggestion[];
+}) {
+  const [spinning, setSpinning] = React.useState(false);
+  const [result, setResult] = React.useState<RoomSuggestion | null>(null);
+  const pool = suggestions.filter((s) => s.bringing && s.vetoCount === 0);
+
+  function spin() {
+    if (pool.length === 0) return;
+    setSpinning(true);
+    setResult(null);
+    let flashes = 0;
+    const interval = setInterval(() => {
+      setResult(pool[Math.floor(Math.random() * pool.length)]);
+      if (++flashes >= 14) {
+        clearInterval(interval);
+        setResult(weightedPick(pool));
+        setSpinning(false);
+      }
+    }, 80);
+  }
+
+  function handleClose() {
+    setSpinning(false);
+    setResult(null);
+    onClose();
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      TransitionComponent={SlideUp}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{
+        sx: {
+          background: BG_ELEVATED,
+          border: `1px solid ${BORDER_MED}`,
+          borderRadius: "14px",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
+          overflow: "hidden",
+        },
+      }}
+    >
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "50%",
+          background:
+            "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(34,85,48,0.2) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
+      <DialogContent sx={{ padding: "32px", position: "relative" }}>
+        <Box
+          sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: "8px" }}
+        >
+          <Typography
+            sx={{ fontFamily: FONT_SERIF, fontSize: "24px", fontWeight: 700, color: TEXT }}
+          >
+            Tonight's pick
+          </Typography>
+          <IconButton onClick={handleClose} size="small" sx={{ color: TEXT_DIM }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+        <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT, mb: "32px" }}>
+          Weighted by votes · {pool.length} game{pool.length !== 1 ? "s" : ""} in the pool
+        </Typography>
+        {pool.length === 0 ? (
+          <Box sx={{ textAlign: "center", py: "32px" }}>
+            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_FAINT }}>
+              No games in the pool yet. Have members mark what they're bringing and cast votes
+              first.
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            <Box
+              sx={{
+                minHeight: "180px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "16px",
+                mb: "28px",
+              }}
+            >
+              {!result && !spinning && (
+                <Typography
+                  sx={{
+                    fontFamily: FONT_SANS,
+                    fontSize: "14px",
+                    color: TEXT_FAINT,
+                    fontStyle: "italic",
+                  }}
+                >
+                  Hit spin when everyone's ready
+                </Typography>
+              )}
+              {(result || spinning) && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "14px",
+                    opacity: spinning ? 0.65 : 1,
+                    transition: "opacity 0.15s",
+                  }}
+                >
+                  {result && (
+                    <Box
+                      sx={{
+                        width: "100px",
+                        height: "100px",
+                        borderRadius: "12px",
+                        background: gameColour(result.name),
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        border: `1px solid ${BORDER_MED}`,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontFamily: FONT_SERIF,
+                          fontSize: "28px",
+                          fontWeight: 700,
+                          color: "rgba(232,223,200,0.5)",
+                          userSelect: "none",
+                        }}
+                      >
+                        {initials(result.name)}
+                      </Typography>
+                    </Box>
+                  )}
+                  <Typography
+                    sx={{
+                      fontFamily: FONT_SERIF,
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: spinning ? TEXT_DIM : GOLD,
+                      textAlign: "center",
+                      maxWidth: "340px",
+                      lineHeight: 1.1,
+                      transition: "color 0.15s",
+                    }}
+                  >
+                    {result?.name}
+                  </Typography>
+                  {!spinning && result && (
+                    <Box sx={{ display: "flex", gap: "8px" }}>
+                      <Chip
+                        label={`👍 ${result.interestedCount}`}
+                        size="small"
+                        sx={{
+                          fontFamily: FONT_SANS,
+                          fontSize: "12px",
+                          background: "rgba(94,201,122,0.15)",
+                          color: GREEN_BRIGHT,
+                          border: "1px solid rgba(94,201,122,0.2)",
+                        }}
+                      />
+                      <Chip
+                        label={`${result.minPlayers}–${result.maxPlayers}p`}
+                        size="small"
+                        sx={{
+                          fontFamily: FONT_SANS,
+                          fontSize: "12px",
+                          background: "rgba(255,255,255,0.05)",
+                          color: TEXT_DIM,
+                          border: `1px solid ${BORDER}`,
+                        }}
+                      />
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Box>
+            <Box sx={{ display: "flex", gap: "10px" }}>
+              <Button
+                fullWidth
+                onClick={spin}
+                disabled={spinning}
+                startIcon={
+                  spinning ? (
+                    <CircularProgress size={16} sx={{ color: "#0f0c08" }} />
+                  ) : (
+                    <CasinoIcon />
+                  )
+                }
+                sx={{
+                  background: AMBER,
+                  borderRadius: "8px",
+                  color: "#0f0c08",
+                  fontFamily: FONT_SANS,
+                  fontSize: "15px",
+                  fontWeight: 500,
+                  padding: "12px",
+                  textTransform: "none",
+                  "&:hover": { background: AMBER_HOVER },
+                  "&.Mui-disabled": {
+                    background: "rgba(200,150,42,0.35)",
+                    color: "rgba(15,12,8,0.5)",
+                  },
+                }}
+              >
+                {spinning ? "Picking…" : result ? "Spin again" : "Spin"}
+              </Button>
+              {result && !spinning && (
+                <Button
+                  onClick={spin}
+                  startIcon={<ShuffleIcon />}
+                  sx={{
+                    background: "transparent",
+                    border: `1px solid ${BORDER_MED}`,
+                    borderRadius: "8px",
+                    color: TEXT_DIM,
+                    fontFamily: FONT_SANS,
+                    fontSize: "15px",
+                    padding: "12px 20px",
+                    textTransform: "none",
+                    "&:hover": { background: "rgba(180,140,60,0.08)", color: TEXT },
+                  }}
+                >
+                  Re-roll
+                </Button>
+              )}
+            </Box>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

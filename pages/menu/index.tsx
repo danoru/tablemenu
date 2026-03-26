@@ -1,5 +1,5 @@
+import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
-import { MOCK_USER_LIBRARY, MockGame } from "@data/mockGameData";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CloseIcon from "@mui/icons-material/Close";
@@ -17,6 +17,7 @@ import {
   Snackbar,
   Typography,
 } from "@mui/material";
+import { LibraryGame } from "@pages/api/games/library";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
@@ -56,7 +57,7 @@ const COURSES = [
     color: "rgba(34,85,48,0.25)",
     border: "rgba(60,160,80,0.2)",
     accent: GREEN_BRIGHT,
-    filter: (g: MockGame) => g.maxPlaytime <= 20,
+    filter: (g: LibraryGame) => g.maxPlaytime <= 20,
     picks: 2,
   },
   {
@@ -67,7 +68,7 @@ const COURSES = [
     color: "rgba(180,110,30,0.18)",
     border: "rgba(180,140,60,0.25)",
     accent: GOLD,
-    filter: (g: MockGame) => g.minPlaytime >= 30 && g.maxPlaytime <= 90,
+    filter: (g: LibraryGame) => g.minPlaytime >= 30 && g.maxPlaytime <= 90,
     picks: 2,
   },
   {
@@ -78,7 +79,7 @@ const COURSES = [
     color: "rgba(60,40,80,0.25)",
     border: "rgba(100,70,160,0.25)",
     accent: "#c4a0f0",
-    filter: (g: MockGame) => g.minPlaytime >= 90,
+    filter: (g: LibraryGame) => g.minPlaytime >= 90,
     picks: 1,
   },
   {
@@ -89,7 +90,7 @@ const COURSES = [
     color: "rgba(90,30,30,0.2)",
     border: "rgba(160,70,70,0.2)",
     accent: "#f0a0a0",
-    filter: (g: MockGame) => g.maxPlaytime <= 25,
+    filter: (g: LibraryGame) => g.maxPlaytime <= 25,
     picks: 2,
   },
 ] as const;
@@ -126,10 +127,11 @@ function pickRandom<T>(arr: T[], n: number): T[] {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface MenuSelection {
-  [courseId: string]: MockGame[];
+  [courseId: string]: LibraryGame[];
 }
 
 interface Props {
+  library: LibraryGame[];
   username: string;
 }
 
@@ -141,7 +143,7 @@ function MiniGameCard({
   onReroll,
   rerolling,
 }: {
-  game: MockGame;
+  game: LibraryGame;
   accent: string;
   onReroll: () => void;
   rerolling: boolean;
@@ -256,7 +258,7 @@ function CourseCard({
   empty,
 }: {
   course: (typeof COURSES)[number];
-  games: MockGame[];
+  games: LibraryGame[];
   onRerollGame: (idx: number) => void;
   rerollingIdx: number | null;
   empty: boolean;
@@ -330,7 +332,7 @@ function CourseCard({
         <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {games.map((game, idx) => (
             <MiniGameCard
-              key={`${game.id}-${idx}`}
+              key={`${game.gameId}-${idx}`}
               game={game}
               accent={course.accent}
               onReroll={() => onRerollGame(idx)}
@@ -345,7 +347,7 @@ function CourseCard({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function MenuPage({ username }: Props) {
+export default function MenuPage({ library, username }: Props) {
   const router = useRouter();
 
   // ── Source mode: solo vs room ──────────────────────────────────────────────
@@ -353,7 +355,7 @@ export default function MenuPage({ username }: Props) {
   const [roomCode, setRoomCode] = React.useState("");
   const [roomError, setRoomError] = React.useState("");
   const [roomLoading, setRoomLoading] = React.useState(false);
-  const [roomPool, setRoomPool] = React.useState<MockGame[] | null>(null);
+  const [roomPool, setRoomPool] = React.useState<LibraryGame[] | null>(null);
   const [roomName, setRoomName] = React.useState("");
 
   // ── Menu state ─────────────────────────────────────────────────────────────
@@ -368,7 +370,7 @@ export default function MenuPage({ username }: Props) {
   }>({ open: false, message: "", severity: "success" });
 
   // Active pool — solo uses mock library, room uses fetched pool
-  const activePool: MockGame[] = mode === "room" && roomPool ? roomPool : MOCK_USER_LIBRARY;
+  const activePool: LibraryGame[] = mode === "room" && roomPool ? roomPool : library;
 
   // ── Room pool fetch ────────────────────────────────────────────────────────
   async function handleRoomConnect() {
@@ -382,8 +384,8 @@ export default function MenuPage({ username }: Props) {
         setRoomError("Room not found. Check the code and try again.");
         return;
       }
-      // Map room suggestions to MockGame shape
-      const pool: MockGame[] = data.room.suggestions
+      // Map room suggestions to Game shape
+      const pool: LibraryGame[] = data.room.suggestions
         .filter((s: any) => s.bringing)
         .map((s: any) => ({
           id: s.gameId,
@@ -446,8 +448,8 @@ export default function MenuPage({ username }: Props) {
       const current = menu[courseId];
 
       // Pick a game not already in this course's selection
-      const currentIds = new Set(current.map((g) => g.id));
-      const candidates = eligible.filter((g) => !currentIds.has(g.id));
+      const currentIds = new Set(current.map((g) => g.gameId));
+      const candidates = eligible.filter((g) => !currentIds.has(g.gameId));
       const pick =
         candidates.length > 0
           ? candidates[Math.floor(Math.random() * candidates.length)]
@@ -900,6 +902,14 @@ export default function MenuPage({ username }: Props) {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
-  if (!session?.user) return { redirect: { destination: "/login", permanent: false } };
-  return { props: { username: (session.user as any).username ?? "" } };
+
+  if (!session?.user) {
+    return { redirect: { destination: "/login", permanent: false } };
+  }
+
+  const currentUserId = Number((session.user as any).id);
+
+  const library = await getUserLibrary(currentUserId);
+
+  return { props: { library, username: (session.user as any).username ?? "" } };
 };

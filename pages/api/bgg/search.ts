@@ -29,13 +29,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   try {
     const bggRes = await fetch(
-      `https://boardgamegeek.com/xmlapi/search?search=${encodeURIComponent(q.trim())}&exact=0`,
+      `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(q.trim())}&type=boardgame`,
       {
         headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.5",
+          Authorization: `Bearer ${process.env.BGG_API_TOKEN}`,
+          Accept: "application/xml",
         },
       }
     );
@@ -77,6 +75,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(200).json({ results: results.slice(0, 20) });
   } catch (err) {
     console.error("[bgg/search]", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error." });
   }
 }
