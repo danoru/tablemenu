@@ -1,9 +1,12 @@
 import { authOptions } from "@/lib/authOptions";
 import AddGameModal from "@/components/modals/AddGameModal";
+import BGGImportModal from "@/components/modals/BGGImportModal";
 import QuickGenModal from "@/components/modals/QuickGenModal";
+import { getUserLibrary } from "@/data/games";
 import { LibraryGame } from "@pages/api/games/library";
 import AddIcon from "@mui/icons-material/Add";
 import CasinoIcon from "@mui/icons-material/Casino";
+import DownloadIcon from "@mui/icons-material/Download";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, Button, InputAdornment, OutlinedInput, Typography } from "@mui/material";
 import { GetServerSideProps } from "next";
@@ -11,7 +14,6 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
-import { getUserLibrary } from "@/data/games";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -153,6 +155,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
   const [search, setSearch] = React.useState("");
   const [addOpen, setAddOpen] = React.useState(false);
   const [quickGenOpen, setQuickGenOpen] = React.useState(false);
+  const [importOpen, setImportOpen] = React.useState(false);
 
   const filtered = React.useMemo(() => {
     if (!search.trim()) return library;
@@ -266,26 +269,48 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
               >
                 Quick Gen
               </Button>
-
-              {/* Only show Add button to library owner */}
               {isSelf && (
-                <Button
-                  onClick={() => setAddOpen(true)}
-                  startIcon={<AddIcon />}
-                  sx={{
-                    background: AMBER,
-                    borderRadius: "8px",
-                    color: "#0f0c08",
-                    fontFamily: FONT_SANS,
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    padding: "9px 18px",
-                    textTransform: "none",
-                    "&:hover": { background: AMBER_HOVER },
-                  }}
-                >
-                  Add game
-                </Button>
+                <>
+                  <Button
+                    onClick={() => setAddOpen(true)}
+                    startIcon={<AddIcon />}
+                    sx={{
+                      background: AMBER,
+                      borderRadius: "8px",
+                      color: "#0f0c08",
+                      fontFamily: FONT_SANS,
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      padding: "9px 18px",
+                      textTransform: "none",
+                      "&:hover": { background: AMBER_HOVER },
+                    }}
+                  >
+                    Add Game
+                  </Button>
+                  <Button
+                    onClick={() => setImportOpen(true)}
+                    startIcon={<DownloadIcon />}
+                    sx={{
+                      background: "transparent",
+                      border: `1px solid ${BORDER_MED}`,
+                      borderRadius: "8px",
+                      color: TEXT_DIM,
+                      fontFamily: FONT_SANS,
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      padding: "9px 18px",
+                      textTransform: "none",
+                      "&:hover": {
+                        background: "rgba(180,140,60,0.08)",
+                        color: TEXT,
+                        borderColor: AMBER,
+                      },
+                    }}
+                  >
+                    Import from BGG
+                  </Button>
+                </>
               )}
             </Box>
           </Box>
@@ -355,6 +380,12 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
       {isSelf && (
         <AddGameModal open={addOpen} onClose={() => setAddOpen(false)} onAdded={handleAddGame} />
       )}
+
+      <BGGImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={() => router.replace(router.asPath)}
+      />
 
       <QuickGenModal open={quickGenOpen} onClose={() => setQuickGenOpen(false)} library={library} />
     </>

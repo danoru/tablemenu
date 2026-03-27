@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   try {
     const bggRes = await fetch(
-      `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(q.trim())}&type=boardgame`,
+      `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(q.trim())}&type=boardgame&excludesubtype=boardgameexpansion`,
       {
         headers: {
           Authorization: `Bearer ${process.env.BGG_API_TOKEN}`,
