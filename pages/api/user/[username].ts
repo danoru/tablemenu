@@ -1,5 +1,7 @@
+import { authOptions } from "@/lib/authOptions";
 import prisma from "@data/db";
 import { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth";
 
 const SAFE_USER_SELECT = {
   id: true,
@@ -34,16 +36,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   if (req.method === "PUT") {
-    const { username, firstName, lastName, email, location, website, bio } = req.body;
+    const { username } = req.query;
+    const { firstName, lastName, location, website, bio } = req.body;
+
+    if (!username || typeof username !== "string") {
+      return res.status(400).json({ message: "Invalid username." });
+    }
+
+    const session = await getServerSession(req, res, authOptions);
+
+    if (!session?.user || (session.user as any).username !== username) {
+      return res.status(403).json({ message: "Unauthorized." });
+    }
 
     try {
       const updatedUser = await prisma.users.update({
         where: { username },
-        data: { firstName, lastName, email, location, website, bio },
+        data: { firstName, lastName, location, website, bio },
         select: SAFE_USER_SELECT,
       });
+
       return res.status(200).json(updatedUser);
     } catch (error) {
+      console.error(error);
       return res.status(500).json({ message: "Error updating user data." });
     }
   }
