@@ -1,3 +1,5 @@
+import GameArt from "@/components/game/GameArt";
+import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import EditIcon from "@mui/icons-material/Edit";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
@@ -6,15 +8,14 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import { Box, Button, CircularProgress, Divider, Typography } from "@mui/material";
+import { LibraryGame } from "@pages/api/games/library";
+import type { Users } from "@prisma/client";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
 import superjson from "superjson";
-import type { Users } from "@prisma/client";
-import { LibraryGame } from "@pages/api/games/library";
-import { getUserLibrary } from "@/data/games";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -46,26 +47,6 @@ function avatarColour(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return palette[Math.abs(hash) % palette.length];
-}
-
-function gameColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.5)",
-    "rgba(100,60,20,0.5)",
-    "rgba(60,40,80,0.5)",
-    "rgba(20,60,90,0.5)",
-    "rgba(90,30,30,0.5)",
-    "rgba(40,70,60,0.5)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-}
-
-function initials(name: string): string {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[1][0]).toUpperCase();
 }
 
 // ─── Stat pill ────────────────────────────────────────────────────────────────
@@ -473,27 +454,7 @@ export default function UserProfilePage({
                   }}
                 >
                   {/* Art placeholder */}
-                  <Box
-                    sx={{
-                      height: "80px",
-                      background: gameColour(game.name),
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontFamily: FONT_SERIF,
-                        fontSize: "20px",
-                        fontWeight: 700,
-                        color: "rgba(232,223,200,0.4)",
-                        userSelect: "none",
-                      }}
-                    >
-                      {initials(game.name)}
-                    </Typography>
-                  </Box>
+                  <GameArt game={game} size={120} />
                   <Box sx={{ padding: "8px 10px" }}>
                     <Typography
                       sx={{

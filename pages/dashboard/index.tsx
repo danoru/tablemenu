@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { LibraryGame } from "@pages/api/games/library";
 import { getUserLibrary } from "@/data/games";
+import GameArt from "@/components/game/GameArt";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -370,30 +371,7 @@ export default function DashboardPage({
                       }}
                     >
                       {/* Mini art placeholder */}
-                      <Box
-                        sx={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "6px",
-                          background: gameColour(game.name),
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            fontFamily: FONT_SERIF,
-                            fontSize: "11px",
-                            fontWeight: 700,
-                            color: "rgba(232,223,200,0.5)",
-                            userSelect: "none",
-                          }}
-                        >
-                          {initials(game.name)}
-                        </Typography>
-                      </Box>
+                      <GameArt game={game} size={36} />
                       <Typography
                         sx={{
                           fontFamily: FONT_SANS,

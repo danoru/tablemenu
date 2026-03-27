@@ -322,11 +322,6 @@ function CourseCard({
           >
             No games in your library fit this course.
           </Typography>
-          <Typography
-            sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT, mt: "4px" }}
-          >
-            Play time data will improve once BGG is connected.
-          </Typography>
         </Box>
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -736,15 +731,7 @@ export default function MenuPage({ library, username }: Props) {
                 alignItems: "center",
                 gap: "10px",
               }}
-            >
-              <Typography
-                sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT, lineHeight: 1.5 }}
-              >
-                ⏳ Play time data is placeholder until the BGG API is connected. Most games will
-                appear in Entrées for now — course distribution will improve automatically once real
-                data arrives.
-              </Typography>
-            </Box>
+            ></Box>
           )}
 
           {/* ── Generate button ───────────────────────────────────────────── */}
