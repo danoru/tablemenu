@@ -23,6 +23,10 @@ export interface LibraryGame {
   bggRating: number | null;
   categories: string[];
   userStars: number | null;
+  yearPublished: number | null;
+  mechanics: string[];
+  designers: string[];
+  publishers: string[];
 }
 
 interface ApiResponse {
@@ -76,6 +80,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       complexity: ug.game.complexity,
       bggRating: ug.game.bggRating,
       categories: ug.game.categories,
+      yearPublished: ug.game.yearPublished,
+      mechanics: ug.game.mechanics,
+      designers: ug.game.designers,
+      publishers: ug.game.publishers,
       userStars: ratingMap.get(ug.gameId) ?? null,
     }));
 

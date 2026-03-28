@@ -152,12 +152,9 @@ model UserGames {
   gameId  Int
   addedAt DateTime @default(now())
   notes   String?
-
-  // Quick Gen weight — default 1, recommended cap 5
   weight  Int      @default(1)
-
-  // Wishlist flag — game is wanted but not yet owned
   isWishlist Boolean @default(false)
+  isFavorite Boolean @default(false)
 
   game    Games    @relation("UserGames", fields: [gameId], references: [id], onDelete: Cascade)
   user    Users    @relation("UserGames", fields: [userId], references: [id], onDelete: Cascade)

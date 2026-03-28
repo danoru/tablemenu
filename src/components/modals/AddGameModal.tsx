@@ -42,8 +42,20 @@ interface SearchResult {
   yearPublished: number | null;
 }
 
-// ─── Slide transition ─────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────
 
+export function cleanText(input: string): string {
+  if (!input) return "";
+
+  return input
+    .replace(/&#0*39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/[\p{Extended_Pictographic}\uFE0F]/gu, "")
+    .trim();
+}
 const SlideUp = React.forwardRef(function SlideUp(
   props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>
@@ -125,7 +137,7 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bggId: game.bggId,
-          name: game.name,
+          name: cleanText(game.name),
           description: game.description,
           imageUrl: game.imageUrl,
           minPlayers: game.minPlayers,
@@ -326,7 +338,7 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {result.name}
+                      {cleanText(result.name)}
                     </Typography>
                     {result.yearPublished && (
                       <Typography

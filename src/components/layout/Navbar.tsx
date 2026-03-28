@@ -27,6 +27,7 @@ function getPages(session: any, onSignOut: () => void): NavPage[] {
         link: `/players/${session.user?.username}`,
         variant: "muted",
       },
+      { id: 2, title: "Games", link: "/games" },
       { id: 2, title: "Menu", link: "/menu" },
       { id: 3, title: "Players", link: "/players" },
       { id: 4, title: "Sign out", action: onSignOut, variant: "muted" },
@@ -35,9 +36,10 @@ function getPages(session: any, onSignOut: () => void): NavPage[] {
 
   return [
     { id: 1, title: "Menu", link: "/menu" },
-    { id: 2, title: "Players", link: "/players" },
-    { id: 3, title: "Sign in", link: "/login", variant: "default" },
-    { id: 4, title: "Create account", link: "/register", variant: "primary" },
+    { id: 2, title: "Games", link: "/games" },
+    { id: 3, title: "Players", link: "/players" },
+    { id: 4, title: "Sign in", link: "/login", variant: "default" },
+    { id: 5, title: "Create account", link: "/register", variant: "primary" },
   ];
 }
 

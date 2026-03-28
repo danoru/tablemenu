@@ -21,7 +21,6 @@ import { LibraryGame } from "@pages/api/games/library";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
-import { useRouter } from "next/router";
 import React from "react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -61,7 +60,7 @@ const COURSES = [
     color: "rgba(180,110,30,0.18)",
     border: "rgba(180,140,60,0.25)",
     accent: GOLD,
-    filter: (g: LibraryGame) => g.minPlaytime >= 30 && g.maxPlaytime <= 90,
+    filter: (g: LibraryGame) => g.minPlaytime >= 30 && g.maxPlaytime <= 89,
     picks: 2,
   },
   {
@@ -83,7 +82,7 @@ const COURSES = [
     color: "rgba(90,30,30,0.2)",
     border: "rgba(160,70,70,0.2)",
     accent: "#f0a0a0",
-    filter: (g: LibraryGame) => g.maxPlaytime <= 25,
+    filter: (g: LibraryGame) => g.maxPlaytime <= 29,
     picks: 2,
   },
 ] as const;
@@ -109,8 +108,6 @@ interface Props {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function MenuPage({ library, username }: Props) {
-  const router = useRouter();
-
   // ── Source mode: solo vs room ──────────────────────────────────────────────
   const [mode, setMode] = React.useState<"solo" | "room">("solo");
   const [roomCode, setRoomCode] = React.useState("");

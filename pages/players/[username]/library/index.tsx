@@ -15,6 +15,7 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
+import Link from "next/link";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -306,7 +307,9 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
               }}
             >
               {filtered.map((game) => (
-                <GameCard key={game.gameId} game={game} />
+                <Link href={`/games/${game.gameId}`} style={{ textDecoration: "none" }}>
+                  <GameCard key={game.gameId} game={game} />
+                </Link>
               ))}
             </Box>
           )}
