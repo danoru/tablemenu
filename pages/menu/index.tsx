@@ -1,3 +1,5 @@
+import CourseCard from "@/components/cards/CourseCard";
+import ExportMenuButton from "@/components/ExportMenuButton";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
@@ -5,13 +7,11 @@ import CasinoIcon from "@mui/icons-material/Casino";
 import CloseIcon from "@mui/icons-material/Close";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import PersonIcon from "@mui/icons-material/Person";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import {
   Alert,
   Box,
   Button,
   CircularProgress,
-  Divider,
   IconButton,
   OutlinedInput,
   Snackbar,
@@ -33,7 +33,6 @@ const AMBER_HOVER = "#dba535";
 const GREEN_BRIGHT = "#5ec97a";
 const BG = "#0f0c08";
 const BG_CARD = "#1a1610";
-const BG_ELEVATED = "#221e14";
 const BORDER = "rgba(180,140,60,0.15)";
 const BORDER_MED = "rgba(180,140,60,0.28)";
 const TEXT = "#f0e6cc";
@@ -41,12 +40,6 @@ const TEXT_DIM = "rgba(232,223,200,0.55)";
 const TEXT_FAINT = "rgba(232,223,200,0.28)";
 const FONT_SERIF = "'Playfair Display', serif";
 const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Course definitions ───────────────────────────────────────────────────────
-// Play time thresholds. Once BGG token is live and real maxPlaytime/minPlaytime
-// values exist in the DB, these comparisons will work correctly automatically.
-// Mock data has placeholder values of 30/60 so all games fall into Entrées
-// until real data arrives — this is expected and noted in the UI.
 
 const COURSES = [
   {
@@ -97,28 +90,6 @@ const COURSES = [
 
 type CourseId = (typeof COURSES)[number]["id"];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function gameColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.5)",
-    "rgba(100,60,20,0.5)",
-    "rgba(60,40,80,0.5)",
-    "rgba(20,60,90,0.5)",
-    "rgba(90,30,30,0.5)",
-    "rgba(40,70,60,0.5)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-}
-
-function initials(name: string): string {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
 function pickRandom<T>(arr: T[], n: number): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, n);
@@ -133,211 +104,6 @@ interface MenuSelection {
 interface Props {
   library: LibraryGame[];
   username: string;
-}
-
-// ─── Game mini card ───────────────────────────────────────────────────────────
-
-function MiniGameCard({
-  game,
-  accent,
-  onReroll,
-  rerolling,
-}: {
-  game: LibraryGame;
-  accent: string;
-  onReroll: () => void;
-  rerolling: boolean;
-}) {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: "14px",
-        padding: "14px 16px",
-        background: "rgba(255,255,255,0.03)",
-        border: `1px solid ${BORDER}`,
-        borderRadius: "10px",
-        transition: "border-color 0.15s",
-        "&:hover": { borderColor: BORDER_MED },
-        opacity: rerolling ? 0.5 : 1,
-      }}
-    >
-      {/* Art */}
-      <Box
-        sx={{
-          width: "48px",
-          height: "48px",
-          borderRadius: "8px",
-          background: game.imageUrl ? "transparent" : gameColour(game.name),
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-          overflow: "hidden",
-        }}
-      >
-        {game.imageUrl ? (
-          <Box
-            component="img"
-            src={game.imageUrl}
-            alt={game.name}
-            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          <Typography
-            sx={{
-              fontFamily: FONT_SERIF,
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "rgba(232,223,200,0.5)",
-              userSelect: "none",
-            }}
-          >
-            {initials(game.name)}
-          </Typography>
-        )}
-      </Box>
-
-      {/* Info */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography
-          sx={{
-            fontFamily: FONT_SANS,
-            fontSize: "14px",
-            fontWeight: 500,
-            color: TEXT,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {game.name}
-        </Typography>
-        <Typography sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT, mt: "2px" }}>
-          {game.minPlayers === game.maxPlayers
-            ? `${game.minPlayers} players`
-            : `${game.minPlayers}–${game.maxPlayers} players`}
-          {" · "}
-          {game.minPlaytime === game.maxPlaytime
-            ? `${game.minPlaytime} min`
-            : `${game.minPlaytime}–${game.maxPlaytime} min`}
-        </Typography>
-      </Box>
-
-      {/* Reroll */}
-      <IconButton
-        onClick={onReroll}
-        disabled={rerolling}
-        size="small"
-        sx={{
-          color: accent,
-          background: "rgba(255,255,255,0.04)",
-          border: `1px solid ${BORDER}`,
-          borderRadius: "7px",
-          "&:hover": { background: "rgba(255,255,255,0.08)", borderColor: accent },
-        }}
-      >
-        {rerolling ? (
-          <CircularProgress size={14} sx={{ color: accent }} />
-        ) : (
-          <RefreshIcon sx={{ fontSize: "16px" }} />
-        )}
-      </IconButton>
-    </Box>
-  );
-}
-
-// ─── Course card ──────────────────────────────────────────────────────────────
-
-function CourseCard({
-  course,
-  games,
-  onRerollGame,
-  rerollingIdx,
-  empty,
-}: {
-  course: (typeof COURSES)[number];
-  games: LibraryGame[];
-  onRerollGame: (idx: number) => void;
-  rerollingIdx: number | null;
-  empty: boolean;
-}) {
-  return (
-    <Box
-      sx={{
-        background: course.color,
-        border: `1px solid ${course.border}`,
-        borderRadius: "14px",
-        padding: "24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-      }}
-    >
-      {/* Course header */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <Box
-          sx={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "10px",
-            background: "rgba(0,0,0,0.2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "22px",
-            flexShrink: 0,
-          }}
-        >
-          {course.icon}
-        </Box>
-        <Box>
-          <Typography
-            sx={{
-              fontFamily: FONT_SERIF,
-              fontSize: "18px",
-              fontWeight: 700,
-              color: TEXT,
-              lineHeight: 1,
-            }}
-          >
-            {course.label}
-          </Typography>
-          <Typography
-            sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT, mt: "3px" }}
-          >
-            {course.subtitle}
-          </Typography>
-        </Box>
-      </Box>
-
-      <Divider sx={{ borderColor: course.border }} />
-
-      {/* Games */}
-      {empty ? (
-        <Box sx={{ textAlign: "center", py: "16px" }}>
-          <Typography
-            sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT, fontStyle: "italic" }}
-          >
-            No games in your library fit this course.
-          </Typography>
-        </Box>
-      ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          {games.map((game, idx) => (
-            <MiniGameCard
-              key={`${game.gameId}-${idx}`}
-              game={game}
-              accent={course.accent}
-              onReroll={() => onRerollGame(idx)}
-              rerolling={rerollingIdx === idx}
-            />
-          ))}
-        </Box>
-      )}
-    </Box>
-  );
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
@@ -364,7 +130,6 @@ export default function MenuPage({ library, username }: Props) {
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
 
-  // Active pool — solo uses mock library, room uses fetched pool
   const activePool: LibraryGame[] = mode === "room" && roomPool ? roomPool : library;
 
   // ── Room pool fetch ────────────────────────────────────────────────────────
@@ -717,23 +482,6 @@ export default function MenuPage({ library, username }: Props) {
               </Box>
             )}
           </Box>
-
-          {/* ── Mock data notice ──────────────────────────────────────────── */}
-          {mode === "solo" && (
-            <Box
-              sx={{
-                background: "rgba(180,110,30,0.08)",
-                border: `1px solid rgba(180,140,60,0.15)`,
-                borderRadius: "10px",
-                padding: "12px 16px",
-                mb: "24px",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-              }}
-            ></Box>
-          )}
-
           {/* ── Generate button ───────────────────────────────────────────── */}
           <Button
             fullWidth
@@ -845,6 +593,7 @@ export default function MenuPage({ library, username }: Props) {
                 >
                   Start over
                 </Button>
+                <ExportMenuButton menu={menu} courses={COURSES} />
               </Box>
             </Box>
           )}

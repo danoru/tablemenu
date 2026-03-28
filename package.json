@@ -25,6 +25,7 @@
     "@mui/material-nextjs": "^7.3.5",
     "@mui/x-date-pickers": "^8.17.0",
     "@prisma/client": "^6.19.0",
+    "@react-pdf/renderer": "^4.3.2",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "decimal.js": "^10.6.0",

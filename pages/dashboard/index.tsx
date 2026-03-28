@@ -3,15 +3,15 @@ import CasinoIcon from "@mui/icons-material/Casino";
 import GroupsIcon from "@mui/icons-material/Groups";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
-import { Box, Button, CircularProgress, Divider, Typography } from "@mui/material";
+import { Box, Button, Divider, Typography } from "@mui/material";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React from "react";
 import { LibraryGame } from "@pages/api/games/library";
 import { getUserLibrary } from "@/data/games";
 import GameArt from "@/components/game/GameArt";
+import StatCard from "@/components/cards/StatCard";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -19,10 +19,8 @@ const GOLD = "#e8c97a";
 const GOLD_FADED = "rgba(232,201,122,0.4)";
 const AMBER = "#c8962a";
 const AMBER_HOVER = "#dba535";
-const GREEN_BRIGHT = "#5ec97a";
 const BG = "#0f0c08";
 const BG_CARD = "#1a1610";
-const BG_ELEVATED = "#221e14";
 const BORDER = "rgba(180,140,60,0.15)";
 const BORDER_MED = "rgba(180,140,60,0.28)";
 const TEXT = "#f0e6cc";
@@ -30,89 +28,6 @@ const TEXT_DIM = "rgba(232,223,200,0.55)";
 const TEXT_FAINT = "rgba(232,223,200,0.28)";
 const FONT_SERIF = "'Playfair Display', serif";
 const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function gameColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.5)",
-    "rgba(100,60,20,0.5)",
-    "rgba(60,40,80,0.5)",
-    "rgba(20,60,90,0.5)",
-    "rgba(90,30,30,0.5)",
-    "rgba(40,70,60,0.5)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-}
-
-function initials(name: string): string {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
-// ─── Stat card ────────────────────────────────────────────────────────────────
-
-function StatCard({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string | number;
-  icon: React.ReactNode;
-}) {
-  return (
-    <Box
-      sx={{
-        background: BG_CARD,
-        border: `1px solid ${BORDER}`,
-        borderRadius: "12px",
-        padding: "20px 24px",
-        display: "flex",
-        alignItems: "center",
-        gap: "16px",
-        flex: 1,
-        minWidth: 0,
-      }}
-    >
-      <Box
-        sx={{
-          width: "40px",
-          height: "40px",
-          borderRadius: "10px",
-          background: "rgba(180,110,30,0.18)",
-          border: `1px solid rgba(180,140,60,0.2)`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: GOLD,
-          flexShrink: 0,
-        }}
-      >
-        {icon}
-      </Box>
-      <Box>
-        <Typography
-          sx={{
-            fontFamily: FONT_SANS,
-            fontSize: "22px",
-            fontWeight: 500,
-            color: TEXT,
-            lineHeight: 1.1,
-          }}
-        >
-          {value}
-        </Typography>
-        <Typography sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT, mt: "2px" }}>
-          {label}
-        </Typography>
-      </Box>
-    </Box>
-  );
-}
 
 // ─── Section header ───────────────────────────────────────────────────────────
 
