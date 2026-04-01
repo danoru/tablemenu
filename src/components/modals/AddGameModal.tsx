@@ -5,6 +5,7 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogContent,
@@ -73,9 +74,10 @@ interface AddGameModalProps {
 
 export default function AddGameModal({ open, onClose, onAdded }: AddGameModalProps) {
   const [query, setQuery] = React.useState("");
+  const [exactMatch, setExactMatch] = React.useState(false);
   const [results, setResults] = React.useState<SearchResult[]>([]);
   const [searching, setSearching] = React.useState(false);
-  const [adding, setAdding] = React.useState<number | null>(null); // bggId being added
+  const [adding, setAdding] = React.useState<number | null>(null);
   const [added, setAdded] = React.useState<Set<number>>(new Set());
   const [searchError, setSearchError] = React.useState("");
   const [snackbar, setSnackbar] = React.useState<{
@@ -85,7 +87,7 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
   }>({ open: false, message: "", severity: "success" });
 
   // ── Debounced search ───────────────────────────────────────────────────────
-  const runSearch = useDebouncedCallback(async (q: string) => {
+  const runSearch = useDebouncedCallback(async (q: string, exact: boolean) => {
     if (q.trim().length < 2) {
       setResults([]);
       setSearching(false);
@@ -94,7 +96,10 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
     setSearching(true);
     setSearchError("");
     try {
-      const res = await fetch(`/api/bgg/search?q=${encodeURIComponent(q.trim())}`);
+      const params = new URLSearchParams({ q: q.trim() });
+      if (exact) params.set("exact", "1");
+
+      const res = await fetch(`/api/bgg/search?${params.toString()}`);
       const data = await res.json();
       if (res.ok) {
         setResults(data.results ?? []);
@@ -113,15 +118,23 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
   function handleQueryChange(e: React.ChangeEvent<HTMLInputElement>) {
     const q = e.target.value;
     setQuery(q);
-    if (q.trim().length >= 2) setSearching(true); // show spinner immediately
-    runSearch(q);
+    if (q.trim().length >= 2) setSearching(true);
+    runSearch(q, exactMatch);
+  }
+
+  function handleExactToggle() {
+    const next = !exactMatch;
+    setExactMatch(next);
+    if (query.trim().length >= 2) {
+      setSearching(true);
+      runSearch(query, next);
+    }
   }
 
   // ── Add a game ─────────────────────────────────────────────────────────────
   async function handleAdd(result: SearchResult) {
     setAdding(result.bggId);
     try {
-      // 1. Fetch full game detail from BGG
       const detailRes = await fetch(`/api/bgg/${result.bggId}`);
       const detailData = await detailRes.json();
       if (!detailRes.ok || !detailData.game) {
@@ -131,7 +144,6 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
 
       const game = detailData.game;
 
-      // 2. Add to library
       const addRes = await fetch("/api/games/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -183,6 +195,7 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
 
   function handleClose() {
     setQuery("");
+    setExactMatch(false);
     setResults([]);
     setSearching(false);
     setAdded(new Set());
@@ -253,7 +266,7 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
             fontFamily: FONT_SANS,
             fontSize: "14px",
             color: TEXT,
-            mb: "16px",
+            mb: "10px",
             "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
             "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: AMBER },
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
@@ -263,6 +276,38 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
             "& input::placeholder": { color: TEXT_FAINT },
           }}
         />
+
+        {/* Exact match toggle */}
+        <Box sx={{ mb: "16px" }}>
+          <Chip
+            label="Exact match"
+            size="small"
+            onClick={handleExactToggle}
+            sx={{
+              fontFamily: FONT_SANS,
+              fontSize: "11px",
+              height: "24px",
+              cursor: "pointer",
+              transition: "all 0.15s",
+              ...(exactMatch
+                ? {
+                    background: "rgba(200,150,42,0.18)",
+                    color: AMBER,
+                    border: `1px solid rgba(200,150,42,0.45)`,
+                  }
+                : {
+                    background: "transparent",
+                    color: TEXT_FAINT,
+                    border: `1px solid ${BORDER}`,
+                    "&:hover": {
+                      background: "rgba(180,140,60,0.06)",
+                      borderColor: BORDER_MED,
+                      color: TEXT_DIM,
+                    },
+                  }),
+            }}
+          />
+        </Box>
 
         {/* Error */}
         {searchError && (
@@ -292,6 +337,11 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
           <Box sx={{ textAlign: "center", py: "32px" }}>
             <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT }}>
               No games found for "{query}"
+              {exactMatch && (
+                <Box component="span" sx={{ display: "block", mt: "6px", fontSize: "12px" }}>
+                  Try turning off exact match for broader results.
+                </Box>
+              )}
             </Typography>
           </Box>
         )}

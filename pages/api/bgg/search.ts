@@ -21,22 +21,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { q } = req.query;
+  const { q, exact } = req.query;
 
   if (!q || typeof q !== "string" || q.trim().length < 2) {
     return res.status(400).json({ error: "Query must be at least 2 characters" });
   }
 
   try {
-    const bggRes = await fetch(
-      `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(q.trim())}&type=boardgame&excludesubtype=boardgameexpansion`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.BGG_API_TOKEN}`,
-          Accept: "application/xml",
-        },
-      }
-    );
+    const bggUrl = new URLSearchParams({
+      query: q.trim(),
+      type: "boardgame",
+      excludesubtype: "boardgameexpansion",
+    });
+    if (exact === "1") bggUrl.set("exact", "1");
+
+    const bggRes = await fetch(`https://boardgamegeek.com/xmlapi2/search?${bggUrl.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.BGG_API_TOKEN}`,
+        Accept: "application/xml",
+      },
+    });
 
     console.log("BGG status:", bggRes.status);
     console.log("BGG ok:", bggRes.ok);
@@ -55,7 +59,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(200).json({ results: [] });
     }
 
-    const itemArray = Array.isArray(items) ? items : [items];
+    const itemArray = (Array.isArray(items) ? items : [items]).filter(
+      (item: any) => item["@_type"] !== "boardgameexpansion"
+    );
 
     const results: BggSearchResult[] = itemArray.map((item: any) => {
       const nameList = Array.isArray(item.name) ? item.name : [item.name];
@@ -70,9 +76,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       };
     });
 
-    results.sort((a, b) => (b.yearPublished ?? 0) - (a.yearPublished ?? 0));
+    results.sort((a, b) => {
+      const q_lower = q.trim().toLowerCase();
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
 
-    return res.status(200).json({ results: results.slice(0, 20) });
+      const rank = (name: string) => {
+        if (name === q_lower) return 0;
+        if (name.startsWith(q_lower)) return 1;
+        if (name.includes(q_lower)) return 2;
+        return 3;
+      };
+
+      return rank(aName) - rank(bName) || aName.localeCompare(bName);
+    });
+
+    return res.status(200).json({ results: results });
   } catch (err) {
     console.error("[bgg/search]", err);
     return res.status(500).json({ error: "Internal server error." });
