@@ -15,6 +15,8 @@ export interface LibraryGame {
   name: string;
   description: string | null;
   imageUrl: string | null;
+  isFavorite: boolean;
+  isWishlist: boolean;
   minPlayers: number;
   maxPlayers: number;
   minPlaytime: number;
@@ -73,6 +75,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       name: ug.game.name,
       description: ug.game.description,
       imageUrl: ug.game.imageUrl,
+      isFavorite: ug.isFavorite,
+      isWishlist: ug.isWishlist,
       minPlayers: ug.game.minPlayers,
       maxPlayers: ug.game.maxPlayers,
       minPlaytime: ug.game.minPlaytime,

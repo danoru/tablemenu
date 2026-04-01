@@ -25,6 +25,8 @@ const AMBER = "#c8962a";
 const AMBER_HOVER = "#dba535";
 const BG = "#0f0c08";
 const BG_CARD = "#1a1610";
+const BLUE = "#5c9ee0";
+const BLUE_BORDER = "rgba(60,100,200,0.28)";
 const BORDER = "rgba(180,140,60,0.15)";
 const BORDER_MED = "rgba(180,140,60,0.28)";
 const TEXT = "#f0e6cc";
@@ -83,6 +85,7 @@ interface Props {
   followerCount: number;
   followingCount: number;
   library: LibraryGame[];
+  wantToPlay: LibraryGame[];
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -94,6 +97,7 @@ export default function UserProfilePage({
   followerCount: initialFollowerCount,
   followingCount,
   library,
+  wantToPlay,
 }: Props) {
   const router = useRouter();
   const [isFollowing, setIsFollowing] = React.useState(initialIsFollowing);
@@ -101,6 +105,7 @@ export default function UserProfilePage({
   const [followLoading, setFollowLoading] = React.useState(false);
 
   const libraryPreview = library.slice(0, 6);
+  const wantToPlayPreview = wantToPlay.slice(0, 6);
 
   async function handleFollow() {
     setFollowLoading(true);
@@ -257,7 +262,6 @@ export default function UserProfilePage({
                   </Typography>
                 )}
 
-                {/* Bio */}
                 {profileUser.bio && (
                   <Typography
                     sx={{
@@ -274,7 +278,6 @@ export default function UserProfilePage({
                   </Typography>
                 )}
 
-                {/* Location + website */}
                 <Box sx={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
                   {profileUser.location && (
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -288,7 +291,12 @@ export default function UserProfilePage({
                   )}
                   {profileUser.website && (
                     <Box
-                      sx={{ display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        cursor: "pointer",
+                      }}
                       onClick={() => window.open(profileUser.website!, "_blank")}
                     >
                       <LinkIcon sx={{ fontSize: "14px", color: GOLD_FADED }} />
@@ -393,11 +401,12 @@ export default function UserProfilePage({
               <StatPill value={followerCount} label="followers" />
               <StatPill value={followingCount} label="following" />
               <StatPill value={library.length} label="games owned" />
+              {wantToPlay.length > 0 && <StatPill value={wantToPlay.length} label="want to play" />}
             </Box>
           </Box>
 
           {/* ── Library preview ──────────────────────────────────────── */}
-          <Box>
+          <Box sx={{ mb: "28px" }}>
             <Box
               sx={{
                 display: "flex",
@@ -407,12 +416,7 @@ export default function UserProfilePage({
               }}
             >
               <Typography
-                sx={{
-                  fontFamily: FONT_SERIF,
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  color: TEXT,
-                }}
+                sx={{ fontFamily: FONT_SERIF, fontSize: "20px", fontWeight: 700, color: TEXT }}
               >
                 Library
               </Typography>
@@ -444,6 +448,7 @@ export default function UserProfilePage({
                   key={game.gameId}
                   onClick={() => router.push(`/players/${profileUser.username}/library`)}
                   sx={{
+                    position: "relative",
                     background: BG_CARD,
                     border: `1px solid ${BORDER}`,
                     borderRadius: "10px",
@@ -453,7 +458,6 @@ export default function UserProfilePage({
                     "&:hover": { borderColor: BORDER_MED, transform: "translateY(-2px)" },
                   }}
                 >
-                  {/* Art placeholder */}
                   <GameArt game={game} size={120} />
                   <Box sx={{ padding: "8px 10px" }}>
                     <Typography
@@ -498,6 +502,74 @@ export default function UserProfilePage({
               View full library
             </Button>
           </Box>
+
+          {/* ── Want to Play preview ─────────────────────────────────── */}
+          {wantToPlay.length > 0 && (
+            <Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  mb: "16px",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <Typography
+                    sx={{ fontFamily: FONT_SERIF, fontSize: "20px", fontWeight: 700, color: TEXT }}
+                  >
+                    Want to Play
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                  gap: "10px",
+                }}
+              >
+                {wantToPlayPreview.map((game) => (
+                  <Box
+                    key={game.gameId}
+                    onClick={() => router.push(`/games/${game.gameId}`)}
+                    sx={{
+                      position: "relative",
+                      background: BG_CARD,
+                      border: `1px solid ${BLUE_BORDER}`,
+                      borderRadius: "10px",
+                      overflow: "hidden",
+                      cursor: "pointer",
+                      transition: "border-color 0.15s, transform 0.15s",
+                      "&:hover": {
+                        borderColor: BLUE,
+                        transform: "translateY(-2px)",
+                      },
+                    }}
+                  >
+                    <GameArt game={game} size={120} />
+
+                    <Box sx={{ padding: "8px 10px" }}>
+                      <Typography
+                        sx={{
+                          fontFamily: FONT_SANS,
+                          fontSize: "11px",
+                          fontWeight: 500,
+                          color: TEXT_DIM,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {game.name}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )}
         </Box>
       </Box>
     </>
@@ -542,6 +614,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const library = await getUserLibrary(user.id);
+  const wantToPlay = library.filter((g) => g.isWishlist);
 
   let isFollowing = false;
   if (currentUserId && currentUserId !== user.id) {
@@ -565,6 +638,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     followerCount: _count.followedBy,
     followingCount: _count.following,
     library,
+    wantToPlay,
   });
 
   return {

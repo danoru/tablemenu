@@ -23,7 +23,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { Games, UserGameRatings, UserGames } from "@prisma/client";
+import { UserGameRatings, UserGames } from "@prisma/client";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
@@ -31,7 +31,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { LibraryGame } from "@pages/api/games/library";
 
-// ─── Design tokens (matches your existing palette) ────────────────────────────
+// ─── Design tokens ────────────────────────────────────────────────────────────
 
 const AMBER = "#c8962a";
 const AMBER_HOVER = "#dba535";
@@ -42,10 +42,11 @@ const GREEN_BRIGHT = "#5ec97a";
 const GREEN_BG = "rgba(34,85,48,0.25)";
 const GREEN_BORDER = "rgba(60,160,80,0.3)";
 const RED = "#e05c5c";
+const BLUE = "#5c9ee0";
+const BLUE_BG = "rgba(34,60,100,0.25)";
+const BLUE_BORDER = "rgba(60,100,200,0.3)";
 const BG = "#0f0c08";
 const BG_CARD = "#1a1610";
-const BG_CARD_HOVER = "#201c14";
-const BG_ELEVATED = "#211d14";
 const TEXT = "#f0e6cc";
 const TEXT_DIM = "rgba(232,223,200,0.55)";
 const TEXT_FAINT = "rgba(232,223,200,0.28)";
@@ -62,6 +63,18 @@ interface PlaySession {
   won: boolean | null;
 }
 
+interface FriendEntry {
+  id: number;
+  username: string;
+  image: string | null;
+}
+
+interface FriendActivity {
+  owns: FriendEntry[];
+  wantToPlay: FriendEntry[];
+  favorited: FriendEntry[];
+}
+
 interface GameDetail extends LibraryGame {
   userGame: Pick<UserGames, "notes" | "weight" | "isWishlist" | "isFavorite"> | null;
   userRating: Pick<UserGameRatings, "stars" | "review"> | null;
@@ -72,7 +85,7 @@ interface Props {
   game: GameDetail;
   isSelf: boolean;
   isInLibrary: boolean;
-  profileUsername: string;
+  friendActivity: FriendActivity;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -104,6 +117,20 @@ function complexityColor(c: number) {
   if (c < 3.5) return "#c8962a";
   if (c < 4.2) return "#e0823a";
   return "#e05c5c";
+}
+
+function avatarColour(name: string): string {
+  const palette = [
+    "rgba(34,85,48,0.8)",
+    "rgba(100,60,20,0.8)",
+    "rgba(60,40,80,0.8)",
+    "rgba(20,60,90,0.8)",
+    "rgba(90,30,30,0.8)",
+    "rgba(40,70,60,0.8)",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return palette[Math.abs(hash) % palette.length];
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -139,7 +166,6 @@ function StarRating({
   readonly?: boolean;
 }) {
   const [hovered, setHovered] = React.useState(0);
-
   return (
     <Box sx={{ display: "flex", gap: "2px" }}>
       {[1, 2, 3, 4, 5].map((star) => {
@@ -200,6 +226,127 @@ function Card({ children, sx = {} }: { children: React.ReactNode; sx?: object })
   );
 }
 
+// ─── Friend avatar ────────────────────────────────────────────────────────────
+
+function FriendAvatar({ friend, onClick }: { friend: FriendEntry; onClick: () => void }) {
+  return (
+    <Tooltip title={friend.username}>
+      <Box
+        onClick={onClick}
+        sx={{
+          width: "28px",
+          height: "28px",
+          borderRadius: "50%",
+          background: friend.image ? "transparent" : avatarColour(friend.username),
+          border: `1.5px solid rgba(180,140,60,0.25)`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          flexShrink: 0,
+          transition: "border-color 0.15s, transform 0.15s",
+          "&:hover": { borderColor: AMBER, transform: "scale(1.1)" },
+          overflow: "hidden",
+        }}
+      >
+        {friend.image ? (
+          <Box
+            component="img"
+            src={friend.image}
+            alt={friend.username}
+            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <Typography
+            sx={{
+              fontFamily: FONT_SERIF,
+              fontSize: "11px",
+              fontWeight: 700,
+              color: "rgba(232,223,200,0.7)",
+              userSelect: "none",
+            }}
+          >
+            {friend.username.slice(0, 1).toUpperCase()}
+          </Typography>
+        )}
+      </Box>
+    </Tooltip>
+  );
+}
+
+// ─── Friend activity row ──────────────────────────────────────────────────────
+
+function FriendActivityRow({
+  label,
+  friends,
+  accentColor,
+  onNavigate,
+}: {
+  label: string;
+  friends: FriendEntry[];
+  accentColor: string;
+  onNavigate: (username: string) => void;
+}) {
+  if (friends.length === 0) return null;
+
+  const displayLabel =
+    friends.length === 1 ? `1 friend ${label}` : `${friends.length} friends ${label}`;
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "10px 0",
+        borderBottom: `1px solid ${AMBER_BORDER_FAINT}`,
+        "&:last-child": { borderBottom: "none" },
+      }}
+    >
+      <Typography
+        sx={{
+          fontFamily: FONT_SANS,
+          fontSize: "12px",
+          color: accentColor,
+          fontWeight: 500,
+          flex: 1,
+          minWidth: 0,
+        }}
+      >
+        {displayLabel}
+      </Typography>
+
+      {/* Stacked avatars */}
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        {friends.slice(0, 6).map((f, i) => (
+          <Box key={f.id} sx={{ ml: i > 0 ? "-6px" : 0, zIndex: friends.length - i }}>
+            <FriendAvatar friend={f} onClick={() => onNavigate(f.username)} />
+          </Box>
+        ))}
+        {friends.length > 6 && (
+          <Box
+            sx={{
+              ml: "-6px",
+              width: "28px",
+              height: "28px",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.06)",
+              border: `1.5px solid rgba(180,140,60,0.25)`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "9px", color: TEXT_FAINT }}>
+              +{friends.length - 6}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    </Box>
+  );
+}
+
 // ─── Play History Row ─────────────────────────────────────────────────────────
 
 function PlayHistoryRow({ session }: { session: PlaySession }) {
@@ -245,26 +392,28 @@ function PlayHistoryRow({ session }: { session: PlaySession }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsername }: Props) {
+export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivity }: Props) {
   const router = useRouter();
 
-  // Library state
   const [inLibrary, setInLibrary] = React.useState(isInLibrary);
   const [isFavorite, setIsFavorite] = React.useState(game.userGame?.isFavorite ?? false);
-  const [isWishlist, setIsWishlist] = React.useState(game.userGame?.isWishlist ?? false);
+  const [isWantToPlay, setIsWantToPlay] = React.useState(game.userGame?.isWishlist ?? false);
   const [libraryLoading, setLibraryLoading] = React.useState(false);
 
-  // Notes state
   const [notes, setNotes] = React.useState(game.userGame?.notes ?? "");
   const [notesSaved, setNotesSaved] = React.useState(false);
   const [notesLoading, setNotesLoading] = React.useState(false);
   const notesTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
-  // Rating state
   const [stars, setStars] = React.useState(game.userRating?.stars ?? 0);
   const [review, setReview] = React.useState(game.userRating?.review ?? "");
   const [ratingLoading, setRatingLoading] = React.useState(false);
   const [ratingSaved, setRatingSaved] = React.useState(false);
+
+  const hasFriendActivity =
+    friendActivity.owns.length > 0 ||
+    friendActivity.wantToPlay.length > 0 ||
+    friendActivity.favorited.length > 0;
 
   // ── Actions ─────────────────────────────────────────────────────────────────
 
@@ -277,6 +426,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
         body: JSON.stringify({ gameId: game.gameId }),
       });
       setInLibrary(true);
+      setIsWantToPlay(false);
     } finally {
       setLibraryLoading(false);
     }
@@ -292,9 +442,9 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
     });
   }
 
-  async function handleToggleWishlist() {
-    const next = !isWishlist;
-    setIsWishlist(next);
+  async function handleToggleWantToPlay() {
+    const next = !isWantToPlay;
+    setIsWantToPlay(next);
     await fetch(`/api/games/${game.gameId}/wishlist`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -348,7 +498,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
       </Head>
 
       <Box sx={{ background: BG, minHeight: "100vh" }}>
-        {/* Ambient glow behind hero */}
         <Box
           sx={{
             position: "fixed",
@@ -372,7 +521,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
             padding: { xs: "24px 16px", md: "40px 32px" },
           }}
         >
-          {/* Back link */}
           <Typography
             onClick={() => router.back()}
             sx={{
@@ -388,10 +536,10 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
               display: "inline-block",
             }}
           >
-            ← Back to library
+            ← Back
           </Typography>
 
-          {/* ── Hero ──────────────────────────────────────────────────────── */}
+          {/* ── Hero ─────────────────────────────────────────────────────── */}
           <Box
             sx={{
               display: "flex",
@@ -401,7 +549,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
               mb: "40px",
             }}
           >
-            {/* Cover art */}
             <Box
               sx={{
                 flexShrink: 0,
@@ -415,7 +562,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
               <GameArt game={game} size={200} />
             </Box>
 
-            {/* Title block */}
             <Box sx={{ flex: 1, textAlign: { xs: "center", sm: "left" } }}>
               {game.yearPublished && (
                 <Typography
@@ -449,12 +595,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
 
               {game.designers.length > 0 && (
                 <Typography
-                  sx={{
-                    fontFamily: FONT_SANS,
-                    fontSize: "14px",
-                    color: TEXT_DIM,
-                    mb: "20px",
-                  }}
+                  sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM, mb: "20px" }}
                 >
                   by {game.designers.slice(0, 3).join(", ")}
                 </Typography>
@@ -583,48 +724,46 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
                   </Box>
                 )}
 
-                {isSelf && inLibrary && (
-                  <>
-                    <Tooltip title={isFavorite ? "Remove from favorites" : "Add to favorites"}>
-                      <IconButton
-                        onClick={handleToggleFavorite}
-                        sx={{
-                          border: `1px solid ${isFavorite ? "rgba(224,92,92,0.4)" : AMBER_BORDER_FAINT}`,
-                          borderRadius: "8px",
-                          color: isFavorite ? RED : TEXT_FAINT,
-                          padding: "9px",
-                          transition: "all 0.2s",
-                          "&:hover": {
-                            color: RED,
-                            borderColor: "rgba(224,92,92,0.4)",
-                            background: "rgba(224,92,92,0.08)",
-                          },
-                        }}
-                      >
-                        {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-                      </IconButton>
-                    </Tooltip>
+                {isSelf && (
+                  <Tooltip title={isFavorite ? "Remove from favorites" : "Mark as favorite"}>
+                    <IconButton
+                      onClick={handleToggleFavorite}
+                      sx={{
+                        border: `1px solid ${isFavorite ? "rgba(224,92,92,0.4)" : AMBER_BORDER_FAINT}`,
+                        borderRadius: "8px",
+                        color: isFavorite ? RED : TEXT_FAINT,
+                        padding: "9px",
+                        transition: "all 0.2s",
+                        "&:hover": {
+                          color: RED,
+                          borderColor: "rgba(224,92,92,0.4)",
+                          background: "rgba(224,92,92,0.08)",
+                        },
+                      }}
+                    >
+                      {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+                    </IconButton>
+                  </Tooltip>
+                )}
 
-                    <Tooltip title={isWishlist ? "Remove from wishlist" : "Move to wishlist"}>
-                      <IconButton
-                        onClick={handleToggleWishlist}
-                        sx={{
-                          border: `1px solid ${isWishlist ? AMBER_BORDER : AMBER_BORDER_FAINT}`,
-                          borderRadius: "8px",
-                          color: isWishlist ? AMBER : TEXT_FAINT,
-                          padding: "9px",
-                          transition: "all 0.2s",
-                          "&:hover": {
-                            color: AMBER,
-                            borderColor: AMBER_BORDER,
-                            background: AMBER_DIM,
-                          },
-                        }}
-                      >
-                        {isWishlist ? <BookmarkIcon /> : <BookmarkBorderIcon />}
-                      </IconButton>
-                    </Tooltip>
-                  </>
+                {isSelf && !inLibrary && (
+                  <Tooltip
+                    title={isWantToPlay ? "Remove from Want to Play" : "Mark as Want to Play"}
+                  >
+                    <IconButton
+                      onClick={handleToggleWantToPlay}
+                      sx={{
+                        border: `1px solid ${isWantToPlay ? BLUE_BORDER : AMBER_BORDER_FAINT}`,
+                        borderRadius: "8px",
+                        color: isWantToPlay ? BLUE : TEXT_FAINT,
+                        padding: "9px",
+                        transition: "all 0.2s",
+                        "&:hover": { color: BLUE, borderColor: BLUE_BORDER, background: BLUE_BG },
+                      }}
+                    >
+                      {isWantToPlay ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+                    </IconButton>
+                  </Tooltip>
                 )}
 
                 {game.bggId && (
@@ -650,7 +789,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
             </Box>
           </Box>
 
-          {/* ── Body grid ──────────────────────────────────────────────────── */}
+          {/* ── Body grid ────────────────────────────────────────────────── */}
           <Box
             sx={{
               display: "grid",
@@ -661,7 +800,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
           >
             {/* ── Left column ───────────────────────────────────────────── */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-              {/* Description */}
               {hasDescription && (
                 <Card>
                   <SectionHeading>About</SectionHeading>
@@ -672,14 +810,11 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
                       color: TEXT_DIM,
                       lineHeight: 1.75,
                     }}
-                    dangerouslySetInnerHTML={{
-                      __html: game.description!.replace(/<[^>]+>/g, ""),
-                    }}
+                    dangerouslySetInnerHTML={{ __html: game.description!.replace(/<[^>]+>/g, "") }}
                   />
                 </Card>
               )}
 
-              {/* Categories + Mechanics */}
               {(hasCategories || hasMechanics) && (
                 <Card>
                   {hasCategories && (
@@ -765,7 +900,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
                     </Typography>
                   )}
                 </Box>
-
                 {!hasSessions ? (
                   <Box
                     sx={{
@@ -798,7 +932,32 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
 
             {/* ── Right column ──────────────────────────────────────────── */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-              {/* Personal notes — only shown to the library owner */}
+              {/* ── Friends activity ──────────────────────────────────── */}
+              {hasFriendActivity && (
+                <Card>
+                  <SectionHeading>Friends</SectionHeading>
+                  <FriendActivityRow
+                    label="own this"
+                    friends={friendActivity.owns}
+                    accentColor={GREEN_BRIGHT}
+                    onNavigate={(username) => router.push(`/players/${username}`)}
+                  />
+                  <FriendActivityRow
+                    label="want to play this"
+                    friends={friendActivity.wantToPlay}
+                    accentColor={BLUE}
+                    onNavigate={(username) => router.push(`/players/${username}`)}
+                  />
+                  <FriendActivityRow
+                    label="have this as a favorite"
+                    friends={friendActivity.favorited}
+                    accentColor={RED}
+                    onNavigate={(username) => router.push(`/players/${username}`)}
+                  />
+                </Card>
+              )}
+
+              {/* Personal notes */}
               {isSelf && inLibrary && (
                 <Card>
                   <Box
@@ -872,7 +1031,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
                       </Typography>
                     )}
                   </Box>
-
                   <TextareaAutosize
                     value={review}
                     onChange={(e) => setReview(e.target.value)}
@@ -894,7 +1052,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
                       marginBottom: "12px",
                     }}
                   />
-
                   <Button
                     onClick={handleSaveRating}
                     disabled={ratingLoading || stars === 0}
@@ -930,12 +1087,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
                   {game.publishers.slice(0, 5).map((p) => (
                     <Typography
                       key={p}
-                      sx={{
-                        fontFamily: FONT_SANS,
-                        fontSize: "13px",
-                        color: TEXT_DIM,
-                        mb: "4px",
-                      }}
+                      sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_DIM, mb: "4px" }}
                     >
                       {p}
                     </Typography>
@@ -951,6 +1103,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, profileUsern
 }
 
 // ─── Server-side props ────────────────────────────────────────────────────────
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { gameId } = context.params as { gameId: string };
   const session = await getServerSession(context.req, context.res, authOptions);
@@ -971,10 +1124,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           }
         : false,
       ratings: currentUserId
-        ? {
-            where: { userId: currentUserId },
-            select: { stars: true, review: true },
-          }
+        ? { where: { userId: currentUserId }, select: { stars: true, review: true } }
         : false,
     },
   });
@@ -999,20 +1149,53 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       won: s.gameSession.players[0]?.won ?? null,
     }));
 
+  // ── Friend activity ───────────────────────────────────────────────────────
+  const friendActivity: FriendActivity = { owns: [], wantToPlay: [], favorited: [] };
+
+  if (currentUserId) {
+    const friendGames = await prisma.userGames.findMany({
+      where: {
+        gameId: id,
+        user: {
+          followedBy: { some: { userId: currentUserId } },
+        },
+      },
+      select: {
+        isWishlist: true,
+        isFavorite: true,
+        user: { select: { id: true, username: true, image: true } },
+      },
+    });
+
+    for (const fg of friendGames) {
+      const entry: FriendEntry = {
+        id: fg.user.id,
+        username: fg.user.username,
+        image: fg.user.image,
+      };
+      if (!fg.isWishlist) friendActivity.owns.push(entry);
+      if (fg.isWishlist) friendActivity.wantToPlay.push(entry);
+      if (fg.isFavorite) friendActivity.favorited.push(entry);
+    }
+  }
+
   const userGame = currentUserId ? (game.users?.[0] ?? null) : null;
   const userRating = currentUserId ? (game.ratings?.[0] ?? null) : null;
   const isInLibrary = !!userGame && !userGame.isWishlist;
 
   return {
     props: {
-      isSelf: !!currentUserId, // "isSelf" now just means "is logged in"
+      isSelf: !!currentUserId,
       isInLibrary,
+      friendActivity,
       game: {
         userGameId: userGame?.id ?? 0,
         gameId: game.id,
         addedAt: game.addedAt.toISOString(),
         weight: userGame?.weight ?? 1,
         notes: userGame?.notes ?? null,
+        isWishlist: userGame?.isWishlist ?? false,
+        isFavorite: userGame?.isFavorite ?? false,
         bggId: game.bggId,
         name: game.name,
         description: game.description,

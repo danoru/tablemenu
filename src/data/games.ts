@@ -36,6 +36,8 @@ export async function getUserLibrary(userId: number) {
     name: ug.game.name,
     description: ug.game.description,
     imageUrl: ug.game.imageUrl,
+    isFavorite: ug.isFavorite,
+    isWishlist: ug.isWishlist,
     minPlayers: ug.game.minPlayers,
     maxPlayers: ug.game.maxPlayers,
     minPlaytime: ug.game.minPlaytime,
