@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ...(maxTime ? { maxPlaytime: { lte: parseInt(maxTime) } } : {}),
       ...(complexity ? { complexity: { lte: parseFloat(complexity) } } : {}),
     },
-    orderBy: { bggRating: "desc" },
+    orderBy: { name: "asc" },
     take: PAGE_SIZE,
     skip: pageNum * PAGE_SIZE,
     select: {
