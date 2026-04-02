@@ -6,15 +6,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import StarIcon from "@mui/icons-material/Star";
 import TimerIcon from "@mui/icons-material/Timer";
 import TuneIcon from "@mui/icons-material/Tune";
-import {
-  Box,
-  Button,
-  Collapse,
-  InputAdornment,
-  OutlinedInput,
-  Slider,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Collapse, InputAdornment, OutlinedInput, Typography } from "@mui/material";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -23,7 +15,6 @@ import React from "react";
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
 const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
 const AMBER_DIM = "rgba(200,150,42,0.12)";
 const AMBER_BORDER = "rgba(180,140,60,0.28)";
 const AMBER_BORDER_FAINT = "rgba(180,140,60,0.15)";
@@ -35,24 +26,8 @@ const TEXT_DIM = "rgba(232,223,200,0.55)";
 const TEXT_FAINT = "rgba(232,223,200,0.28)";
 const FONT_SERIF = "'Playfair Display', serif";
 const FONT_SANS = "'DM Sans', sans-serif";
-const PAGE_SIZE = 48;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-type GameResult = {
-  id: number;
-  name: string;
-  imageUrl: string | null;
-  bggId: number | null;
-  minPlayers: number;
-  maxPlayers: number;
-  minPlaytime: number;
-  maxPlaytime: number;
-  complexity: number | null;
-  bggRating: number | null;
-  categories: string[];
-  yearPublished: number | null;
-};
 
 interface Filters {
   q: string;
@@ -63,9 +38,9 @@ interface Filters {
 
 // ─── Game card ────────────────────────────────────────────────────────────────
 
-function GameCard({ game }: { game: GameResult }) {
+function GameCard({ game }: { game: LibraryGame }) {
   return (
-    <Link href={`/games/${game.id}`} style={{ textDecoration: "none" }}>
+    <Link href={`/games/${game.gameId}`} style={{ textDecoration: "none" }}>
       <Box
         sx={{
           background: BG_CARD,
@@ -83,12 +58,11 @@ function GameCard({ game }: { game: GameResult }) {
           },
         }}
       >
-        {/* Art — reuse GameArt with a minimal shim since it expects LibraryGame */}
         <GameArt
           game={
             {
               ...game,
-              gameId: game.id, // shim for GameArt
+              gameId: game.gameId,
               userGameId: 0,
               addedAt: "",
               weight: 1,
@@ -206,7 +180,7 @@ export default function GamesIndexPage() {
   const router = useRouter();
 
   // ── State ──────────────────────────────────────────────────────────────────
-  const [games, setGames] = React.useState<GameResult[]>([]);
+  const [games, setGames] = React.useState<LibraryGame[]>([]);
   const [total, setTotal] = React.useState(0);
   const [page, setPage] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
@@ -521,7 +495,7 @@ export default function GamesIndexPage() {
               }}
             >
               {games.map((game) => (
-                <GameCard key={game.id} game={game} />
+                <GameCard key={game.gameId} game={game} />
               ))}
             </Box>
           )}
