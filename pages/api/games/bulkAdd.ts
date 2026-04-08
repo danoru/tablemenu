@@ -33,7 +33,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   for (const game of games) {
     try {
-      // Upsert the game record
       const dbGame = await prisma.games.upsert({
         where: { bggId: game.bggId },
         update: {
@@ -72,7 +71,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         },
       });
 
-      // Add to user library if not already there
       const existing = await prisma.userGames.findUnique({
         where: { userId_gameId: { userId, gameId: dbGame.id } },
       });
@@ -89,7 +87,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
   }
 
-  // Trigger achievement check once after all imports
   if (added > 0) {
     await checkAchievements(userId, { event: "GAME_ADDED" });
   }

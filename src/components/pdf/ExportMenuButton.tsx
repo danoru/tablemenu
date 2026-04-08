@@ -1,3 +1,4 @@
+import { FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
 import React from "react";
 import dynamic from "next/dynamic";
 import {
@@ -13,8 +14,6 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { LibraryGame } from "@pages/api/games/library";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface CourseConfig {
   readonly id: string;
@@ -32,23 +31,6 @@ interface Props {
   courses: readonly CourseConfig[];
 }
 
-// ─── Colour constants (match MenuPage) ────────────────────────────────────────
-
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SANS = "'DM Sans', sans-serif";
-const FONT_SERIF = "'Playfair Display', serif";
-
-// ─── Lazy-loaded PDF components (no SSR) ─────────────────────────────────────
-//
-// @react-pdf/renderer uses browser APIs and must not run on the server.
-// We lazy-load both the viewer and the download link via next/dynamic.
-
 const PDFViewer = dynamic(() => import("@react-pdf/renderer").then((m) => m.PDFViewer), {
   ssr: false,
   loading: () => <PdfLoadingSpinner />,
@@ -60,8 +42,6 @@ const PDFDownloadLink = dynamic(
 );
 
 const MenuPdfDocument = dynamic(() => import("./MenuPDFDocument"), { ssr: false });
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function PdfLoadingSpinner() {
   return (
@@ -76,15 +56,13 @@ function PdfLoadingSpinner() {
         minHeight: "300px",
       }}
     >
-      <CircularProgress size={28} sx={{ color: AMBER }} />
+      <CircularProgress size={28} sx={{ color: "primary.main" }} />
       <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT }}>
         Preparing preview…
       </Typography>
     </Box>
   );
 }
-
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ExportMenuButton({ menu, courses }: Props) {
   const [open, setOpen] = React.useState(false);
@@ -104,13 +82,13 @@ export default function ExportMenuButton({ menu, courses }: Props) {
 
   return (
     <>
-      {/* ── Trigger button ── */}
       <Button
         onClick={handleOpen}
         startIcon={<PictureAsPdfIcon />}
         sx={{
           background: "transparent",
-          border: `1px solid ${BORDER}`,
+          border: "1px solid",
+          borderColor: "divider",
           borderRadius: "8px",
           color: TEXT_DIM,
           fontFamily: FONT_SANS,
@@ -120,15 +98,14 @@ export default function ExportMenuButton({ menu, courses }: Props) {
           textTransform: "none",
           "&:hover": {
             background: "rgba(180,140,60,0.08)",
-            color: TEXT,
-            borderColor: AMBER,
+            color: "text.primary",
+            borderColor: "primary.main",
           },
         }}
       >
         Export as PDF
       </Button>
 
-      {/* ── Preview modal ── */}
       <Dialog
         open={open}
         onClose={handleClose}
@@ -136,21 +113,21 @@ export default function ExportMenuButton({ menu, courses }: Props) {
         fullWidth
         PaperProps={{
           sx: {
-            background: BG_CARD,
-            border: `1px solid ${BORDER}`,
+            background: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
             borderRadius: "14px",
             overflow: "hidden",
           },
         }}
       >
-        {/* Dialog header */}
         <DialogTitle
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 24px",
-            borderBottom: `1px solid ${BORDER}`,
+            borderBottom: "1px solid divider",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
@@ -160,7 +137,7 @@ export default function ExportMenuButton({ menu, courses }: Props) {
                 fontStyle: "italic",
                 fontSize: "20px",
                 fontWeight: 700,
-                color: TEXT,
+                color: "text.primary",
               }}
             >
               Menu Preview
@@ -171,7 +148,6 @@ export default function ExportMenuButton({ menu, courses }: Props) {
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            {/* Download link — renders once MenuPdfDocument is ready */}
             {mounted && (
               <PDFDownloadLink
                 document={<MenuPdfDocument menu={menu} courses={courses} />}
@@ -190,21 +166,21 @@ export default function ExportMenuButton({ menu, courses }: Props) {
                     disabled={loading}
                     startIcon={
                       loading ? (
-                        <CircularProgress size={14} sx={{ color: AMBER }} />
+                        <CircularProgress size={14} sx={{ color: "primary.main" }} />
                       ) : (
                         <PictureAsPdfIcon sx={{ fontSize: "15px !important" }} />
                       )
                     }
                     sx={{
-                      background: AMBER,
+                      background: "primary.main",
                       borderRadius: "8px",
-                      color: "#0f0c08",
+                      color: "background.default",
                       fontFamily: FONT_SANS,
                       fontSize: "13px",
                       fontWeight: 500,
                       padding: "7px 16px",
                       textTransform: "none",
-                      "&:hover": { background: AMBER_HOVER },
+                      "&:hover": { background: "primary.light" },
                       "&.Mui-disabled": {
                         background: "rgba(200,150,42,0.4)",
                         color: "rgba(15,12,8,0.5)",
@@ -227,7 +203,6 @@ export default function ExportMenuButton({ menu, courses }: Props) {
           </Box>
         </DialogTitle>
 
-        {/* PDF preview */}
         <DialogContent sx={{ padding: 0, height: "70vh", overflow: "hidden" }}>
           {mounted ? (
             <PDFViewer width="100%" height="100%" showToolbar={false} style={{ border: "none" }}>

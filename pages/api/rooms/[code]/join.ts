@@ -34,7 +34,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     if (!room) return res.status(404).json({ error: "Room not found" });
     if (!room.isActive) return res.status(400).json({ error: "This room is no longer active" });
 
-    // Upsert so hitting join twice is idempotent
     await prisma.roomInvites.upsert({
       where: { roomId_userId: { roomId: room.id, userId } },
       update: { status: "ACCEPTED" },

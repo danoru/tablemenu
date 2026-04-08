@@ -1,6 +1,18 @@
-import GameArt from "@/components/game/GameArt";
+import GameArt from "@/components/games/GameArt";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
+import {
+  AMBER_DIM,
+  BLUE,
+  BORDER_AMBER,
+  BORDER_BLUE,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  GOLD_FADED,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import EditIcon from "@mui/icons-material/Edit";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import LinkIcon from "@mui/icons-material/Link";
@@ -17,26 +29,6 @@ import { useRouter } from "next/router";
 import React from "react";
 import superjson from "superjson";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const GOLD_FADED = "rgba(232,201,122,0.35)";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const BLUE = "#5c9ee0";
-const BLUE_BORDER = "rgba(60,100,200,0.28)";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function avatarColour(name: string): string {
   const palette = [
     "rgba(34,85,48,0.6)",
@@ -51,8 +43,6 @@ function avatarColour(name: string): string {
   return palette[Math.abs(hash) % palette.length];
 }
 
-// ─── Stat pill ────────────────────────────────────────────────────────────────
-
 function StatPill({ value, label }: { value: number; label: string }) {
   return (
     <Box sx={{ textAlign: "center" }}>
@@ -61,7 +51,7 @@ function StatPill({ value, label }: { value: number; label: string }) {
           fontFamily: FONT_SERIF,
           fontSize: "22px",
           fontWeight: 700,
-          color: TEXT,
+          color: "text.primary",
           lineHeight: 1,
         }}
       >
@@ -74,8 +64,6 @@ function StatPill({ value, label }: { value: number; label: string }) {
   );
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface ProfileUser extends Omit<Users, "password"> {}
 
 interface Props {
@@ -87,8 +75,6 @@ interface Props {
   library: LibraryGame[];
   wantToPlay: LibraryGame[];
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function UserProfilePage({
   profileUser,
@@ -136,8 +122,7 @@ export default function UserProfilePage({
         <title>{profileUser.username} — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: BG, minHeight: "100vh", position: "relative" }}>
-        {/* Ambient glow */}
+      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -161,11 +146,11 @@ export default function UserProfilePage({
             padding: { xs: "28px 16px", md: "44px 32px" },
           }}
         >
-          {/* ── Profile header ───────────────────────────────────────── */}
           <Box
             sx={{
-              background: BG_CARD,
-              border: `1px solid ${BORDER}`,
+              background: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
               borderRadius: "16px",
               padding: { xs: "28px 24px", md: "36px 40px" },
               mb: "24px",
@@ -179,14 +164,13 @@ export default function UserProfilePage({
                 flexWrap: "wrap",
               }}
             >
-              {/* Avatar */}
               <Box
                 sx={{
                   width: { xs: "64px", md: "80px" },
                   height: { xs: "64px", md: "80px" },
                   borderRadius: "50%",
                   background: avatarColour(profileUser.username),
-                  border: `2px solid ${BORDER_MED}`,
+                  border: `2px solid ${BORDER_AMBER}`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -221,7 +205,7 @@ export default function UserProfilePage({
                       fontFamily: FONT_SERIF,
                       fontSize: { xs: "24px", md: "30px" },
                       fontWeight: 900,
-                      color: TEXT,
+                      color: "text.primary",
                       letterSpacing: "-0.3px",
                       lineHeight: 1,
                     }}
@@ -237,8 +221,8 @@ export default function UserProfilePage({
                         fontWeight: 500,
                         letterSpacing: "1px",
                         textTransform: "uppercase",
-                        color: AMBER,
-                        background: "rgba(200,150,42,0.15)",
+                        color: "primary.main",
+                        background: AMBER_DIM,
                         border: "1px solid rgba(200,150,42,0.25)",
                         padding: "3px 8px",
                         borderRadius: "10px",
@@ -323,7 +307,6 @@ export default function UserProfilePage({
                 </Box>
               </Box>
 
-              {/* Action buttons */}
               <Box sx={{ display: "flex", gap: "8px", flexShrink: 0 }}>
                 {isSelf ? (
                   <Button
@@ -331,7 +314,7 @@ export default function UserProfilePage({
                     onClick={() => router.push(`/players/${profileUser.username}/settings`)}
                     sx={{
                       background: "transparent",
-                      border: `1px solid ${BORDER_MED}`,
+                      border: `1px solid ${BORDER_AMBER}`,
                       borderRadius: "8px",
                       color: TEXT_DIM,
                       fontFamily: FONT_SANS,
@@ -341,8 +324,8 @@ export default function UserProfilePage({
                       textTransform: "none",
                       "&:hover": {
                         background: "rgba(180,140,60,0.08)",
-                        color: TEXT,
-                        borderColor: AMBER,
+                        color: "text.primary",
+                        borderColor: "primary.main",
                       },
                     }}
                   >
@@ -372,7 +355,7 @@ export default function UserProfilePage({
                       ...(isFollowing
                         ? {
                             background: "transparent",
-                            border: `1px solid ${BORDER_MED}`,
+                            border: `1px solid ${BORDER_AMBER}`,
                             color: TEXT_DIM,
                             "&:hover": {
                               borderColor: "rgba(220,80,80,0.4)",
@@ -381,10 +364,10 @@ export default function UserProfilePage({
                             },
                           }
                         : {
-                            background: AMBER,
+                            background: "primary.main",
                             border: "none",
-                            color: "#0f0c08",
-                            "&:hover": { background: AMBER_HOVER },
+                            color: "background.default",
+                            "&:hover": { background: "primary.light" },
                           }),
                       "&.Mui-disabled": { opacity: 0.5 },
                     }}
@@ -395,8 +378,7 @@ export default function UserProfilePage({
               </Box>
             </Box>
 
-            {/* ── Stats row ──────────────────────────────────────────── */}
-            <Divider sx={{ borderColor: BORDER, my: "24px" }} />
+            <Divider sx={{ borderColor: "divider", my: "24px" }} />
             <Box sx={{ display: "flex", gap: "32px" }}>
               <StatPill value={followerCount} label="followers" />
               <StatPill value={followingCount} label="following" />
@@ -405,7 +387,6 @@ export default function UserProfilePage({
             </Box>
           </Box>
 
-          {/* ── Library preview ──────────────────────────────────────── */}
           <Box sx={{ mb: "28px" }}>
             <Box
               sx={{
@@ -416,7 +397,12 @@ export default function UserProfilePage({
               }}
             >
               <Typography
-                sx={{ fontFamily: FONT_SERIF, fontSize: "20px", fontWeight: 700, color: TEXT }}
+                sx={{
+                  fontFamily: FONT_SERIF,
+                  fontSize: "20px",
+                  fontWeight: 700,
+                  color: "text.primary",
+                }}
               >
                 Library
               </Typography>
@@ -449,13 +435,14 @@ export default function UserProfilePage({
                   onClick={() => router.push(`/players/${profileUser.username}/library`)}
                   sx={{
                     position: "relative",
-                    background: BG_CARD,
-                    border: `1px solid ${BORDER}`,
+                    background: "background.paper",
+                    border: "1px solid",
+                    borderColor: "divider",
                     borderRadius: "10px",
                     overflow: "hidden",
                     cursor: "pointer",
                     transition: "border-color 0.15s, transform 0.15s",
-                    "&:hover": { borderColor: BORDER_MED, transform: "translateY(-2px)" },
+                    "&:hover": { borderColor: BORDER_AMBER, transform: "translateY(-2px)" },
                   }}
                 >
                   <GameArt game={game} size={120} />
@@ -484,7 +471,8 @@ export default function UserProfilePage({
               onClick={() => router.push(`/players/${profileUser.username}/library`)}
               sx={{
                 background: "transparent",
-                border: `1px solid ${BORDER}`,
+                border: "1px solid",
+                borderColor: "divider",
                 borderRadius: "10px",
                 color: TEXT_FAINT,
                 fontFamily: FONT_SANS,
@@ -494,7 +482,7 @@ export default function UserProfilePage({
                 textTransform: "none",
                 "&:hover": {
                   background: "rgba(180,140,60,0.06)",
-                  borderColor: BORDER_MED,
+                  borderColor: BORDER_AMBER,
                   color: TEXT_DIM,
                 },
               }}
@@ -503,7 +491,6 @@ export default function UserProfilePage({
             </Button>
           </Box>
 
-          {/* ── Want to Play preview ─────────────────────────────────── */}
           {wantToPlay.length > 0 && (
             <Box>
               <Box
@@ -516,7 +503,12 @@ export default function UserProfilePage({
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <Typography
-                    sx={{ fontFamily: FONT_SERIF, fontSize: "20px", fontWeight: 700, color: TEXT }}
+                    sx={{
+                      fontFamily: FONT_SERIF,
+                      fontSize: "20px",
+                      fontWeight: 700,
+                      color: "text.primary",
+                    }}
                   >
                     Want to Play
                   </Typography>
@@ -536,8 +528,8 @@ export default function UserProfilePage({
                     onClick={() => router.push(`/games/${game.gameId}`)}
                     sx={{
                       position: "relative",
-                      background: BG_CARD,
-                      border: `1px solid ${BLUE_BORDER}`,
+                      background: "background.paper",
+                      border: `1px solid ${BORDER_BLUE}`,
                       borderRadius: "10px",
                       overflow: "hidden",
                       cursor: "pointer",
@@ -575,8 +567,6 @@ export default function UserProfilePage({
     </>
   );
 }
-
-// ─── Data fetching ────────────────────────────────────────────────────────────
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { username } = context.params as { username: string };

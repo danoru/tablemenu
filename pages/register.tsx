@@ -1,4 +1,13 @@
 import {
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  GOLD_FADED,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
+import {
   Alert,
   Box,
   Button,
@@ -13,41 +22,23 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import * as Yup from "yup";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const GOLD_FADED = "rgba(232,201,122,0.4)";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT = "#f0e6cc";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Shared input sx ──────────────────────────────────────────────────────────
-
 const inputSx = {
   mb: "16px",
   "& .MuiInputLabel-root": {
     fontFamily: FONT_SANS,
     fontSize: "14px",
     color: TEXT_FAINT,
-    "&.Mui-focused": { color: AMBER },
+    "&.Mui-focused": { color: "primary.main" },
   },
   "& .MuiOutlinedInput-root": {
     fontFamily: FONT_SANS,
     fontSize: "15px",
-    color: TEXT,
+    color: "text.primary",
     background: "rgba(255,255,255,0.03)",
-    "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
-    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: AMBER },
+    "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
+    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: AMBER,
+      borderColor: "primary.main",
       borderWidth: "1px",
     },
   },
@@ -58,8 +49,6 @@ const inputSx = {
     ml: 0,
   },
 };
-
-// ─── Validation ───────────────────────────────────────────────────────────────
 
 const validationSchema = Yup.object({
   username: Yup.string()
@@ -72,8 +61,6 @@ const validationSchema = Yup.object({
     .oneOf([Yup.ref("password")], "Passwords must match.")
     .required("Please confirm your password."),
 });
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function RegistrationForm() {
   const router = useRouter();
@@ -124,7 +111,7 @@ export default function RegistrationForm() {
   return (
     <Box
       sx={{
-        background: BG,
+        background: "background.default",
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
@@ -134,7 +121,6 @@ export default function RegistrationForm() {
         overflow: "hidden",
       }}
     >
-      {/* Ambient glow */}
       <Box
         sx={{
           position: "absolute",
@@ -149,7 +135,6 @@ export default function RegistrationForm() {
       />
 
       <Box sx={{ position: "relative", zIndex: 1, width: "100%", maxWidth: "420px" }}>
-        {/* Logo wordmark */}
         <Box sx={{ textAlign: "center", mb: "36px" }}>
           <Link href="/" style={{ textDecoration: "none" }}>
             <Typography
@@ -175,11 +160,11 @@ export default function RegistrationForm() {
           </Typography>
         </Box>
 
-        {/* Card */}
         <Box
           sx={{
-            background: BG_CARD,
-            border: `1px solid ${BORDER}`,
+            background: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
             borderRadius: "14px",
             padding: { xs: "28px 24px", sm: "36px 40px" },
           }}
@@ -242,7 +227,6 @@ export default function RegistrationForm() {
                   sx={inputSx}
                 />
 
-                {/* Password requirements hint */}
                 <Typography
                   sx={{
                     fontFamily: FONT_SANS,
@@ -260,16 +244,16 @@ export default function RegistrationForm() {
                   disabled={isSubmitting}
                   type="submit"
                   sx={{
-                    background: AMBER,
+                    background: "primary.main",
                     borderRadius: "8px",
-                    color: "#0f0c08",
+                    color: "background.default",
                     fontFamily: FONT_SANS,
                     fontSize: "15px",
                     fontWeight: 500,
                     padding: "12px",
                     textTransform: "none",
                     mb: "20px",
-                    "&:hover": { background: AMBER_HOVER },
+                    "&:hover": { background: "primary.light" },
                     "&.Mui-disabled": {
                       background: "rgba(200,150,42,0.35)",
                       color: "rgba(15,12,8,0.5)",
@@ -299,7 +283,6 @@ export default function RegistrationForm() {
           </Formik>
         </Box>
 
-        {/* BGG attribution — required for public-facing apps */}
         <Box sx={{ textAlign: "center", mt: "24px" }}>
           <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: TEXT_FAINT }}>
             Game data powered by{" "}

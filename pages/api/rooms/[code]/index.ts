@@ -3,8 +3,6 @@ import prisma from "@data/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface RoomMember {
   userId: number;
   username: string;
@@ -20,12 +18,9 @@ export interface RoomSuggestion {
   minPlaytime: number;
   maxPlaytime: number;
   suggestedBy: number | null;
-  // vote tallies
   interestedCount: number;
   vetoCount: number;
-  // current user's vote
   myVote: boolean | null;
-  // is the suggesting member bringing this game tonight?
   bringing: boolean;
 }
 
@@ -49,8 +44,6 @@ interface ApiResponse {
   error?: string;
 }
 
-// ─── Handler ──────────────────────────────────────────────────────────────────
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -72,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         invites: { include: { user: { select: { id: true, username: true } } } },
         gameSuggs: { include: { game: true, room: false } },
         votes: true,
-        sessions: { where: { status: "ACTIVE" }, select: { id: true }, take: 1 }, // ← add this
+        sessions: { where: { status: "ACTIVE" }, select: { id: true }, take: 1 },
       },
     });
 
@@ -80,14 +73,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(404).json({ error: "Room not found" });
     }
 
-    // ── Members ───────────────────────────────────────────────────────────────
     const members: RoomMember[] = room.invites.map((inv) => ({
       userId: inv.user.id,
       username: inv.user.username,
       status: inv.status,
     }));
 
-    // ── Suggestions with vote tallies ─────────────────────────────────────────
     const suggestions: RoomSuggestion[] = room.gameSuggs.map((sugg) => {
       const gameVotes = room.votes.filter((v) => v.gameId === sugg.gameId);
       const interestedCount = gameVotes.filter((v) => v.interested).length;
@@ -125,7 +116,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       suggestions,
     };
 
-    // Short cache for polling — 5s max age so clients get fresh data quickly
     res.setHeader("Cache-Control", "private, max-age=5");
     return res.status(200).json({ room: roomData });
   } catch (err) {

@@ -1,8 +1,6 @@
+import { FONT_SERIF } from "@/styles/theme";
 import { Box, Typography } from "@mui/material";
 import { LibraryGame } from "@pages/api/games/library";
-
-const BORDER = "rgba(180,140,60,0.15)";
-const FONT_SERIF = "'Playfair Display', serif";
 
 function gameColour(name: string): string {
   const palette = [
@@ -45,7 +43,8 @@ export default function GameArt({ game, size = 120 }: { game: LibraryGame; size?
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        border: `1px solid ${BORDER}`,
+        border: "1px solid",
+        borderColor: "divider",
         borderBottom: "none",
         flexShrink: 0,
       }}

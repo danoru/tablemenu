@@ -25,7 +25,6 @@ interface ApiResponse {
   retrying?: boolean;
 }
 
-// BGG returns 202 when the collection is being prepared — retry up to 5 times
 async function fetchWithRetry(
   url: string,
   headers: Record<string, string>,
@@ -53,9 +52,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   };
 
   try {
-    // own=1 — only owned games
-    // excludesubtype=boardgameexpansion — no expansions
-    // stats=1 — includes ratings and weight
     const url = `https://boardgamegeek.com/xmlapi2/collection?username=${encodeURIComponent(username.trim())}&own=1&excludesubtype=boardgameexpansion&stats=1`;
 
     let bggRes: Response;
@@ -82,7 +78,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
     const parsed = parser.parse(xml);
 
-    // BGG returns an error message in XML when username not found
     if (parsed?.errors?.error) {
       return res
         .status(404)
@@ -122,8 +117,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           maxPlaytime: Number(stats?.["@_maxplaytime"] ?? 0),
           complexity,
           bggRating,
-          // Collection endpoint doesn't include categories/mechanics/designers
-          // These will be populated via individual game fetches on bulkAdd
           categories: [],
           mechanics: [],
           designers: [],
@@ -132,7 +125,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         };
       });
 
-    res.setHeader("Cache-Control", "private, max-age=300"); // 5 min cache
+    res.setHeader("Cache-Control", "private, max-age=300");
     return res.status(200).json({ games });
   } catch (err) {
     console.error("[bgg/collection]", err);

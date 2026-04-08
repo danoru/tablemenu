@@ -3,19 +3,15 @@ import prisma from "@data/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 type Action =
-  | { type: "bring"; gameId: number } // toggle "bringing tonight"
-  | { type: "vote"; gameId: number; interested: boolean } // cast a vote
-  | { type: "remove"; gameId: number }; // remove game from room suggestions
+  | { type: "bring"; gameId: number }
+  | { type: "vote"; gameId: number; interested: boolean }
+  | { type: "remove"; gameId: number };
 
 interface ApiResponse {
   message?: string;
   error?: string;
 }
-
-// ─── Handler ──────────────────────────────────────────────────────────────────
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
   if (req.method !== "POST") {
@@ -44,7 +40,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     if (!room) return res.status(404).json({ error: "Room not found" });
     if (!room.isActive) return res.status(400).json({ error: "Room is no longer active" });
 
-    // Verify the user is a member of this room
     const membership = await prisma.roomInvites.findUnique({
       where: { roomId_userId: { roomId: room.id, userId } },
     });
@@ -52,14 +47,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(403).json({ error: "You are not a member of this room" });
     }
 
-    // ── Bring toggle ──────────────────────────────────────────────────────────
     if (action.type === "bring") {
       const existing = await prisma.roomGameSuggestions.findUnique({
         where: { roomId_gameId: { roomId: room.id, gameId: action.gameId } },
       });
 
       if (existing) {
-        // Toggle off — only the person who added it can remove it
         if (existing.suggestedBy !== userId) {
           return res.status(403).json({ error: "You can only remove games you added" });
         }
@@ -75,7 +68,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       }
     }
 
-    // ── Vote ──────────────────────────────────────────────────────────────────
     if (action.type === "vote") {
       await prisma.roomGameVotes.upsert({
         where: {

@@ -1,11 +1,5 @@
+import { FONT_SANS, GOLD, TEXT_FAINT } from "@/styles/theme";
 import { Box, Typography } from "@mui/material";
-
-const GOLD = "#e8c97a";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const TEXT = "#f0e6cc";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SANS = "'DM Sans', sans-serif";
 
 export default function StatCard({
   label,
@@ -19,8 +13,9 @@ export default function StatCard({
   return (
     <Box
       sx={{
-        background: BG_CARD,
-        border: `1px solid ${BORDER}`,
+        background: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: "12px",
         padding: "20px 24px",
         display: "flex",
@@ -52,7 +47,7 @@ export default function StatCard({
             fontFamily: FONT_SANS,
             fontSize: "22px",
             fontWeight: 500,
-            color: TEXT,
+            color: "text.primary",
             lineHeight: 1.1,
           }}
         >

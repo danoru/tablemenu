@@ -1,17 +1,9 @@
+import { FONT_SANS, FONT_SERIF, TEXT_FAINT } from "@/styles/theme";
 import type { RoomSuggestion } from "@api/rooms/[code]/index";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GREEN_BRIGHT = "#5ec97a";
-const BORDER = "rgba(180,140,60,0.15)";
-const TEXT = "#f0e6cc";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
 
 function gameColour(name: string): string {
   const palette = [
@@ -60,7 +52,7 @@ export default function SuggestionRow({
         padding: "14px 18px",
         borderRadius: "10px",
         background: suggestion.bringing ? "rgba(34,85,48,0.1)" : "rgba(255,255,255,0.02)",
-        border: `1px solid ${suggestion.bringing ? "rgba(60,160,80,0.2)" : BORDER}`,
+        border: `1px solid ${suggestion.bringing ? "rgba(60,160,80,0.2)" : "divider"}`,
         transition: "all 0.15s",
         mb: "8px",
       }}
@@ -95,7 +87,7 @@ export default function SuggestionRow({
             fontFamily: FONT_SANS,
             fontSize: "14px",
             fontWeight: 500,
-            color: TEXT,
+            color: "text.primary",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -105,7 +97,7 @@ export default function SuggestionRow({
         </Typography>
         <Box sx={{ display: "flex", gap: "8px", mt: "3px", alignItems: "center" }}>
           {suggestion.bringing && (
-            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: GREEN_BRIGHT }}>
+            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: "secondary.light" }}>
               ✓ In the pool
             </Typography>
           )}
@@ -126,8 +118,8 @@ export default function SuggestionRow({
             padding: "3px 8px",
           }}
         >
-          <ThumbUpIcon sx={{ fontSize: "11px", color: GREEN_BRIGHT }} />
-          <Typography sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: GREEN_BRIGHT }}>
+          <ThumbUpIcon sx={{ fontSize: "11px", color: "secondary.light" }} />
+          <Typography sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: "secondary.light" }}>
             {suggestion.interestedCount}
           </Typography>
         </Box>
@@ -158,9 +150,9 @@ export default function SuggestionRow({
             size="small"
             sx={{
               background: isBringing ? "rgba(34,85,48,0.3)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${isBringing ? "rgba(60,160,80,0.3)" : BORDER}`,
+              border: `1px solid ${isBringing ? "rgba(60,160,80,0.3)" : "divider"}`,
               borderRadius: "7px",
-              color: isBringing ? GREEN_BRIGHT : TEXT_FAINT,
+              color: isBringing ? "primary.light" : TEXT_FAINT,
               "&:hover": {
                 background: isBringing ? "rgba(34,85,48,0.5)" : "rgba(255,255,255,0.08)",
               },
@@ -177,9 +169,9 @@ export default function SuggestionRow({
             sx={{
               background:
                 suggestion.myVote === true ? "rgba(94,201,122,0.2)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${suggestion.myVote === true ? "rgba(94,201,122,0.3)" : BORDER}`,
+              border: `1px solid ${suggestion.myVote === true ? "rgba(94,201,122,0.3)" : "divider"}`,
               borderRadius: "7px",
-              color: suggestion.myVote === true ? GREEN_BRIGHT : TEXT_FAINT,
+              color: suggestion.myVote === true ? "primary.light" : TEXT_FAINT,
               "&:hover": { background: "rgba(94,201,122,0.15)" },
             }}
           >
@@ -194,7 +186,7 @@ export default function SuggestionRow({
             sx={{
               background:
                 suggestion.myVote === false ? "rgba(220,80,80,0.15)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${suggestion.myVote === false ? "rgba(220,80,80,0.25)" : BORDER}`,
+              border: `1px solid ${suggestion.myVote === false ? "rgba(220,80,80,0.25)" : "divider"}`,
               borderRadius: "7px",
               color: suggestion.myVote === false ? "rgba(220,120,120,0.9)" : TEXT_FAINT,
               "&:hover": { background: "rgba(220,80,80,0.1)" },

@@ -8,8 +8,8 @@ import { checkAchievements } from "@/services/achievements";
 interface LoggedGame {
   gameId: number;
   durationMin: number | null;
-  winnerIds: number[]; // userIds of winners, empty = not tracked
-  playerIds: number[]; // all userIds who played
+  winnerIds: number[];
+  playerIds: number[];
 }
 
 interface LogSessionBody {
@@ -47,14 +47,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     if (room.hostId !== userId)
       return res.status(403).json({ error: "Only the host can log games" });
 
-    // Find the active or most recent session to attach logs to
     const roomSession = await prisma.roomSessions.findFirst({
       where: { roomId: room.id, status: { in: ["ACTIVE", "CLOSED"] } },
       orderBy: { openedAt: "desc" },
     });
 
     for (const loggedGame of games) {
-      // Create a GameSession per game played
       const gameSession = await prisma.gameSessions.create({
         data: {
           playedAt: new Date(),
@@ -64,12 +62,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         },
       });
 
-      // Link the game
       await prisma.gameSessionGames.create({
         data: { gameSessionId: gameSession.id, gameId: loggedGame.gameId },
       });
 
-      // Link all players, marking winners
       const allPlayerIds = [...new Set([...loggedGame.playerIds, userId])];
       await prisma.gameSessionPlayers.createMany({
         data: allPlayerIds.map((pid) => ({
@@ -79,12 +75,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             ? true
             : loggedGame.winnerIds.length > 0
               ? false
-              : null, // null = not tracked
+              : null,
         })),
         skipDuplicates: true,
       });
 
-      // Trigger play achievements for each participant
       for (const pid of allPlayerIds) {
         await checkAchievements(pid, { event: "SESSION_CLOSED", sessionId: gameSession.id });
       }

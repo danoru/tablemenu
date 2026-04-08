@@ -1,3 +1,12 @@
+import {
+  BG_ELEVATED,
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CloseIcon from "@mui/icons-material/Close";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
@@ -15,21 +24,6 @@ import {
 import { TransitionProps } from "@mui/material/transitions";
 import { RoomSuggestion } from "@pages/api/rooms/[code]";
 import React from "react";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const GREEN_BRIGHT = "#5ec97a";
-const BG_ELEVATED = "#221e14";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
 
 function gameColour(name: string): string {
   const palette = [
@@ -109,7 +103,7 @@ export default function RoomQuickGenModal({
       PaperProps={{
         sx: {
           background: BG_ELEVATED,
-          border: `1px solid ${BORDER_MED}`,
+          border: `1px solid ${BORDER_AMBER}`,
           borderRadius: "14px",
           boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
           overflow: "hidden",
@@ -133,7 +127,12 @@ export default function RoomQuickGenModal({
           sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: "8px" }}
         >
           <Typography
-            sx={{ fontFamily: FONT_SERIF, fontSize: "24px", fontWeight: 700, color: TEXT }}
+            sx={{
+              fontFamily: FONT_SERIF,
+              fontSize: "24px",
+              fontWeight: 700,
+              color: "text.primary",
+            }}
           >
             Tonight's pick
           </Typography>
@@ -197,7 +196,7 @@ export default function RoomQuickGenModal({
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        border: `1px solid ${BORDER_MED}`,
+                        border: `1px solid ${BORDER_AMBER}`,
                       }}
                     >
                       <Typography
@@ -236,7 +235,7 @@ export default function RoomQuickGenModal({
                           fontFamily: FONT_SANS,
                           fontSize: "12px",
                           background: "rgba(94,201,122,0.15)",
-                          color: GREEN_BRIGHT,
+                          color: "secondary.light",
                           border: "1px solid rgba(94,201,122,0.2)",
                         }}
                       />
@@ -248,7 +247,8 @@ export default function RoomQuickGenModal({
                           fontSize: "12px",
                           background: "rgba(255,255,255,0.05)",
                           color: TEXT_DIM,
-                          border: `1px solid ${BORDER}`,
+                          border: "1px solid",
+                          borderColor: "divider",
                         }}
                       />
                     </Box>
@@ -263,21 +263,21 @@ export default function RoomQuickGenModal({
                 disabled={spinning}
                 startIcon={
                   spinning ? (
-                    <CircularProgress size={16} sx={{ color: "#0f0c08" }} />
+                    <CircularProgress size={16} sx={{ color: "background.default" }} />
                   ) : (
                     <CasinoIcon />
                   )
                 }
                 sx={{
-                  background: AMBER,
+                  background: "primary.main",
                   borderRadius: "8px",
-                  color: "#0f0c08",
+                  color: "background.default",
                   fontFamily: FONT_SANS,
                   fontSize: "15px",
                   fontWeight: 500,
                   padding: "12px",
                   textTransform: "none",
-                  "&:hover": { background: AMBER_HOVER },
+                  "&:hover": { background: "primary.light" },
                   "&.Mui-disabled": {
                     background: "rgba(200,150,42,0.35)",
                     color: "rgba(15,12,8,0.5)",
@@ -292,14 +292,14 @@ export default function RoomQuickGenModal({
                   startIcon={<ShuffleIcon />}
                   sx={{
                     background: "transparent",
-                    border: `1px solid ${BORDER_MED}`,
+                    border: `1px solid ${BORDER_AMBER}`,
                     borderRadius: "8px",
                     color: TEXT_DIM,
                     fontFamily: FONT_SANS,
                     fontSize: "15px",
                     padding: "12px 20px",
                     textTransform: "none",
-                    "&:hover": { background: "rgba(180,140,60,0.08)", color: TEXT },
+                    "&:hover": { background: "rgba(180,140,60,0.08)", color: "text.primary" },
                   }}
                 >
                   Re-roll

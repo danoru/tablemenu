@@ -1,4 +1,13 @@
 import {
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  GOLD_FADED,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
+import {
   Alert,
   Box,
   Button,
@@ -16,41 +25,23 @@ import { useRouter } from "next/router";
 import React from "react";
 import * as Yup from "yup";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const GOLD_FADED = "rgba(232,201,122,0.4)";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Shared input sx ─────────────────────────────────────────────────────────
-
 const inputSx = {
   mb: "16px",
   "& .MuiInputLabel-root": {
     fontFamily: FONT_SANS,
     fontSize: "14px",
     color: TEXT_FAINT,
-    "&.Mui-focused": { color: AMBER },
+    "&.Mui-focused": { color: "primary.main" },
   },
   "& .MuiOutlinedInput-root": {
     fontFamily: FONT_SANS,
     fontSize: "15px",
-    color: TEXT,
+    color: "text.primary",
     background: "rgba(255,255,255,0.03)",
-    "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
-    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: AMBER },
+    "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
+    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: AMBER,
+      borderColor: "primary.main",
       borderWidth: "1px",
     },
   },
@@ -62,14 +53,10 @@ const inputSx = {
   },
 };
 
-// ─── Validation ───────────────────────────────────────────────────────────────
-
 const validationSchema = Yup.object({
   username: Yup.string().required("Username is required."),
   password: Yup.string().required("Password is required."),
 });
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function LoginForm() {
   const router = useRouter();
@@ -106,7 +93,7 @@ export default function LoginForm() {
   return (
     <Box
       sx={{
-        background: BG,
+        background: "background.default",
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
@@ -116,7 +103,6 @@ export default function LoginForm() {
         overflow: "hidden",
       }}
     >
-      {/* Ambient glow */}
       <Box
         sx={{
           position: "absolute",
@@ -138,7 +124,6 @@ export default function LoginForm() {
           maxWidth: "420px",
         }}
       >
-        {/* Logo wordmark */}
         <Box sx={{ textAlign: "center", mb: "36px" }}>
           <Link href="/" style={{ textDecoration: "none" }}>
             <Typography
@@ -168,12 +153,11 @@ export default function LoginForm() {
             Sign in to your account
           </Typography>
         </Box>
-
-        {/* Card */}
         <Box
           sx={{
-            background: BG_CARD,
-            border: `1px solid ${BORDER}`,
+            background: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
             borderRadius: "14px",
             padding: { xs: "28px 24px", sm: "36px 40px" },
           }}
@@ -225,8 +209,8 @@ export default function LoginForm() {
                       name="rememberMe"
                       onChange={handleChange}
                       sx={{
-                        color: BORDER_MED,
-                        "&.Mui-checked": { color: AMBER },
+                        color: BORDER_AMBER,
+                        "&.Mui-checked": { color: "primary.main" },
                         padding: "6px 8px",
                       }}
                     />
@@ -244,16 +228,16 @@ export default function LoginForm() {
                   disabled={isSubmitting}
                   type="submit"
                   sx={{
-                    background: AMBER,
+                    background: "primary.main",
                     borderRadius: "8px",
-                    color: "#0f0c08",
+                    color: "background.default",
                     fontFamily: FONT_SANS,
                     fontSize: "15px",
                     fontWeight: 500,
                     padding: "12px",
                     textTransform: "none",
                     mb: "20px",
-                    "&:hover": { background: AMBER_HOVER },
+                    "&:hover": { background: "primary.light" },
                     "&.Mui-disabled": {
                       background: "rgba(200,150,42,0.35)",
                       color: "rgba(15,12,8,0.5)",

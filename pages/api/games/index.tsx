@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const pageNum = parseInt(page);
   const PAGE_SIZE = 48;
 
-  const games = await prisma.games.findMany({
+  const dbGames = await prisma.games.findMany({
     where: {
       ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
       ...(players
@@ -50,6 +50,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
     },
   });
+
+  const games = dbGames.map((g) => ({
+    gameId: g.id,
+    name: g.name,
+    imageUrl: g.imageUrl,
+    bggId: g.bggId,
+    minPlayers: g.minPlayers,
+    maxPlayers: g.maxPlayers,
+    minPlaytime: g.minPlaytime,
+    maxPlaytime: g.maxPlaytime,
+    complexity: g.complexity,
+    bggRating: g.bggRating,
+    categories: g.categories,
+    yearPublished: g.yearPublished,
+  }));
 
   return res.status(200).json({ games, total, page: pageNum, pageSize: PAGE_SIZE });
 }

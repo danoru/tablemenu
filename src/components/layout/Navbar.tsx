@@ -1,3 +1,4 @@
+import { FONT_SANS, FONT_SERIF, GOLD, GOLD_FADED, GOLD_LIGHT, TEXT_DIM } from "@/styles/theme";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, Button, Container, Divider, IconButton, Menu, MenuItem } from "@mui/material";
 import { useSession, signOut } from "next-auth/react";
@@ -6,8 +7,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import * as React from "react";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface NavPage {
   id: number;
   title: string;
@@ -15,8 +14,6 @@ interface NavPage {
   action?: () => void;
   variant?: "default" | "primary" | "muted";
 }
-
-// ─── Nav link builder ────────────────────────────────────────────────────────
 
 function getPages(session: any, onSignOut: () => void): NavPage[] {
   if (session) {
@@ -42,21 +39,6 @@ function getPages(session: any, onSignOut: () => void): NavPage[] {
     { id: 5, title: "Create account", link: "/register", variant: "primary" },
   ];
 }
-
-// ─── Shared style tokens ──────────────────────────────────────────────────────
-
-const NAV_BG = "#0f0c08";
-const NAV_BORDER = "rgba(180,140,60,0.15)";
-const GOLD = "#e8c97a";
-const GOLD_FADED = "rgba(232,201,122,0.4)";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_LIGHT = "#c8b880";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const FONT_SANS = "'DM Sans', sans-serif";
-const FONT_SERIF = "'Playfair Display', serif";
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Navbar() {
   const router = useRouter();
@@ -92,8 +74,8 @@ export default function Navbar() {
     <Box
       component="nav"
       sx={{
-        backgroundColor: NAV_BG,
-        borderBottom: `1px solid ${NAV_BORDER}`,
+        backgroundColor: "background.default",
+        borderBottom: "1px solid divider",
         position: "sticky",
         top: 0,
         zIndex: 100,
@@ -110,7 +92,6 @@ export default function Navbar() {
             gap: 2,
           }}
         >
-          {/* ── Logo ─────────────────────────────────────────────────────── */}
           <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
             <Box
               sx={{
@@ -148,7 +129,6 @@ export default function Navbar() {
             </Box>
           </Link>
 
-          {/* ── Desktop nav ───────────────────────────────────────────────── */}
           <Box
             sx={{
               display: { xs: "none", md: "flex" },
@@ -163,9 +143,9 @@ export default function Navbar() {
                     key={page.id}
                     onClick={() => handlePageClick(page)}
                     sx={{
-                      background: AMBER,
+                      background: "primary.main",
                       borderRadius: "6px",
-                      color: "#0f0c08",
+                      color: "background.default",
                       fontFamily: FONT_SANS,
                       fontSize: "13px",
                       fontWeight: 500,
@@ -173,7 +153,7 @@ export default function Navbar() {
                       ml: "4px",
                       padding: "7px 18px",
                       textTransform: "none",
-                      "&:hover": { background: AMBER_HOVER },
+                      "&:hover": { background: "primary.light" },
                     }}
                   >
                     {page.title}
@@ -197,7 +177,7 @@ export default function Navbar() {
                       textTransform: "none",
                       "&:hover": {
                         background: "rgba(255,255,255,0.04)",
-                        color: TEXT_LIGHT,
+                        color: GOLD_LIGHT,
                       },
                     }}
                   >
@@ -214,7 +194,7 @@ export default function Navbar() {
                     background: "transparent",
                     border: page.variant === "default" ? "1px solid rgba(180,140,60,0.3)" : "none",
                     borderRadius: "6px",
-                    color: page.variant === "default" ? TEXT_LIGHT : TEXT_DIM,
+                    color: page.variant === "default" ? GOLD_LIGHT : TEXT_DIM,
                     fontFamily: FONT_SANS,
                     fontSize: "13px",
                     fontWeight: 500,
@@ -226,7 +206,7 @@ export default function Navbar() {
                           ? "rgba(180,140,60,0.1)"
                           : "rgba(255,255,255,0.04)",
                       borderColor: "rgba(180,140,60,0.5)",
-                      color: TEXT_LIGHT,
+                      color: GOLD_LIGHT,
                     },
                   }}
                 >
@@ -236,7 +216,6 @@ export default function Navbar() {
             })}
           </Box>
 
-          {/* ── Mobile hamburger ─────────────────────────────────────────── */}
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
             <IconButton
               aria-controls="mobile-nav-menu"
@@ -244,7 +223,7 @@ export default function Navbar() {
               aria-label="Open navigation menu"
               onClick={handleOpenNavMenu}
               sx={{
-                color: TEXT_LIGHT,
+                color: GOLD_LIGHT,
                 "&:hover": { background: "rgba(255,255,255,0.06)" },
               }}
             >
@@ -262,7 +241,7 @@ export default function Navbar() {
               sx={{
                 "& .MuiPaper-root": {
                   backgroundColor: "#1a1610",
-                  border: `1px solid ${NAV_BORDER}`,
+                  border: "1px solid divider",
                   borderRadius: "10px",
                   boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
                   minWidth: "200px",
@@ -277,7 +256,7 @@ export default function Navbar() {
                 return (
                   <Box key={page.id}>
                     {!session && index === 2 && (
-                      <Divider sx={{ borderColor: NAV_BORDER, my: "4px" }} />
+                      <Divider sx={{ borderColor: "divider", my: "4px" }} />
                     )}
                     <MenuItem
                       onClick={() => handlePageClick(page)}
@@ -285,7 +264,11 @@ export default function Navbar() {
                         fontFamily: FONT_SANS,
                         fontSize: "14px",
                         fontWeight: isPrimary ? 500 : 400,
-                        color: isPrimary ? AMBER : page.variant === "muted" ? TEXT_DIM : TEXT_LIGHT,
+                        color: isPrimary
+                          ? "primary.main"
+                          : page.variant === "muted"
+                            ? TEXT_DIM
+                            : GOLD_LIGHT,
                         padding: "10px 20px",
                         "&:hover": {
                           background: "rgba(180,140,60,0.08)",

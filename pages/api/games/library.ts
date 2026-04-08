@@ -3,8 +3,6 @@ import prisma from "@data/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface LibraryGame {
   userGameId: number;
   gameId: number;
@@ -35,8 +33,6 @@ interface ApiResponse {
   library?: LibraryGame[];
   error?: string;
 }
-
-// ─── Handler ──────────────────────────────────────────────────────────────────
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
   if (req.method !== "GET") {

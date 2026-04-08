@@ -1,35 +1,26 @@
+import {
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  GOLD_FADED,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
+import StatCard from "@/components/ui/StatCard";
+import GameArt from "@/components/games/GameArt";
+import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import CasinoIcon from "@mui/icons-material/Casino";
 import GroupsIcon from "@mui/icons-material/Groups";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import { Box, Button, Divider, Typography } from "@mui/material";
+import { LibraryGame } from "@pages/api/games/library";
 import { GetServerSideProps } from "next";
-import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { LibraryGame } from "@pages/api/games/library";
-import { getUserLibrary } from "@/data/games";
-import GameArt from "@/components/game/GameArt";
-import StatCard from "@/components/cards/StatCard";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const GOLD_FADED = "rgba(232,201,122,0.4)";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Section header ───────────────────────────────────────────────────────────
+import { getServerSession } from "next-auth";
 
 function SectionHeader({
   title,
@@ -44,7 +35,9 @@ function SectionHeader({
     <Box
       sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", mb: "16px" }}
     >
-      <Typography sx={{ fontFamily: FONT_SERIF, fontSize: "20px", fontWeight: 700, color: TEXT }}>
+      <Typography
+        sx={{ fontFamily: FONT_SERIF, fontSize: "20px", fontWeight: 700, color: "text.primary" }}
+      >
         {title}
       </Typography>
       {action && (
@@ -65,8 +58,6 @@ function SectionHeader({
     </Box>
   );
 }
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 interface DashboardProps {
   activeRooms: {
@@ -105,8 +96,7 @@ export default function DashboardPage({
         <title>Dashboard — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: BG, minHeight: "100vh", position: "relative" }}>
-        {/* Ambient glow */}
+      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -130,7 +120,6 @@ export default function DashboardPage({
             padding: { xs: "28px 16px", md: "44px 32px" },
           }}
         >
-          {/* ── Greeting ─────────────────────────────────────────────────── */}
           <Box sx={{ mb: "36px" }}>
             <Typography
               sx={{
@@ -150,7 +139,7 @@ export default function DashboardPage({
                 fontFamily: FONT_SERIF,
                 fontSize: { xs: "34px", md: "44px" },
                 fontWeight: 900,
-                color: TEXT,
+                color: "text.primary",
                 lineHeight: 1.05,
                 letterSpacing: "-0.5px",
               }}
@@ -159,7 +148,6 @@ export default function DashboardPage({
             </Typography>
           </Box>
 
-          {/* ── Quick Gen CTA ─────────────────────────────────────────────── */}
           <Box
             sx={{
               background: "rgba(34,85,48,0.14)",
@@ -194,7 +182,7 @@ export default function DashboardPage({
                   fontFamily: FONT_SERIF,
                   fontSize: { xs: "20px", md: "24px" },
                   fontWeight: 700,
-                  color: TEXT,
+                  color: "text.primary",
                   mb: "6px",
                 }}
               >
@@ -208,23 +196,22 @@ export default function DashboardPage({
               startIcon={<CasinoIcon />}
               onClick={() => router.push(`/players/${username}/library`)}
               sx={{
-                background: AMBER,
+                background: "primary.main",
                 borderRadius: "8px",
-                color: "#0f0c08",
+                color: "background.default",
                 fontFamily: FONT_SANS,
                 fontSize: "15px",
                 fontWeight: 500,
                 padding: "12px 24px",
                 textTransform: "none",
                 flexShrink: 0,
-                "&:hover": { background: AMBER_HOVER },
+                "&:hover": { background: "primary.light" },
               }}
             >
               Quick Gen
             </Button>
           </Box>
 
-          {/* ── Stats row ─────────────────────────────────────────────────── */}
           <Box
             sx={{
               display: "flex",
@@ -250,7 +237,6 @@ export default function DashboardPage({
             />
           </Box>
 
-          {/* ── Two-column content ────────────────────────────────────────── */}
           <Box
             sx={{
               display: "grid",
@@ -258,7 +244,6 @@ export default function DashboardPage({
               gap: "24px",
             }}
           >
-            {/* Recently added */}
             <Box>
               <SectionHeader
                 title="Recently added"
@@ -267,8 +252,9 @@ export default function DashboardPage({
               />
               <Box
                 sx={{
-                  background: BG_CARD,
-                  border: `1px solid ${BORDER}`,
+                  background: "background.paper",
+                  border: "1px solid",
+                  borderColor: "divider",
                   borderRadius: "12px",
                   overflow: "hidden",
                 }}
@@ -285,14 +271,13 @@ export default function DashboardPage({
                         transition: "background 0.15s",
                       }}
                     >
-                      {/* Mini art placeholder */}
                       <GameArt game={game} size={36} />
                       <Typography
                         sx={{
                           fontFamily: FONT_SANS,
                           fontSize: "14px",
                           fontWeight: 500,
-                          color: TEXT,
+                          color: "text.primary",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -302,18 +287,18 @@ export default function DashboardPage({
                       </Typography>
                     </Box>
                     {i < recentGames.length - 1 && (
-                      <Divider sx={{ borderColor: BORDER, mx: "18px" }} />
+                      <Divider sx={{ borderColor: "divider", mx: "18px" }} />
                     )}
                   </Box>
                 ))}
               </Box>
             </Box>
 
-            {/* Active rooms */}
             <Box
               sx={{
-                background: BG_CARD,
-                border: `1px solid ${BORDER}`,
+                background: "background.paper",
+                border: "1px solid",
+                borderColor: "divider",
                 borderRadius: "12px",
                 overflow: "hidden",
               }}
@@ -343,7 +328,7 @@ export default function DashboardPage({
                     onClick={() => router.push("/rooms/new")}
                     sx={{
                       background: "transparent",
-                      border: `1px solid ${BORDER_MED}`,
+                      border: `1px solid ${BORDER_AMBER}`,
                       borderRadius: "8px",
                       color: TEXT_DIM,
                       fontFamily: FONT_SANS,
@@ -354,8 +339,8 @@ export default function DashboardPage({
                       mt: "4px",
                       "&:hover": {
                         background: "rgba(180,140,60,0.08)",
-                        color: TEXT,
-                        borderColor: AMBER,
+                        color: "text.primary",
+                        borderColor: "primary.main",
                       },
                     }}
                   >
@@ -385,7 +370,7 @@ export default function DashboardPage({
                             fontFamily: FONT_SANS,
                             fontSize: "14px",
                             fontWeight: 500,
-                            color: TEXT,
+                            color: "text.primary",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
@@ -412,12 +397,12 @@ export default function DashboardPage({
                           fontWeight: 500,
                           letterSpacing: "0.8px",
                           textTransform: "uppercase",
-                          color: room.type === "RECURRING" ? "#5ec97a" : TEXT_FAINT,
+                          color: room.type === "RECURRING" ? "secondary.light" : TEXT_FAINT,
                           background:
                             room.type === "RECURRING"
                               ? "rgba(34,85,48,0.3)"
                               : "rgba(255,255,255,0.05)",
-                          border: `1px solid ${room.type === "RECURRING" ? "rgba(60,160,80,0.25)" : BORDER}`,
+                          border: `1px solid ${room.type === "RECURRING" ? "rgba(60,160,80,0.25)" : "divider"}`,
                           padding: "2px 8px",
                           borderRadius: "10px",
                           flexShrink: 0,
@@ -427,7 +412,7 @@ export default function DashboardPage({
                       </Box>
                     </Box>
                     {i < activeRooms.length - 1 && (
-                      <Divider sx={{ borderColor: BORDER, mx: "18px" }} />
+                      <Divider sx={{ borderColor: "divider", mx: "18px" }} />
                     )}
                   </Box>
                 ))
@@ -435,13 +420,13 @@ export default function DashboardPage({
             </Box>
           </Box>
 
-          {/* ── Activity feed placeholder ─────────────────────────────────── */}
           <Box sx={{ mt: "32px" }}>
             <SectionHeader title="Friend activity" />
             <Box
               sx={{
-                background: BG_CARD,
-                border: `1px solid ${BORDER}`,
+                background: "background.paper",
+                border: "1px solid",
+                borderColor: "divider",
                 borderRadius: "12px",
                 padding: "40px 24px",
                 display: "flex",
@@ -466,7 +451,7 @@ export default function DashboardPage({
                 onClick={() => router.push("/users")}
                 sx={{
                   background: "transparent",
-                  border: `1px solid ${BORDER_MED}`,
+                  border: `1px solid ${BORDER_AMBER}`,
                   borderRadius: "8px",
                   color: TEXT_DIM,
                   fontFamily: FONT_SANS,
@@ -477,8 +462,8 @@ export default function DashboardPage({
                   mt: "4px",
                   "&:hover": {
                     background: "rgba(180,140,60,0.08)",
-                    color: TEXT,
-                    borderColor: AMBER,
+                    color: "text.primary",
+                    borderColor: "primary.main",
                   },
                 }}
               >
@@ -491,8 +476,6 @@ export default function DashboardPage({
     </>
   );
 }
-
-// ─── Server-side auth guard ───────────────────────────────────────────────────
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);

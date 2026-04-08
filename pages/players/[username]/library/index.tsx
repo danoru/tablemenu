@@ -1,9 +1,10 @@
-import GameArt from "@/components/game/GameArt";
+import GameGrid from "@/components/games/GameGrid";
 import AddGameModal from "@/components/modals/AddGameModal";
 import BGGImportModal from "@/components/modals/BGGImportModal";
 import QuickGenModal from "@/components/modals/QuickGenModal";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
+import { BORDER_AMBER, FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
 import { LibraryGame } from "@pages/api/games/library";
 import AddIcon from "@mui/icons-material/Add";
 import CasinoIcon from "@mui/icons-material/Casino";
@@ -11,80 +12,16 @@ import DownloadIcon from "@mui/icons-material/Download";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, Button, InputAdornment, OutlinedInput, Typography } from "@mui/material";
 import { GetServerSideProps } from "next";
-import { getServerSession } from "next-auth";
 import Head from "next/head";
+import { getServerSession } from "next-auth";
 import { useRouter } from "next/router";
 import React from "react";
-import Link from "next/link";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const GREEN_BRIGHT = "#5ec97a";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Game card ────────────────────────────────────────────────────────────────
-
-function GameCard({ game }: { game: LibraryGame }) {
-  return (
-    <Box
-      sx={{
-        background: BG_CARD,
-        border: `1px solid ${BORDER}`,
-        borderRadius: "10px",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        transition: "border-color 0.2s, transform 0.2s",
-        "&:hover": { borderColor: BORDER_MED, transform: "translateY(-2px)" },
-      }}
-    >
-      <GameArt game={game} size={120} />
-      <Box sx={{ padding: "10px 12px 12px", flex: 1 }}>
-        <Typography
-          sx={{
-            fontFamily: FONT_SANS,
-            fontSize: "13px",
-            fontWeight: 500,
-            color: TEXT,
-            lineHeight: 1.35,
-            mb: "6px",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }}
-        >
-          {game.name}
-        </Typography>
-        <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: TEXT_FAINT }}>
-          {game.minPlayers === game.maxPlayers
-            ? `${game.minPlayers} players`
-            : `${game.minPlayers}–${game.maxPlayers} players`}
-        </Typography>
-      </Box>
-    </Box>
-  );
-}
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Props {
   isSelf: boolean;
   profileUsername: string;
   userGames: LibraryGame[];
 }
-
-// ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function UserLibraryPage({ isSelf, profileUsername, userGames }: Props) {
   const router = useRouter();
@@ -113,7 +50,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
         <title>{profileUsername}'s Library — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: BG, minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -137,7 +74,6 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
             padding: { xs: "24px 16px", md: "40px 32px" },
           }}
         >
-          {/* Back link */}
           <Typography
             onClick={() => router.push(`/users/${profileUsername}`)}
             sx={{
@@ -156,7 +92,6 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
             ← {profileUsername}'s profile
           </Typography>
 
-          {/* Header */}
           <Box
             sx={{
               display: "flex",
@@ -173,7 +108,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
                   fontFamily: FONT_SERIF,
                   fontSize: { xs: "30px", md: "38px" },
                   fontWeight: 900,
-                  color: TEXT,
+                  color: "text.primary",
                   lineHeight: 1.1,
                   letterSpacing: "-0.5px",
                 }}
@@ -195,7 +130,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
                   background: "rgba(34,85,48,0.25)",
                   border: "1px solid rgba(60,160,80,0.3)",
                   borderRadius: "8px",
-                  color: GREEN_BRIGHT,
+                  color: "secondary.light",
                   fontFamily: FONT_SANS,
                   fontSize: "14px",
                   fontWeight: 500,
@@ -212,15 +147,15 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
                     onClick={() => setAddOpen(true)}
                     startIcon={<AddIcon />}
                     sx={{
-                      background: AMBER,
+                      background: "primary.main",
                       borderRadius: "8px",
-                      color: "#0f0c08",
+                      color: "background.default",
                       fontFamily: FONT_SANS,
                       fontSize: "14px",
                       fontWeight: 500,
                       padding: "9px 18px",
                       textTransform: "none",
-                      "&:hover": { background: AMBER_HOVER },
+                      "&:hover": { background: "primary.light" },
                     }}
                   >
                     Add Game
@@ -230,7 +165,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
                     startIcon={<DownloadIcon />}
                     sx={{
                       background: "transparent",
-                      border: `1px solid ${BORDER_MED}`,
+                      border: `1px solid ${BORDER_AMBER}`,
                       borderRadius: "8px",
                       color: TEXT_DIM,
                       fontFamily: FONT_SANS,
@@ -240,8 +175,8 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
                       textTransform: "none",
                       "&:hover": {
                         background: "rgba(180,140,60,0.08)",
-                        color: TEXT,
-                        borderColor: AMBER,
+                        color: "text.primary",
+                        borderColor: "primary.main",
                       },
                     }}
                   >
@@ -252,7 +187,6 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
             </Box>
           </Box>
 
-          {/* Search */}
           <OutlinedInput
             fullWidth
             value={search}
@@ -266,20 +200,19 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "14px",
-              color: TEXT,
+              color: "text.primary",
               mb: "28px",
               background: "rgba(255,255,255,0.03)",
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER },
-              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
               "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: AMBER,
+                borderColor: "primary.main",
                 borderWidth: "1px",
               },
               "& input::placeholder": { color: TEXT_FAINT },
             }}
           />
 
-          {/* Empty search state */}
           {filtered.length === 0 && (
             <Box sx={{ textAlign: "center", py: "64px" }}>
               <Typography sx={{ fontFamily: FONT_SERIF, fontSize: "20px", color: TEXT_DIM }}>
@@ -293,26 +226,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
             </Box>
           )}
 
-          {/* Game grid */}
-          {filtered.length > 0 && (
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "repeat(auto-fill, minmax(130px, 1fr))",
-                  sm: "repeat(auto-fill, minmax(150px, 1fr))",
-                  md: "repeat(auto-fill, minmax(160px, 1fr))",
-                },
-                gap: "14px",
-              }}
-            >
-              {filtered.map((game) => (
-                <Link href={`/games/${game.gameId}`} style={{ textDecoration: "none" }}>
-                  <GameCard key={game.gameId} game={game} />
-                </Link>
-              ))}
-            </Box>
-          )}
+          <GameGrid games={filtered} />
         </Box>
       </Box>
 

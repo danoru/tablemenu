@@ -1,8 +1,18 @@
 import LogGamesModal from "@/components/modals/LogGamesModal";
 import RoomQuickGenModal from "@/components/modals/RoomQuickGenModal";
-import SuggestionRow from "@/components/SuggestionsRow";
+import SuggestionRow from "@/components/games/SuggestionsRow";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
+import {
+  AMBER_DIM,
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  GOLD_FADED,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import type { RoomData } from "@api/rooms/[code]/index";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CheckIcon from "@mui/icons-material/Check";
@@ -18,25 +28,6 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const GOLD_FADED = "rgba(232,201,122,0.35)";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const GREEN_BRIGHT = "#5ec97a";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function gameColour(name: string): string {
   const palette = [
@@ -70,16 +61,12 @@ function avatarColour(name: string): string {
   return palette[Math.abs(hash) % palette.length];
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface Props {
   initialRoom: RoomData;
   currentUserId: number;
   library: LibraryGame[];
   username: string;
 }
-
-// ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function RoomPage({ initialRoom, currentUserId, library, username }: Props) {
   const router = useRouter();
@@ -102,16 +89,13 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
 
   const isHost = room.hostId === currentUserId;
 
-  // ── Polling ────────────────────────────────────────────────────────────────
   React.useEffect(() => {
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/rooms/${code}`);
         const data = await res.json();
         if (res.ok && data.room) setRoom(data.room);
-      } catch {
-        /* silent */
-      }
+      } catch {}
     }, 5000);
     return () => clearInterval(interval);
   }, [code]);
@@ -242,7 +226,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
         <title>{room.name} — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: BG, minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -266,7 +250,6 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
             padding: { xs: "24px 16px", md: "40px 32px" },
           }}
         >
-          {/* ── Room header ───────────────────────────────────────────────── */}
           <Box
             sx={{
               display: "flex",
@@ -283,7 +266,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                   fontFamily: FONT_SERIF,
                   fontSize: { xs: "28px", md: "36px" },
                   fontWeight: 900,
-                  color: TEXT,
+                  color: "text.primary",
                   lineHeight: 1.05,
                   letterSpacing: "-0.5px",
                 }}
@@ -340,7 +323,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                   {room.code}
                 </Typography>
                 {copied ? (
-                  <CheckIcon sx={{ fontSize: "14px", color: GREEN_BRIGHT }} />
+                  <CheckIcon sx={{ fontSize: "14px", color: "secondary.light" }} />
                 ) : (
                   <ContentCopyIcon sx={{ fontSize: "14px", color: GOLD_FADED }} />
                 )}
@@ -349,15 +332,15 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                 onClick={() => setQuickGenOpen(true)}
                 startIcon={<CasinoIcon />}
                 sx={{
-                  background: AMBER,
+                  background: "primary.main",
                   borderRadius: "8px",
-                  color: "#0f0c08",
+                  color: "background.default",
                   fontFamily: FONT_SANS,
                   fontSize: "14px",
                   fontWeight: 500,
                   padding: "9px 18px",
                   textTransform: "none",
-                  "&:hover": { background: AMBER_HOVER },
+                  "&:hover": { background: "primary.light" },
                 }}
               >
                 Spin
@@ -368,7 +351,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                   startIcon={<SettingsIcon sx={{ fontSize: "16px !important" }} />}
                   sx={{
                     background: "transparent",
-                    border: `1px solid ${BORDER_MED}`,
+                    border: `1px solid ${BORDER_AMBER}`,
                     borderRadius: "8px",
                     color: TEXT_DIM,
                     fontFamily: FONT_SANS,
@@ -378,8 +361,8 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                     textTransform: "none",
                     "&:hover": {
                       background: "rgba(180,140,60,0.08)",
-                      color: TEXT,
-                      borderColor: AMBER,
+                      color: "text.primary",
+                      borderColor: "primary.main",
                     },
                   }}
                 >
@@ -389,7 +372,6 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
             </Box>
           </Box>
 
-          {/* ── Session banner ────────────────────────────────────────────── */}
           {isHost && (
             <Box
               sx={{
@@ -413,7 +395,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                         width: "8px",
                         height: "8px",
                         borderRadius: "50%",
-                        background: GREEN_BRIGHT,
+                        background: "secondary.light",
                         "@keyframes pulse": { "0%,100%": { opacity: 1 }, "50%": { opacity: 0.3 } },
                         animation: "pulse 2s infinite",
                       }}
@@ -424,7 +406,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                           fontFamily: FONT_SANS,
                           fontSize: "14px",
                           fontWeight: 500,
-                          color: TEXT,
+                          color: "text.primary",
                         }}
                       >
                         Session is live
@@ -445,7 +427,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                           fontFamily: FONT_SANS,
                           fontSize: "14px",
                           fontWeight: 500,
-                          color: TEXT,
+                          color: "text.primary",
                         }}
                       >
                         Ready to play?
@@ -469,7 +451,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                         background: "rgba(34,85,48,0.3)",
                         border: "1px solid rgba(60,160,80,0.35)",
                         borderRadius: "8px",
-                        color: GREEN_BRIGHT,
+                        color: "secondary.light",
                         fontFamily: FONT_SANS,
                         fontSize: "13px",
                         fontWeight: 500,
@@ -486,7 +468,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                       startIcon={<CheckCircleIcon />}
                       sx={{
                         background: "transparent",
-                        border: `1px solid ${BORDER_MED}`,
+                        border: `1px solid ${BORDER_AMBER}`,
                         borderRadius: "8px",
                         color: TEXT_DIM,
                         fontFamily: FONT_SANS,
@@ -496,8 +478,8 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                         textTransform: "none",
                         "&:hover": {
                           background: "rgba(180,140,60,0.08)",
-                          color: TEXT,
-                          borderColor: AMBER,
+                          color: "text.primary",
+                          borderColor: "primary.main",
                         },
                       }}
                     >
@@ -514,21 +496,21 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                     disabled={sessionLoading}
                     startIcon={
                       sessionLoading ? (
-                        <CircularProgress size={14} sx={{ color: "#0f0c08" }} />
+                        <CircularProgress size={14} sx={{ color: "background.default" }} />
                       ) : (
                         <NightlifeIcon />
                       )
                     }
                     sx={{
-                      background: AMBER,
+                      background: "primary.main",
                       borderRadius: "8px",
-                      color: "#0f0c08",
+                      color: "background.default",
                       fontFamily: FONT_SANS,
                       fontSize: "13px",
                       fontWeight: 500,
                       padding: "8px 18px",
                       textTransform: "none",
-                      "&:hover": { background: AMBER_HOVER },
+                      "&:hover": { background: "primary.light" },
                       "&.Mui-disabled": {
                         background: "rgba(200,150,42,0.35)",
                         color: "rgba(15,12,8,0.5)",
@@ -542,7 +524,6 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
             </Box>
           )}
 
-          {/* ── Two column layout ─────────────────────────────────────────── */}
           <Box
             sx={{
               display: "grid",
@@ -550,14 +531,13 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
               gap: "24px",
             }}
           >
-            {/* ── Left: game pool ───────────────────────────────────────── */}
             <Box>
               <Typography
                 sx={{
                   fontFamily: FONT_SERIF,
                   fontSize: "20px",
                   fontWeight: 700,
-                  color: TEXT,
+                  color: "text.primary",
                   mb: "16px",
                 }}
               >
@@ -567,8 +547,9 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
               {room.suggestions.length === 0 ? (
                 <Box
                   sx={{
-                    background: BG_CARD,
-                    border: `1px solid ${BORDER}`,
+                    background: "background.paper",
+                    border: "1px solid",
+                    borderColor: "divider",
                     borderRadius: "12px",
                     padding: "40px 24px",
                     textAlign: "center",
@@ -594,13 +575,13 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
 
               {myLibrary.length > 0 && (
                 <Box sx={{ mt: "28px" }}>
-                  <Divider sx={{ borderColor: BORDER, mb: "20px" }} />
+                  <Divider sx={{ borderColor: "divider", mb: "20px" }} />
                   <Typography
                     sx={{
                       fontFamily: FONT_SERIF,
                       fontSize: "18px",
                       fontWeight: 700,
-                      color: TEXT,
+                      color: "text.primary",
                       mb: "14px",
                     }}
                   >
@@ -617,10 +598,11 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                           padding: "10px 14px",
                           borderRadius: "8px",
                           background: "rgba(255,255,255,0.02)",
-                          border: `1px solid ${BORDER}`,
+                          border: "1px solid",
+                          borderColor: "divider",
                           "&:hover": {
                             background: "rgba(180,140,60,0.05)",
-                            borderColor: BORDER_MED,
+                            borderColor: BORDER_AMBER,
                           },
                         }}
                       >
@@ -653,7 +635,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                             fontFamily: FONT_SANS,
                             fontSize: "14px",
                             fontWeight: 500,
-                            color: TEXT,
+                            color: "text.primary",
                             flex: 1,
                           }}
                         >
@@ -685,14 +667,13 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
               )}
             </Box>
 
-            {/* ── Right: members ────────────────────────────────────────── */}
             <Box>
               <Typography
                 sx={{
                   fontFamily: FONT_SERIF,
                   fontSize: "20px",
                   fontWeight: 700,
-                  color: TEXT,
+                  color: "text.primary",
                   mb: "16px",
                 }}
               >
@@ -700,8 +681,9 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
               </Typography>
               <Box
                 sx={{
-                  background: BG_CARD,
-                  border: `1px solid ${BORDER}`,
+                  background: "background.paper",
+                  border: "1px solid",
+                  borderColor: "divider",
                   borderRadius: "12px",
                   overflow: "hidden",
                   mb: "16px",
@@ -725,7 +707,8 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                             height: "34px",
                             borderRadius: "50%",
                             background: avatarColour(member.username),
-                            border: `1px solid ${BORDER}`,
+                            border: "1px solid",
+                            borderColor: "divider",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -749,7 +732,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                             fontFamily: FONT_SANS,
                             fontSize: "14px",
                             fontWeight: 500,
-                            color: TEXT,
+                            color: "text.primary",
                             flex: 1,
                           }}
                         >
@@ -764,8 +747,8 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                                 fontWeight: 500,
                                 letterSpacing: "0.8px",
                                 textTransform: "uppercase",
-                                color: AMBER,
-                                background: "rgba(200,150,42,0.15)",
+                                color: "primary.main",
+                                background: AMBER_DIM,
                                 border: "1px solid rgba(200,150,42,0.2)",
                                 padding: "2px 7px",
                                 borderRadius: "10px",
@@ -777,7 +760,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                           )}
                         </Typography>
                       </Box>
-                      {i < arr.length - 1 && <Divider sx={{ borderColor: BORDER }} />}
+                      {i < arr.length - 1 && <Divider sx={{ borderColor: "divider" }} />}
                     </Box>
                   ))}
               </Box>
@@ -830,7 +813,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                   sx={{
                     mt: "10px",
                     background: "transparent",
-                    border: `1px solid ${BORDER_MED}`,
+                    border: `1px solid ${BORDER_AMBER}`,
                     borderRadius: "7px",
                     color: TEXT_DIM,
                     fontFamily: FONT_SANS,
@@ -838,7 +821,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                     fontWeight: 500,
                     padding: "7px",
                     textTransform: "none",
-                    "&:hover": { background: "rgba(180,140,60,0.08)", color: TEXT },
+                    "&:hover": { background: "rgba(180,140,60,0.08)", color: "text.primary" },
                   }}
                 >
                   {copied ? "Copied!" : "Copy room code"}
@@ -849,7 +832,6 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
         </Box>
       </Box>
 
-      {/* ── Modals ────────────────────────────────────────────────────────── */}
       <RoomQuickGenModal
         open={quickGenOpen}
         onClose={() => setQuickGenOpen(false)}
@@ -878,8 +860,6 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
     </>
   );
 }
-
-// ─── Server-side props ────────────────────────────────────────────────────────
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { code } = context.params as { code: string };
@@ -922,8 +902,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: { initialRoom: buildRoomData(room, currentUserId), currentUserId, library, username },
   };
 };
-
-// ─── Room data builder ────────────────────────────────────────────────────────
 
 function buildRoomData(room: any, currentUserId: number): RoomData {
   const members = room.invites.map((inv: any) => ({

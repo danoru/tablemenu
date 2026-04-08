@@ -33,7 +33,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     if (room.hostId !== userId)
       return res.status(403).json({ error: "Only the host can open a session" });
 
-    // Close any previously open session for this room (shouldn't happen but safe)
     await prisma.roomSessions.updateMany({
       where: { roomId: room.id, status: "ACTIVE" },
       data: { status: "CLOSED", closedAt: new Date() },
@@ -49,7 +48,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       },
     });
 
-    // Update lastOpenedAt on the room for streak tracking
     await prisma.rooms.update({
       where: { id: room.id },
       data: { lastOpenedAt: new Date() },

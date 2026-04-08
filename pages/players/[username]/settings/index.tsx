@@ -1,4 +1,5 @@
 import { authOptions } from "@/lib/authOptions";
+import { BORDER_AMBER, FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
 import {
   Box,
   Button,
@@ -17,41 +18,23 @@ import { useRouter } from "next/router";
 import React from "react";
 import * as Yup from "yup";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const GOLD_FADED = "rgba(232,201,122,0.4)";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Shared input sx ──────────────────────────────────────────────────────────
-
 const inputSx = {
   mb: "16px",
   "& .MuiInputLabel-root": {
     fontFamily: FONT_SANS,
     fontSize: "14px",
     color: TEXT_FAINT,
-    "&.Mui-focused": { color: AMBER },
+    "&.Mui-focused": { color: "primary.main" },
   },
   "& .MuiOutlinedInput-root": {
     fontFamily: FONT_SANS,
     fontSize: "15px",
-    color: TEXT,
+    color: "text.primary",
     background: "rgba(255,255,255,0.03)",
-    "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
-    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: AMBER },
+    "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
+    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: AMBER,
+      borderColor: "primary.main",
       borderWidth: "1px",
     },
   },
@@ -63,8 +46,6 @@ const inputSx = {
   },
 };
 
-// ─── Validation ───────────────────────────────────────────────────────────────
-
 const validationSchema = Yup.object({
   firstName: Yup.string().max(50, "Max 50 characters."),
   lastName: Yup.string().max(50, "Max 50 characters."),
@@ -72,8 +53,6 @@ const validationSchema = Yup.object({
   location: Yup.string().max(100, "Max 100 characters."),
   website: Yup.string().url("Must be a valid URL (include https://).").nullable(),
 });
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ProfileValues {
   firstName: string;
@@ -87,8 +66,6 @@ interface Props {
   username: string;
   initial: ProfileValues;
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function EditProfilePage({ username, initial }: Props) {
   const router = useRouter();
@@ -144,7 +121,7 @@ export default function EditProfilePage({ username, initial }: Props) {
         <title>Edit Profile — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: BG, minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -168,7 +145,6 @@ export default function EditProfilePage({ username, initial }: Props) {
             padding: { xs: "28px 16px", md: "44px 32px" },
           }}
         >
-          {/* Header */}
           <Box sx={{ mb: "32px" }}>
             <Typography
               sx={{
@@ -191,7 +167,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                 fontFamily: FONT_SERIF,
                 fontSize: { xs: "30px", md: "38px" },
                 fontWeight: 900,
-                color: TEXT,
+                color: "text.primary",
                 letterSpacing: "-0.5px",
                 lineHeight: 1.05,
               }}
@@ -200,7 +176,6 @@ export default function EditProfilePage({ username, initial }: Props) {
             </Typography>
           </Box>
 
-          {/* Avatar preview */}
           <Box
             sx={{
               display: "flex",
@@ -215,7 +190,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                 height: "64px",
                 borderRadius: "50%",
                 background: avatarColour(username),
-                border: `2px solid ${BORDER_MED}`,
+                border: `2px solid ${BORDER_AMBER}`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -236,18 +211,23 @@ export default function EditProfilePage({ username, initial }: Props) {
             </Box>
             <Box>
               <Typography
-                sx={{ fontFamily: FONT_SANS, fontSize: "15px", fontWeight: 500, color: TEXT }}
+                sx={{
+                  fontFamily: FONT_SANS,
+                  fontSize: "15px",
+                  fontWeight: 500,
+                  color: "text.primary",
+                }}
               >
                 {username}
               </Typography>
             </Box>
           </Box>
 
-          {/* Form card */}
           <Box
             sx={{
-              background: BG_CARD,
-              border: `1px solid ${BORDER}`,
+              background: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
               borderRadius: "14px",
               padding: { xs: "24px", md: "32px 36px" },
             }}
@@ -259,7 +239,6 @@ export default function EditProfilePage({ username, initial }: Props) {
             >
               {({ isSubmitting, errors, touched, handleChange, handleBlur, values }) => (
                 <Form noValidate>
-                  {/* Name row */}
                   <Typography
                     sx={{
                       fontFamily: FONT_SANS,
@@ -300,9 +279,8 @@ export default function EditProfilePage({ username, initial }: Props) {
                     />
                   </Box>
 
-                  <Divider sx={{ borderColor: BORDER, mb: "24px" }} />
+                  <Divider sx={{ borderColor: "divider", mb: "24px" }} />
 
-                  {/* Bio */}
                   <Typography
                     sx={{
                       fontFamily: FONT_SANS,
@@ -340,9 +318,8 @@ export default function EditProfilePage({ username, initial }: Props) {
                     }}
                   />
 
-                  <Divider sx={{ borderColor: BORDER, mb: "24px" }} />
+                  <Divider sx={{ borderColor: "divider", mb: "24px" }} />
 
-                  {/* Location + website */}
                   <Typography
                     sx={{
                       fontFamily: FONT_SANS,
@@ -383,24 +360,23 @@ export default function EditProfilePage({ username, initial }: Props) {
                     sx={inputSx}
                   />
 
-                  <Divider sx={{ borderColor: BORDER, mb: "24px" }} />
+                  <Divider sx={{ borderColor: "divider", mb: "24px" }} />
 
-                  {/* Actions */}
                   <Box sx={{ display: "flex", gap: "10px" }}>
                     <Button
                       fullWidth
                       type="submit"
                       disabled={isSubmitting}
                       sx={{
-                        background: AMBER,
+                        background: "primary.main",
                         borderRadius: "8px",
-                        color: "#0f0c08",
+                        color: "background.default",
                         fontFamily: FONT_SANS,
                         fontSize: "15px",
                         fontWeight: 500,
                         padding: "12px",
                         textTransform: "none",
-                        "&:hover": { background: AMBER_HOVER },
+                        "&:hover": { background: "primary.light" },
                         "&.Mui-disabled": {
                           background: "rgba(200,150,42,0.35)",
                           color: "rgba(15,12,8,0.5)",
@@ -417,7 +393,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                       onClick={() => router.push(`/users/${username}`)}
                       sx={{
                         background: "transparent",
-                        border: `1px solid ${BORDER_MED}`,
+                        border: `1px solid ${BORDER_AMBER}`,
                         borderRadius: "8px",
                         color: TEXT_DIM,
                         fontFamily: FONT_SANS,
@@ -427,8 +403,8 @@ export default function EditProfilePage({ username, initial }: Props) {
                         textTransform: "none",
                         "&:hover": {
                           background: "rgba(180,140,60,0.08)",
-                          color: TEXT,
-                          borderColor: AMBER,
+                          color: "text.primary",
+                          borderColor: "primary.main",
                         },
                       }}
                     >
@@ -459,9 +435,6 @@ export default function EditProfilePage({ username, initial }: Props) {
     </>
   );
 }
-
-// ─── Server-side guard ────────────────────────────────────────────────────────
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { username } = context.params as { username: string };
   const session = await getServerSession(context.req, context.res, authOptions);

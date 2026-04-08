@@ -1,3 +1,4 @@
+import { BORDER_AMBER, FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
 import {
   Alert,
   Box,
@@ -8,7 +9,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
   Slider,
   Snackbar,
   TextField,
@@ -25,37 +25,25 @@ import * as Yup from "yup";
 import { authOptions } from "@/lib/authOptions";
 import prisma from "@data/db";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const GREEN_BRIGHT = "#5ec97a";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
 const inputSx = {
   mb: "16px",
   "& .MuiInputLabel-root": {
     fontFamily: FONT_SANS,
     fontSize: "14px",
     color: TEXT_FAINT,
-    "&.Mui-focused": { color: AMBER },
+    "&.Mui-focused": { color: "primary.main" },
   },
   "& .MuiOutlinedInput-root": {
     fontFamily: FONT_SANS,
     fontSize: "15px",
-    color: TEXT,
+    color: "text.primary",
     background: "rgba(255,255,255,0.03)",
-    "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
-    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: AMBER },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: AMBER, borderWidth: "1px" },
+    "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
+    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "primary.main",
+      borderWidth: "1px",
+    },
   },
   "& .MuiFormHelperText-root": {
     fontFamily: FONT_SANS,
@@ -82,14 +70,12 @@ const TIME_MARKS = [
   { value: 240, label: "4hr+" },
 ];
 
-// ─── Toggle button ────────────────────────────────────────────────────────────
-
 function ToggleOption({
   label,
   sublabel,
   active,
   onClick,
-  accent = AMBER,
+  accent = "primary.main",
 }: {
   label: string;
   sublabel: string;
@@ -106,11 +92,11 @@ function ToggleOption({
         borderRadius: "10px",
         cursor: "pointer",
         background: active
-          ? `rgba(${accent === GREEN_BRIGHT ? "34,85,48" : "180,110,30"},0.2)`
+          ? `rgba(${accent === "secondary.light" ? "34,85,48" : "180,110,30"},0.2)`
           : "rgba(255,255,255,0.03)",
-        border: `1px solid ${active ? (accent === GREEN_BRIGHT ? "rgba(60,160,80,0.35)" : BORDER_MED) : BORDER}`,
+        border: `1px solid ${active ? (accent === "secondary.light" ? "rgba(60,160,80,0.35)" : BORDER_AMBER) : "divider"}`,
         transition: "all 0.15s",
-        "&:hover": { borderColor: active ? undefined : BORDER_MED },
+        "&:hover": { borderColor: active ? undefined : BORDER_AMBER },
       }}
     >
       <Typography
@@ -118,7 +104,7 @@ function ToggleOption({
           fontFamily: FONT_SANS,
           fontSize: "14px",
           fontWeight: 500,
-          color: active ? TEXT : TEXT_DIM,
+          color: active ? "text.primary" : TEXT_DIM,
         }}
       >
         {label}
@@ -129,8 +115,6 @@ function ToggleOption({
     </Box>
   );
 }
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface RoomData {
   id: number;
@@ -152,8 +136,6 @@ const validationSchema = Yup.object({
   name: Yup.string().max(60, "Max 60 characters").required("Room name is required"),
   description: Yup.string().max(200, "Max 200 characters"),
 });
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function RoomSettingsPage({ room, username }: Props) {
   const router = useRouter();
@@ -244,7 +226,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
         <title>Room Settings — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: BG, minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -268,7 +250,6 @@ export default function RoomSettingsPage({ room, username }: Props) {
             padding: { xs: "28px 16px", md: "44px 32px" },
           }}
         >
-          {/* Header */}
           <Typography
             onClick={() => router.push(`/rooms/${code}`)}
             sx={{ ...sectionLabel, mb: "12px", cursor: "pointer", "&:hover": { color: TEXT_DIM } }}
@@ -280,7 +261,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
               fontFamily: FONT_SERIF,
               fontSize: { xs: "28px", md: "36px" },
               fontWeight: 900,
-              color: TEXT,
+              color: "text.primary",
               letterSpacing: "-0.5px",
               lineHeight: 1.05,
               mb: "6px",
@@ -312,11 +293,11 @@ export default function RoomSettingsPage({ room, username }: Props) {
           >
             {({ isSubmitting, errors, touched, handleChange, handleBlur, values }) => (
               <Form noValidate>
-                {/* ── Details ─────────────────────────────────────────────── */}
                 <Box
                   sx={{
-                    background: BG_CARD,
-                    border: `1px solid ${BORDER}`,
+                    background: "background.paper",
+                    border: "1px solid",
+                    borderColor: "divider",
                     borderRadius: "14px",
                     padding: { xs: "24px", md: "28px 32px" },
                     mb: "16px",
@@ -352,11 +333,11 @@ export default function RoomSettingsPage({ room, username }: Props) {
                   />
                 </Box>
 
-                {/* ── Room type ────────────────────────────────────────────── */}
                 <Box
                   sx={{
-                    background: BG_CARD,
-                    border: `1px solid ${BORDER}`,
+                    background: "background.paper",
+                    border: "1px solid",
+                    borderColor: "divider",
                     borderRadius: "14px",
                     padding: { xs: "24px", md: "28px 32px" },
                     mb: "16px",
@@ -375,16 +356,16 @@ export default function RoomSettingsPage({ room, username }: Props) {
                       sublabel="Persistent — reopen each week"
                       active={roomType === "RECURRING"}
                       onClick={() => setRoomType("RECURRING")}
-                      accent={GREEN_BRIGHT}
+                      accent={"secondary.light"}
                     />
                   </Box>
                 </Box>
 
-                {/* ── Visibility ───────────────────────────────────────────── */}
                 <Box
                   sx={{
-                    background: BG_CARD,
-                    border: `1px solid ${BORDER}`,
+                    background: "background.paper",
+                    border: "1px solid",
+                    borderColor: "divider",
                     borderRadius: "14px",
                     padding: { xs: "24px", md: "28px 32px" },
                     mb: "16px",
@@ -407,11 +388,11 @@ export default function RoomSettingsPage({ room, username }: Props) {
                   </Box>
                 </Box>
 
-                {/* ── Players & time ───────────────────────────────────────── */}
                 <Box
                   sx={{
-                    background: BG_CARD,
-                    border: `1px solid ${BORDER}`,
+                    background: "background.paper",
+                    border: "1px solid",
+                    borderColor: "divider",
                     borderRadius: "14px",
                     padding: { xs: "24px", md: "28px 32px" },
                     mb: "16px",
@@ -419,7 +400,6 @@ export default function RoomSettingsPage({ room, username }: Props) {
                 >
                   <Typography sx={sectionLabel}>Default settings</Typography>
 
-                  {/* Player count */}
                   <Box sx={{ mb: "28px" }}>
                     <Box sx={{ display: "flex", justifyContent: "space-between", mb: "8px" }}>
                       <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_DIM }}>
@@ -430,7 +410,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
                           fontFamily: FONT_SERIF,
                           fontSize: "20px",
                           fontWeight: 700,
-                          color: TEXT,
+                          color: "text.primary",
                           lineHeight: 1,
                         }}
                       >
@@ -444,12 +424,12 @@ export default function RoomSettingsPage({ room, username }: Props) {
                       value={playerCount}
                       onChange={(_, v) => setPlayerCount(v as number)}
                       sx={{
-                        color: AMBER,
+                        color: "primary.main",
                         "& .MuiSlider-thumb": {
-                          background: AMBER,
+                          background: "primary.main",
                           "&:hover": { boxShadow: "0 0 0 8px rgba(200,150,42,0.15)" },
                         },
-                        "& .MuiSlider-rail": { background: BORDER_MED },
+                        "& .MuiSlider-rail": { background: BORDER_AMBER },
                       }}
                     />
                     <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -466,7 +446,6 @@ export default function RoomSettingsPage({ room, username }: Props) {
                     </Box>
                   </Box>
 
-                  {/* Time budget */}
                   <Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", mb: "8px" }}>
                       <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_DIM }}>
@@ -477,7 +456,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
                           fontFamily: FONT_SERIF,
                           fontSize: "20px",
                           fontWeight: 700,
-                          color: TEXT,
+                          color: "text.primary",
                           lineHeight: 1,
                         }}
                       >
@@ -492,13 +471,13 @@ export default function RoomSettingsPage({ room, username }: Props) {
                       value={timeBudget}
                       onChange={(_, v) => setTimeBudget(v as number)}
                       sx={{
-                        color: AMBER,
+                        color: "primary.main",
                         "& .MuiSlider-thumb": {
-                          background: AMBER,
+                          background: "primary.main",
                           "&:hover": { boxShadow: "0 0 0 8px rgba(200,150,42,0.15)" },
                         },
-                        "& .MuiSlider-rail": { background: BORDER_MED },
-                        "& .MuiSlider-mark": { background: BORDER_MED },
+                        "& .MuiSlider-rail": { background: BORDER_AMBER },
+                        "& .MuiSlider-mark": { background: BORDER_AMBER },
                         "& .MuiSlider-markLabel": {
                           fontFamily: FONT_SANS,
                           fontSize: "11px",
@@ -509,22 +488,21 @@ export default function RoomSettingsPage({ room, username }: Props) {
                   </Box>
                 </Box>
 
-                {/* ── Save ─────────────────────────────────────────────────── */}
                 <Box sx={{ display: "flex", gap: "10px", mb: "40px" }}>
                   <Button
                     fullWidth
                     type="submit"
                     disabled={isSubmitting}
                     sx={{
-                      background: AMBER,
+                      background: "primary.main",
                       borderRadius: "8px",
-                      color: "#0f0c08",
+                      color: "background.default",
                       fontFamily: FONT_SANS,
                       fontSize: "15px",
                       fontWeight: 500,
                       padding: "13px",
                       textTransform: "none",
-                      "&:hover": { background: AMBER_HOVER },
+                      "&:hover": { background: "primary.light" },
                       "&.Mui-disabled": {
                         background: "rgba(200,150,42,0.35)",
                         color: "rgba(15,12,8,0.5)",
@@ -541,7 +519,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
                     onClick={() => router.push(`/rooms/${code}`)}
                     sx={{
                       background: "transparent",
-                      border: `1px solid ${BORDER_MED}`,
+                      border: `1px solid ${BORDER_AMBER}`,
                       borderRadius: "8px",
                       color: TEXT_DIM,
                       fontFamily: FONT_SANS,
@@ -551,8 +529,8 @@ export default function RoomSettingsPage({ room, username }: Props) {
                       textTransform: "none",
                       "&:hover": {
                         background: "rgba(180,140,60,0.08)",
-                        color: TEXT,
-                        borderColor: AMBER,
+                        color: "text.primary",
+                        borderColor: "primary.main",
                       },
                     }}
                   >
@@ -560,7 +538,6 @@ export default function RoomSettingsPage({ room, username }: Props) {
                   </Button>
                 </Box>
 
-                {/* ── Danger zone ──────────────────────────────────────────── */}
                 <Box
                   sx={{
                     background: "rgba(220,80,80,0.05)",
@@ -570,7 +547,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
                   }}
                 >
                   <Typography sx={{ ...sectionLabel, color: "rgba(220,120,120,0.6)" }}>
-                    Danger zone
+                    Danger Zone
                   </Typography>
                   <Box
                     sx={{
@@ -587,7 +564,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
                           fontFamily: FONT_SANS,
                           fontSize: "14px",
                           fontWeight: 500,
-                          color: TEXT,
+                          color: "text.primary",
                         }}
                       >
                         Archive this room
@@ -633,7 +610,6 @@ export default function RoomSettingsPage({ room, username }: Props) {
         </Box>
       </Box>
 
-      {/* ── Confirm archive dialog ─────────────────────────────────────────── */}
       <Dialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -647,7 +623,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
         }}
       >
         <DialogTitle
-          sx={{ fontFamily: FONT_SERIF, fontSize: "20px", fontWeight: 700, color: TEXT }}
+          sx={{ fontFamily: FONT_SERIF, fontSize: "20px", fontWeight: 700, color: "text.primary" }}
         >
           Archive "{room.name}"?
         </DialogTitle>
@@ -662,7 +638,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
             onClick={() => setDeleteOpen(false)}
             sx={{
               background: "transparent",
-              border: `1px solid ${BORDER_MED}`,
+              border: `1px solid ${BORDER_AMBER}`,
               borderRadius: "8px",
               color: TEXT_DIM,
               fontFamily: FONT_SANS,
@@ -670,7 +646,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
               fontWeight: 500,
               padding: "8px 18px",
               textTransform: "none",
-              "&:hover": { background: "rgba(180,140,60,0.08)", color: TEXT },
+              "&:hover": { background: "rgba(180,140,60,0.08)", color: "text.primary" },
             }}
           >
             Cancel
@@ -711,8 +687,6 @@ export default function RoomSettingsPage({ room, username }: Props) {
   );
 }
 
-// ─── Server-side props ────────────────────────────────────────────────────────
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { code } = context.params as { code: string };
   const session = await getServerSession(context.req, context.res, authOptions);
@@ -740,7 +714,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   if (!room || !room.isActive) return { notFound: true };
 
-  // Only the host can access settings
   if (room.hostId !== userId) {
     return { redirect: { destination: `/rooms/${code}`, permanent: false } };
   }

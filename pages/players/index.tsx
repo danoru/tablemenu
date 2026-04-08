@@ -1,5 +1,15 @@
 import { authOptions } from "@/lib/authOptions";
 import { getAllUsers } from "@data/users";
+import {
+  AMBER_DIM,
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  GOLD_FADED,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import SearchIcon from "@mui/icons-material/Search";
@@ -21,24 +31,6 @@ import React from "react";
 import superjson from "superjson";
 import type { Users } from "@prisma/client";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const GOLD_FADED = "rgba(232,201,122,0.35)";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function avatarColour(name: string): string {
   const palette = [
     "rgba(34,85,48,0.6)",
@@ -57,16 +49,12 @@ function avatarInitial(name: string): string {
   return name.slice(0, 1).toUpperCase();
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface Props {
   users: Users[];
   currentUserId: number | null;
   currentUsername: string | null;
   initialFollowing: number[];
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function UsersPage({
   users,
@@ -125,8 +113,7 @@ export default function UsersPage({
         <title>Players — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: BG, minHeight: "100vh", position: "relative" }}>
-        {/* Ambient glow */}
+      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -150,14 +137,13 @@ export default function UsersPage({
             padding: { xs: "28px 16px", md: "44px 32px" },
           }}
         >
-          {/* ── Header ─────────────────────────────────────────────────── */}
           <Box sx={{ mb: "32px" }}>
             <Typography
               sx={{
                 fontFamily: FONT_SERIF,
                 fontSize: { xs: "32px", md: "40px" },
                 fontWeight: 900,
-                color: TEXT,
+                color: "text.primary",
                 lineHeight: 1.05,
                 letterSpacing: "-0.5px",
                 mb: "8px",
@@ -177,7 +163,6 @@ export default function UsersPage({
             </Typography>
           </Box>
 
-          {/* ── Search ─────────────────────────────────────────────────── */}
           <OutlinedInput
             fullWidth
             value={search}
@@ -191,20 +176,19 @@ export default function UsersPage({
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "14px",
-              color: TEXT,
+              color: "text.primary",
               mb: "24px",
               background: "rgba(255,255,255,0.03)",
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER },
-              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
               "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: AMBER,
+                borderColor: "primary.main",
                 borderWidth: "1px",
               },
               "& input::placeholder": { color: TEXT_FAINT },
             }}
           />
 
-          {/* ── Count ──────────────────────────────────────────────────── */}
           <Typography
             sx={{
               fontFamily: FONT_SANS,
@@ -218,11 +202,11 @@ export default function UsersPage({
             {search && ` matching "${search}"`}
           </Typography>
 
-          {/* ── User list ──────────────────────────────────────────────── */}
           <Box
             sx={{
-              background: BG_CARD,
-              border: `1px solid ${BORDER}`,
+              background: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
               borderRadius: "14px",
               overflow: "hidden",
             }}
@@ -247,12 +231,11 @@ export default function UsersPage({
                       alignItems: "center",
                       gap: "16px",
                       padding: "14px 20px",
-                      borderBottom: i < filtered.length - 1 ? `1px solid ${BORDER}` : "none",
+                      borderBottom: i < filtered.length - 1 ? "1px solid divider" : "none",
                       transition: "background 0.15s",
                       "&:hover": { background: "rgba(255,255,255,0.025)" },
                     }}
                   >
-                    {/* Avatar */}
                     <Box
                       onClick={() => router.push(`/players/${user.username}`)}
                       sx={{
@@ -260,7 +243,8 @@ export default function UsersPage({
                         height: "40px",
                         borderRadius: "50%",
                         background: avatarColour(user.username),
-                        border: `1px solid ${BORDER}`,
+                        border: "1px solid",
+                        borderColor: "divider",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -283,7 +267,6 @@ export default function UsersPage({
                       </Typography>
                     </Box>
 
-                    {/* Username + join date */}
                     <Box
                       sx={{ flex: 1, minWidth: 0, cursor: "pointer" }}
                       onClick={() => router.push(`/players/${user.username}`)}
@@ -293,7 +276,7 @@ export default function UsersPage({
                           fontFamily: FONT_SANS,
                           fontSize: "15px",
                           fontWeight: 500,
-                          color: TEXT,
+                          color: "text.primary",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -310,8 +293,8 @@ export default function UsersPage({
                               fontWeight: 500,
                               letterSpacing: "0.8px",
                               textTransform: "uppercase",
-                              color: AMBER,
-                              background: "rgba(200,150,42,0.15)",
+                              color: "primary.main",
+                              background: AMBER_DIM,
                               border: "1px solid rgba(200,150,42,0.25)",
                               padding: "2px 7px",
                               borderRadius: "10px",
@@ -338,7 +321,6 @@ export default function UsersPage({
                       </Typography>
                     </Box>
 
-                    {/* Library link */}
                     <Tooltip title={`${user.username}'s library`} placement="top">
                       <Box
                         onClick={() => router.push(`/players/${user.username}/library`)}
@@ -346,7 +328,8 @@ export default function UsersPage({
                           width: "34px",
                           height: "34px",
                           borderRadius: "8px",
-                          border: `1px solid ${BORDER}`,
+                          border: "1px solid",
+                          borderColor: "divider",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -389,7 +372,7 @@ export default function UsersPage({
                           ...(isFollowing
                             ? {
                                 background: "transparent",
-                                border: `1px solid ${BORDER_MED}`,
+                                border: `1px solid ${BORDER_AMBER}`,
                                 color: TEXT_DIM,
                                 "&:hover": {
                                   borderColor: "rgba(220,80,80,0.4)",
@@ -398,10 +381,10 @@ export default function UsersPage({
                                 },
                               }
                             : {
-                                background: AMBER,
+                                background: "primary.main",
                                 border: "none",
-                                color: "#0f0c08",
-                                "&:hover": { background: AMBER_HOVER },
+                                color: "background.default",
+                                "&:hover": { background: "primary.light" },
                               }),
                           "&.Mui-disabled": {
                             opacity: 0.5,
@@ -422,7 +405,6 @@ export default function UsersPage({
   );
 }
 
-// ─── Data fetching ────────────────────────────────────────────────────────────
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
   const currentUserId = session ? Number((session.user as any).id) : null;

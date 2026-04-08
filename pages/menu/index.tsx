@@ -1,7 +1,17 @@
-import CourseCard from "@/components/cards/CourseCard";
-import ExportMenuButton from "@/components/ExportMenuButton";
+import CourseCard from "@/components/rooms/CourseCard";
+import ExportMenuButton from "@/components/pdf/ExportMenuButton";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
+import {
+  AMBER_DIM,
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  GOLD_FADED,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CloseIcon from "@mui/icons-material/Close";
@@ -23,23 +33,6 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import React from "react";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const GOLD_FADED = "rgba(232,201,122,0.35)";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const GREEN_BRIGHT = "#5ec97a";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
 const COURSES = [
   {
     id: "appetizer",
@@ -48,7 +41,7 @@ const COURSES = [
     subtitle: "While everyone arrives",
     color: "rgba(34,85,48,0.25)",
     border: "rgba(60,160,80,0.2)",
-    accent: GREEN_BRIGHT,
+    accent: "secondary.light",
     filter: (g: LibraryGame) => g.maxPlaytime <= 20,
     picks: 2,
   },
@@ -93,9 +86,6 @@ function pickRandom<T>(arr: T[], n: number): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, n);
 }
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface MenuSelection {
   [courseId: string]: LibraryGame[];
 }
@@ -105,10 +95,7 @@ interface Props {
   username: string;
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
-
 export default function MenuPage({ library, username }: Props) {
-  // ── Source mode: solo vs room ──────────────────────────────────────────────
   const [mode, setMode] = React.useState<"solo" | "room">("solo");
   const [roomCode, setRoomCode] = React.useState("");
   const [roomError, setRoomError] = React.useState("");
@@ -116,7 +103,6 @@ export default function MenuPage({ library, username }: Props) {
   const [roomPool, setRoomPool] = React.useState<LibraryGame[] | null>(null);
   const [roomName, setRoomName] = React.useState("");
 
-  // ── Menu state ─────────────────────────────────────────────────────────────
   const [menu, setMenu] = React.useState<MenuSelection | null>(null);
   const [generating, setGenerating] = React.useState(false);
   const [rerolling, setRerolling] = React.useState<{ courseId: string; idx: number } | null>(null);
@@ -129,7 +115,6 @@ export default function MenuPage({ library, username }: Props) {
 
   const activePool: LibraryGame[] = mode === "room" && roomPool ? roomPool : library;
 
-  // ── Room pool fetch ────────────────────────────────────────────────────────
   async function handleRoomConnect() {
     if (!roomCode.trim()) return;
     setRoomLoading(true);
@@ -141,7 +126,6 @@ export default function MenuPage({ library, username }: Props) {
         setRoomError("Room not found. Check the code and try again.");
         return;
       }
-      // Map room suggestions to Game shape
       const pool: LibraryGame[] = data.room.suggestions
         .filter((s: any) => s.bringing)
         .map((s: any) => ({
@@ -160,7 +144,7 @@ export default function MenuPage({ library, username }: Props) {
       setRoomPool(pool);
       setRoomName(data.room.name);
       setMode("room");
-      setMenu(null); // clear old menu when switching pools
+      setMenu(null);
     } catch {
       setRoomError("Failed to connect to room.");
     } finally {
@@ -177,12 +161,10 @@ export default function MenuPage({ library, username }: Props) {
     setMenu(null);
   }
 
-  // ── Menu generation ────────────────────────────────────────────────────────
   function generateMenu() {
     setGenerating(true);
     setMenu(null);
 
-    // Small delay for dramatic effect
     setTimeout(() => {
       const selection: MenuSelection = {};
       for (const course of COURSES) {
@@ -194,7 +176,6 @@ export default function MenuPage({ library, username }: Props) {
     }, 600);
   }
 
-  // ── Per-game reroll ────────────────────────────────────────────────────────
   function handleRerollGame(courseId: CourseId, idx: number) {
     if (!menu) return;
     setRerolling({ courseId, idx });
@@ -204,7 +185,6 @@ export default function MenuPage({ library, username }: Props) {
       const eligible = activePool.filter(course.filter);
       const current = menu[courseId];
 
-      // Pick a game not already in this course's selection
       const currentIds = new Set(current.map((g) => g.gameId));
       const candidates = eligible.filter((g) => !currentIds.has(g.gameId));
       const pick =
@@ -236,8 +216,7 @@ export default function MenuPage({ library, username }: Props) {
         <title>The Menu — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: BG, minHeight: "100vh", position: "relative" }}>
-        {/* Ambient glow */}
+      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -261,7 +240,6 @@ export default function MenuPage({ library, username }: Props) {
             padding: { xs: "28px 16px", md: "44px 32px" },
           }}
         >
-          {/* ── Page header ──────────────────────────────────────────────── */}
           <Box sx={{ mb: "36px" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: "12px", mb: "8px" }}>
               <Typography
@@ -269,7 +247,7 @@ export default function MenuPage({ library, username }: Props) {
                   fontFamily: FONT_SERIF,
                   fontSize: { xs: "36px", md: "48px" },
                   fontWeight: 900,
-                  color: TEXT,
+                  color: "text.primary",
                   lineHeight: 1.05,
                   letterSpacing: "-0.5px",
                   fontStyle: "italic",
@@ -285,11 +263,11 @@ export default function MenuPage({ library, username }: Props) {
             </Typography>
           </Box>
 
-          {/* ── Source toggle ─────────────────────────────────────────────── */}
           <Box
             sx={{
-              background: BG_CARD,
-              border: `1px solid ${BORDER}`,
+              background: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
               borderRadius: "14px",
               padding: "20px 24px",
               mb: "28px",
@@ -323,7 +301,7 @@ export default function MenuPage({ library, username }: Props) {
                 startIcon={<PersonIcon sx={{ fontSize: "15px !important" }} />}
                 sx={{
                   background: mode === "solo" ? "rgba(200,150,42,0.2)" : "rgba(255,255,255,0.04)",
-                  border: `1px solid ${mode === "solo" ? AMBER : BORDER}`,
+                  border: `1px solid ${mode === "solo" ? "primary.main" : "divider"}`,
                   borderRadius: "8px",
                   color: mode === "solo" ? GOLD : TEXT_DIM,
                   fontFamily: FONT_SANS,
@@ -331,7 +309,7 @@ export default function MenuPage({ library, username }: Props) {
                   fontWeight: 500,
                   padding: "7px 16px",
                   textTransform: "none",
-                  "&:hover": { background: "rgba(200,150,42,0.15)", borderColor: AMBER },
+                  "&:hover": { background: AMBER_DIM, borderColor: "primary.main" },
                 }}
               >
                 My library
@@ -350,9 +328,9 @@ export default function MenuPage({ library, username }: Props) {
                 onClick={() => mode !== "room" && setMode("room")}
                 sx={{
                   background: mode === "room" ? "rgba(34,85,48,0.25)" : "rgba(255,255,255,0.04)",
-                  border: `1px solid ${mode === "room" ? "rgba(60,160,80,0.4)" : BORDER}`,
+                  border: `1px solid ${mode === "room" ? "rgba(60,160,80,0.4)" : "divider"}`,
                   borderRadius: "8px",
-                  color: mode === "room" ? GREEN_BRIGHT : TEXT_DIM,
+                  color: mode === "room" ? "primary.light" : TEXT_DIM,
                   fontFamily: FONT_SANS,
                   fontSize: "13px",
                   fontWeight: 500,
@@ -376,7 +354,6 @@ export default function MenuPage({ library, username }: Props) {
               </Button>
             </Box>
 
-            {/* Room code input — shown when room mode is selected but not yet connected */}
             {mode === "room" && !roomPool && (
               <Box sx={{ display: "flex", gap: "8px", mt: "16px", flexWrap: "wrap" }}>
                 <OutlinedInput
@@ -392,7 +369,7 @@ export default function MenuPage({ library, username }: Props) {
                     fontFamily: FONT_SANS,
                     fontSize: "15px",
                     fontWeight: 500,
-                    color: TEXT,
+                    color: "text.primary",
                     letterSpacing: "2px",
                     width: "160px",
                     "& input": { textAlign: "center", padding: "9px 14px" },
@@ -402,11 +379,11 @@ export default function MenuPage({ library, username }: Props) {
                       fontSize: "13px",
                     },
                     "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: roomError ? "rgba(220,80,80,0.5)" : BORDER_MED,
+                      borderColor: roomError ? "rgba(220,80,80,0.5)" : BORDER_AMBER,
                     },
-                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: AMBER },
+                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
                     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: AMBER,
+                      borderColor: "primary.main",
                       borderWidth: "1px",
                     },
                   }}
@@ -415,15 +392,15 @@ export default function MenuPage({ library, username }: Props) {
                   onClick={handleRoomConnect}
                   disabled={roomLoading || !roomCode.trim()}
                   sx={{
-                    background: AMBER,
+                    background: "primary.main",
                     borderRadius: "8px",
-                    color: "#0f0c08",
+                    color: "background.default",
                     fontFamily: FONT_SANS,
                     fontSize: "13px",
                     fontWeight: 500,
                     padding: "9px 18px",
                     textTransform: "none",
-                    "&:hover": { background: AMBER_HOVER },
+                    "&:hover": { background: "primary.light" },
                     "&.Mui-disabled": {
                       background: "rgba(200,150,42,0.35)",
                       color: "rgba(15,12,8,0.5)",
@@ -452,7 +429,6 @@ export default function MenuPage({ library, username }: Props) {
               </Box>
             )}
 
-            {/* Connected room — show disconnect option */}
             {mode === "room" && roomPool && (
               <Box sx={{ display: "flex", alignItems: "center", gap: "8px", mt: "16px" }}>
                 <Box
@@ -460,13 +436,15 @@ export default function MenuPage({ library, username }: Props) {
                     width: "8px",
                     height: "8px",
                     borderRadius: "50%",
-                    background: GREEN_BRIGHT,
+                    background: "secondary.light",
                     flexShrink: 0,
                     "@keyframes pulse": { "0%, 100%": { opacity: 1 }, "50%": { opacity: 0.3 } },
                     animation: "pulse 2s infinite",
                   }}
                 />
-                <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: GREEN_BRIGHT }}>
+                <Typography
+                  sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: "secondary.light" }}
+                >
                   Connected to {roomName}
                 </Typography>
                 <IconButton
@@ -479,22 +457,21 @@ export default function MenuPage({ library, username }: Props) {
               </Box>
             )}
           </Box>
-          {/* ── Generate button ───────────────────────────────────────────── */}
           <Button
             fullWidth
             onClick={generateMenu}
             disabled={generating || (mode === "room" && !roomPool)}
             startIcon={
               generating ? (
-                <CircularProgress size={18} sx={{ color: "#0f0c08" }} />
+                <CircularProgress size={18} sx={{ color: "background.default" }} />
               ) : (
                 <AutoAwesomeIcon />
               )
             }
             sx={{
-              background: AMBER,
+              background: "primary.main",
               borderRadius: "10px",
-              color: "#0f0c08",
+              color: "background.default",
               fontFamily: FONT_SERIF,
               fontSize: "17px",
               fontWeight: 700,
@@ -502,7 +479,7 @@ export default function MenuPage({ library, username }: Props) {
               padding: "14px",
               textTransform: "none",
               mb: "36px",
-              "&:hover": { background: AMBER_HOVER },
+              "&:hover": { background: "primary.light" },
               "&.Mui-disabled": { background: "rgba(200,150,42,0.35)", color: "rgba(15,12,8,0.5)" },
             }}
           >
@@ -513,10 +490,8 @@ export default function MenuPage({ library, username }: Props) {
                 : "Plan my evening"}
           </Button>
 
-          {/* ── Menu output ───────────────────────────────────────────────── */}
           {hasMenu && !generating && (
             <Box>
-              {/* Decorative header */}
               <Box sx={{ textAlign: "center", mb: "32px" }}>
                 <Typography
                   sx={{
@@ -541,7 +516,6 @@ export default function MenuPage({ library, username }: Props) {
                 />
               </Box>
 
-              {/* Course cards */}
               <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 {COURSES.map((course) => {
                   const picks = menu[course.id] ?? [];
@@ -558,7 +532,6 @@ export default function MenuPage({ library, username }: Props) {
                 })}
               </Box>
 
-              {/* Footer actions */}
               <Box
                 sx={{
                   display: "flex",
@@ -573,7 +546,7 @@ export default function MenuPage({ library, username }: Props) {
                   startIcon={<CasinoIcon />}
                   sx={{
                     background: "transparent",
-                    border: `1px solid ${BORDER_MED}`,
+                    border: `1px solid ${BORDER_AMBER}`,
                     borderRadius: "8px",
                     color: TEXT_DIM,
                     fontFamily: FONT_SANS,
@@ -583,8 +556,8 @@ export default function MenuPage({ library, username }: Props) {
                     textTransform: "none",
                     "&:hover": {
                       background: "rgba(180,140,60,0.08)",
-                      color: TEXT,
-                      borderColor: AMBER,
+                      color: "text.primary",
+                      borderColor: "primary.main",
                     },
                   }}
                 >
@@ -595,7 +568,6 @@ export default function MenuPage({ library, username }: Props) {
             </Box>
           )}
 
-          {/* ── Empty state (before generation) ──────────────────────────── */}
           {!hasMenu && !generating && (
             <Box sx={{ textAlign: "center", py: "48px" }}>
               <Typography
@@ -630,8 +602,6 @@ export default function MenuPage({ library, username }: Props) {
     </>
   );
 }
-
-// ─── Server-side auth ─────────────────────────────────────────────────────────
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);

@@ -44,7 +44,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       data: { status: "CLOSED", closedAt: new Date() },
     });
 
-    // Clear per-session bringing list and votes so the room is clean next time
     if (req.body.clearSession) {
       await prisma.roomGameSuggestions.deleteMany({ where: { roomId: room.id } });
       await prisma.roomGameVotes.deleteMany({ where: { roomId: room.id } });

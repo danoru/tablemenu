@@ -1,19 +1,15 @@
+import {
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD_FADED,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import { Box, Button, Typography } from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-
-const GOLD = "#e8c97a";
-const GOLD_FADED = "rgba(232,201,122,0.15)";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const BG = "#0f0c08";
-const BORDER = "rgba(180,140,60,0.15)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
 
 export default function NotFoundPage() {
   const router = useRouter();
@@ -27,7 +23,7 @@ export default function NotFoundPage() {
 
       <Box
         sx={{
-          background: BG,
+          background: "background.default",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -37,7 +33,6 @@ export default function NotFoundPage() {
           overflow: "hidden",
         }}
       >
-        {/* Ambient glow */}
         <Box
           sx={{
             position: "absolute",
@@ -51,7 +46,6 @@ export default function NotFoundPage() {
           }}
         />
 
-        {/* Large background 404 */}
         <Typography
           sx={{
             position: "absolute",
@@ -69,7 +63,6 @@ export default function NotFoundPage() {
           404
         </Typography>
 
-        {/* Content */}
         <Box
           sx={{
             position: "relative",
@@ -78,7 +71,6 @@ export default function NotFoundPage() {
             maxWidth: "480px",
           }}
         >
-          {/* Overline */}
           <Typography
             sx={{
               fontFamily: FONT_SANS,
@@ -99,7 +91,7 @@ export default function NotFoundPage() {
               fontSize: { xs: "32px", md: "42px" },
               fontWeight: 900,
               fontStyle: "italic",
-              color: TEXT,
+              color: "text.primary",
               lineHeight: 1.1,
               letterSpacing: "-0.5px",
               mb: "16px",
@@ -121,30 +113,28 @@ export default function NotFoundPage() {
             This seat doesn't exist — or the game has already moved on without it.
           </Typography>
 
-          {/* Divider */}
           <Box
             sx={{
               width: "40px",
               height: "1px",
-              background: `linear-gradient(to right, transparent, ${BORDER}, transparent)`,
+              background: `linear-gradient(to right, transparent, divider, transparent)`,
               margin: "0 auto 36px",
             }}
           />
 
-          {/* Actions */}
           <Box sx={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
             <Button
               onClick={() => router.push(session ? "/dashboard" : "/")}
               sx={{
-                background: AMBER,
+                background: "primary.main",
                 borderRadius: "8px",
-                color: "#0f0c08",
+                color: "primary.contrastText",
                 fontFamily: FONT_SANS,
                 fontSize: "14px",
                 fontWeight: 500,
                 padding: "11px 24px",
                 textTransform: "none",
-                "&:hover": { background: AMBER_HOVER },
+                "&:hover": { background: "primary.light" },
               }}
             >
               Back to the table
@@ -153,7 +143,8 @@ export default function NotFoundPage() {
               onClick={() => router.back()}
               sx={{
                 background: "transparent",
-                border: `1px solid ${BORDER}`,
+                border: "1px solid",
+                borderColor: "divider",
                 borderRadius: "8px",
                 color: TEXT_DIM,
                 fontFamily: FONT_SANS,
@@ -163,8 +154,8 @@ export default function NotFoundPage() {
                 textTransform: "none",
                 "&:hover": {
                   background: "rgba(180,140,60,0.06)",
-                  borderColor: "rgba(180,140,60,0.28)",
-                  color: TEXT,
+                  borderColor: BORDER_AMBER,
+                  color: "text.primary",
                 },
               }}
             >

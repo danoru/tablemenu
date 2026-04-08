@@ -1,8 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface BggSearchResult {
   bggId: number;
   name: string;
@@ -13,8 +11,6 @@ interface ApiResponse {
   results?: BggSearchResult[];
   error?: string;
 }
-
-// ─── Handler ──────────────────────────────────────────────────────────────────
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
   if (req.method !== "GET") {

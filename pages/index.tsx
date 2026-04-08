@@ -1,3 +1,4 @@
+import { GOLD, GOLD_LIGHT } from "@/styles/theme";
 import { Box, Button, OutlinedInput, Typography } from "@mui/material";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
@@ -9,7 +10,7 @@ import { authOptions } from "./api/auth/[...nextauth]";
 
 const styles = {
   root: {
-    background: "#0f0c08",
+    background: "background.primary",
     minHeight: "100vh",
     position: "relative" as const,
     overflowX: "hidden" as const,
@@ -61,7 +62,7 @@ const styles = {
     fontFamily: "'Playfair Display', serif",
     fontSize: "22px",
     fontWeight: 900,
-    color: "#e8c97a",
+    color: GOLD,
     letterSpacing: "-0.3px",
     userSelect: "none" as const,
   },
@@ -91,7 +92,7 @@ const styles = {
     gap: "8px",
     background: "rgba(34,85,48,0.3)",
     border: "1px solid rgba(60,160,80,0.25)",
-    color: "#5ec97a",
+    color: "secondary.light",
     fontSize: "11px",
     fontWeight: 500,
     letterSpacing: "1.2px",
@@ -105,7 +106,7 @@ const styles = {
   eyebrowDot: {
     width: "6px",
     height: "6px",
-    background: "#5ec97a",
+    background: "secondary.light",
     borderRadius: "50%",
     flexShrink: 0,
   },
@@ -122,7 +123,7 @@ const styles = {
 
   headlineEm: {
     fontStyle: "italic",
-    color: "#e8c97a",
+    color: GOLD,
   },
 
   subhead: {
@@ -182,7 +183,7 @@ const styles = {
     fontWeight: 500,
     letterSpacing: "1px",
     textTransform: "uppercase" as const,
-    color: amber ? "#e8c97a" : "#5ec97a",
+    color: amber ? GOLD : "secondary.light",
     background: amber ? "rgba(180,110,30,0.25)" : "rgba(34,85,48,0.4)",
     border: amber ? "1px solid rgba(180,140,60,0.25)" : "1px solid rgba(60,160,80,0.2)",
     padding: "3px 10px",
@@ -361,12 +362,10 @@ export default function HomePage() {
       </Head>
 
       <Box sx={styles.root}>
-        {/* Ambient background glows */}
         <Box sx={styles.ambientTop} />
         <Box sx={styles.ambientBottom} />
 
         <Box sx={styles.content}>
-          {/* ── Hero ── */}
           <Box sx={styles.hero}>
             <Box sx={styles.eyebrow}>
               <Box
@@ -400,14 +399,14 @@ export default function HomePage() {
                   background: "#c8962a",
                   border: "none",
                   borderRadius: "8px",
-                  color: "#0f0c08",
+                  color: "background.default",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: "15px",
                   fontWeight: 500,
                   padding: "13px 28px",
                   textTransform: "none",
                   "&:hover": {
-                    background: "#dba535",
+                    background: "primary.light",
                     transform: "translateY(-1px)",
                   },
                   transition: "all 0.2s",
@@ -421,7 +420,7 @@ export default function HomePage() {
                   background: "transparent",
                   border: "1px solid rgba(180,140,60,0.35)",
                   borderRadius: "8px",
-                  color: "#c8b880",
+                  color: GOLD_LIGHT,
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: "15px",
                   fontWeight: 500,
@@ -435,12 +434,10 @@ export default function HomePage() {
             </Box>
           </Box>
 
-          {/* ── Divider ── */}
           <Box sx={styles.dividerWrap}>
             <Box sx={styles.divider} />
           </Box>
 
-          {/* ── Mode Cards ── */}
           <Box sx={styles.modes}>
             <Box sx={styles.modeCard(true)}>
               <Box sx={styles.modeTag(false)}>Quick Gen</Box>
@@ -467,7 +464,6 @@ export default function HomePage() {
             </Box>
           </Box>
 
-          {/* ── Feature Pills ── */}
           <Box sx={styles.features}>
             {FEATURES.map((f) => (
               <Box key={f.title} sx={styles.featCard}>
@@ -478,7 +474,6 @@ export default function HomePage() {
             ))}
           </Box>
 
-          {/* ── Room Code Entry ── */}
           <Box sx={styles.roomSection}>
             <Box sx={styles.roomBox}>
               <Box sx={styles.roomText}>
@@ -531,14 +526,14 @@ export default function HomePage() {
                   sx={{
                     background: "#c8962a",
                     borderRadius: "7px",
-                    color: "#0f0c08",
+                    color: "background.default",
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: "14px",
                     fontWeight: 500,
                     padding: "10px 20px",
                     textTransform: "none",
                     whiteSpace: "nowrap",
-                    "&:hover": { background: "#dba535" },
+                    "&:hover": { background: "primary.light" },
                     "&.Mui-disabled": {
                       background: "rgba(200,150,42,0.35)",
                       color: "rgba(15,12,8,0.5)",

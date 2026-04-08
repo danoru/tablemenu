@@ -1,3 +1,12 @@
+import {
+  BG_ELEVATED,
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import type { BGGCollectionGame } from "@api/bgg/collection";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
@@ -22,32 +31,12 @@ import {
 import { TransitionProps } from "@mui/material/transitions";
 import React from "react";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const GREEN_BRIGHT = "#5ec97a";
-const BG_ELEVATED = "#221e14";
-const BG_CARD = "#1a1610";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Slide transition ─────────────────────────────────────────────────────────
-
 const SlideUp = React.forwardRef(function SlideUp(
   props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type Step = "input" | "preview" | "importing" | "done";
 
@@ -79,7 +68,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
   }>({ open: false, message: "", severity: "success" });
 
   function handleClose() {
-    if (step === "importing") return; // don't allow close mid-import
+    if (step === "importing") return;
     setStep("input");
     setBggUsername("");
     setGames([]);
@@ -88,7 +77,6 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
     onClose();
   }
 
-  // ── Step 1: fetch collection preview ──────────────────────────────────────
   async function handleFetch() {
     if (!bggUsername.trim()) return;
     setFetching(true);
@@ -120,11 +108,9 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
     }
   }
 
-  // ── Step 2: confirm import ────────────────────────────────────────────────
   async function handleImport() {
     setStep("importing");
     try {
-      // Send in batches of 50 to avoid request size limits
       const BATCH_SIZE = 50;
       let totalAdded = 0;
       let totalSkipped = 0;
@@ -170,14 +156,13 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
       PaperProps={{
         sx: {
           background: BG_ELEVATED,
-          border: `1px solid ${BORDER_MED}`,
+          border: `1px solid ${BORDER_AMBER}`,
           borderRadius: "14px",
           boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
         },
       }}
     >
       <DialogContent sx={{ padding: "28px" }}>
-        {/* ── Header ──────────────────────────────────────────────────────── */}
         <Box
           sx={{
             display: "flex",
@@ -188,7 +173,12 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
         >
           <Box>
             <Typography
-              sx={{ fontFamily: FONT_SERIF, fontSize: "22px", fontWeight: 700, color: TEXT }}
+              sx={{
+                fontFamily: FONT_SERIF,
+                fontSize: "22px",
+                fontWeight: 700,
+                color: "text.primary",
+              }}
             >
               Import from BGG
             </Typography>
@@ -205,7 +195,6 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
           )}
         </Box>
 
-        {/* ── Step: input ─────────────────────────────────────────────────── */}
         {step === "input" && (
           <>
             <Typography
@@ -243,12 +232,12 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
               sx={{
                 fontFamily: FONT_SANS,
                 fontSize: "15px",
-                color: TEXT,
+                color: "text.primary",
                 mb: "16px",
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
-                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: AMBER },
+                "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
+                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
                 "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: AMBER,
+                  borderColor: "primary.main",
                   borderWidth: "1px",
                 },
                 "& input::placeholder": { color: TEXT_FAINT },
@@ -273,18 +262,22 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
               onClick={handleFetch}
               disabled={fetching || !bggUsername.trim()}
               startIcon={
-                fetching ? <CircularProgress size={16} sx={{ color: "#0f0c08" }} /> : <SearchIcon />
+                fetching ? (
+                  <CircularProgress size={16} sx={{ color: "background.default" }} />
+                ) : (
+                  <SearchIcon />
+                )
               }
               sx={{
-                background: AMBER,
+                background: "primary.main",
                 borderRadius: "8px",
-                color: "#0f0c08",
+                color: "background.default",
                 fontFamily: FONT_SANS,
                 fontSize: "15px",
                 fontWeight: 500,
                 padding: "12px",
                 textTransform: "none",
-                "&:hover": { background: AMBER_HOVER },
+                "&:hover": { background: "primary.light" },
                 "&.Mui-disabled": {
                   background: "rgba(200,150,42,0.35)",
                   color: "rgba(15,12,8,0.5)",
@@ -308,7 +301,6 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
           </>
         )}
 
-        {/* ── Step: preview ───────────────────────────────────────────────── */}
         {step === "preview" && (
           <>
             <Box
@@ -321,7 +313,12 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
             >
               <Box>
                 <Typography
-                  sx={{ fontFamily: FONT_SANS, fontSize: "14px", fontWeight: 500, color: TEXT }}
+                  sx={{
+                    fontFamily: FONT_SANS,
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    color: "text.primary",
+                  }}
                 >
                   Found {games.length} games
                 </Typography>
@@ -342,20 +339,20 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                   fontSize: "12px",
                   color: TEXT_DIM,
                   textTransform: "none",
-                  "&:hover": { color: TEXT },
+                  "&:hover": { color: "text.primary" },
                 }}
               >
                 ← Change username
               </Button>
             </Box>
 
-            {/* Game preview list */}
             <Box
               sx={{
                 maxHeight: "280px",
                 overflowY: "auto",
-                background: BG_CARD,
-                border: `1px solid ${BORDER}`,
+                background: "background.paper",
+                border: "1px solid",
+                borderColor: "divider",
                 borderRadius: "10px",
                 mb: "20px",
               }}
@@ -403,7 +400,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                           fontFamily: FONT_SANS,
                           fontSize: "13px",
                           fontWeight: 500,
-                          color: TEXT,
+                          color: "text.primary",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -425,7 +422,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                       </Typography>
                     )}
                   </Box>
-                  {i < games.length - 1 && <Divider sx={{ borderColor: BORDER }} />}
+                  {i < games.length - 1 && <Divider sx={{ borderColor: "divider" }} />}
                 </Box>
               ))}
             </Box>
@@ -435,15 +432,15 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
               onClick={handleImport}
               startIcon={<DownloadIcon />}
               sx={{
-                background: AMBER,
+                background: "primary.main",
                 borderRadius: "8px",
-                color: "#0f0c08",
+                color: "background.default",
                 fontFamily: FONT_SANS,
                 fontSize: "15px",
                 fontWeight: 500,
                 padding: "12px",
                 textTransform: "none",
-                "&:hover": { background: AMBER_HOVER },
+                "&:hover": { background: "primary.light" },
               }}
             >
               Import all {games.length} games
@@ -451,16 +448,15 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
           </>
         )}
 
-        {/* ── Step: importing ──────────────────────────────────────────────── */}
         {step === "importing" && (
           <Box sx={{ textAlign: "center", py: "24px" }}>
-            <CircularProgress sx={{ color: AMBER, mb: "20px" }} />
+            <CircularProgress sx={{ color: "primary.main", mb: "20px" }} />
             <Typography
               sx={{
                 fontFamily: FONT_SERIF,
                 fontSize: "20px",
                 fontWeight: 700,
-                color: TEXT,
+                color: "text.primary",
                 mb: "8px",
               }}
             >
@@ -474,23 +470,22 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
             <LinearProgress
               sx={{
                 borderRadius: "4px",
-                background: BORDER,
-                "& .MuiLinearProgress-bar": { background: AMBER },
+                background: "divider",
+                "& .MuiLinearProgress-bar": { background: "primary.main" },
               }}
             />
           </Box>
         )}
 
-        {/* ── Step: done ───────────────────────────────────────────────────── */}
         {step === "done" && importResult && (
           <Box sx={{ textAlign: "center", py: "16px" }}>
-            <CheckCircleIcon sx={{ fontSize: "48px", color: GREEN_BRIGHT, mb: "16px" }} />
+            <CheckCircleIcon sx={{ fontSize: "48px", color: "secondary.light", mb: "16px" }} />
             <Typography
               sx={{
                 fontFamily: FONT_SERIF,
                 fontSize: "22px",
                 fontWeight: 700,
-                color: TEXT,
+                color: "text.primary",
                 mb: "8px",
               }}
             >
@@ -504,7 +499,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                     fontFamily: FONT_SERIF,
                     fontSize: "28px",
                     fontWeight: 700,
-                    color: GREEN_BRIGHT,
+                    color: "secondary.light",
                   }}
                 >
                   {importResult.added}
@@ -546,15 +541,15 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
               fullWidth
               onClick={handleClose}
               sx={{
-                background: AMBER,
+                background: "primary.main",
                 borderRadius: "8px",
-                color: "#0f0c08",
+                color: "background.default",
                 fontFamily: FONT_SANS,
                 fontSize: "15px",
                 fontWeight: 500,
                 padding: "12px",
                 textTransform: "none",
-                "&:hover": { background: AMBER_HOVER },
+                "&:hover": { background: "primary.light" },
               }}
             >
               Done

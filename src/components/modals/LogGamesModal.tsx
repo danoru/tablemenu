@@ -1,3 +1,14 @@
+import {
+  AMBER_DIM,
+  BG_ELEVATED,
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  GOLD_FADED,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -20,20 +31,6 @@ import {
 import { TransitionProps } from "@mui/material/transitions";
 import { RoomMember, RoomSuggestion } from "@pages/api/rooms/[code]";
 import React from "react";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const BG_ELEVATED = "#221e14";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
 
 function gameColour(name: string): string {
   const palette = [
@@ -163,7 +160,7 @@ export default function LogGamesModal({
       PaperProps={{
         sx: {
           background: BG_ELEVATED,
-          border: `1px solid ${BORDER_MED}`,
+          border: `1px solid ${BORDER_AMBER}`,
           borderRadius: "14px",
           boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
         },
@@ -179,7 +176,12 @@ export default function LogGamesModal({
           }}
         >
           <Typography
-            sx={{ fontFamily: FONT_SERIF, fontSize: "22px", fontWeight: 700, color: TEXT }}
+            sx={{
+              fontFamily: FONT_SERIF,
+              fontSize: "22px",
+              fontWeight: 700,
+              color: "text.primary",
+            }}
           >
             Log a game
           </Typography>
@@ -188,7 +190,6 @@ export default function LogGamesModal({
           </IconButton>
         </Box>
 
-        {/* Game picker */}
         <Typography
           sx={{
             fontFamily: FONT_SANS,
@@ -226,13 +227,11 @@ export default function LogGamesModal({
                   padding: "10px 14px",
                   borderRadius: "8px",
                   background:
-                    selectedGame?.gameId === s.gameId
-                      ? "rgba(200,150,42,0.15)"
-                      : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${selectedGame?.gameId === s.gameId ? AMBER : BORDER}`,
+                    selectedGame?.gameId === s.gameId ? AMBER_DIM : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${selectedGame?.gameId === s.gameId ? "primary.main" : "divider"}`,
                   cursor: "pointer",
                   transition: "all 0.15s",
-                  "&:hover": { borderColor: BORDER_MED },
+                  "&:hover": { borderColor: BORDER_AMBER },
                 }}
               >
                 <Box
@@ -264,21 +263,20 @@ export default function LogGamesModal({
                     fontFamily: FONT_SANS,
                     fontSize: "14px",
                     fontWeight: 500,
-                    color: selectedGame?.gameId === s.gameId ? TEXT : TEXT_DIM,
+                    color: selectedGame?.gameId === s.gameId ? "text.primary" : TEXT_DIM,
                     flex: 1,
                   }}
                 >
                   {s.name}
                 </Typography>
                 {selectedGame?.gameId === s.gameId && (
-                  <CheckCircleIcon sx={{ fontSize: "16px", color: AMBER }} />
+                  <CheckCircleIcon sx={{ fontSize: "16px", color: "primary.main" }} />
                 )}
               </Box>
             ))
           )}
         </Box>
 
-        {/* Duration */}
         <Typography
           sx={{
             fontFamily: FONT_SANS,
@@ -300,20 +298,19 @@ export default function LogGamesModal({
           sx={{
             fontFamily: FONT_SANS,
             fontSize: "14px",
-            color: TEXT,
+            color: "text.primary",
             mb: "24px",
             width: "140px",
-            "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
-            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: AMBER },
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
+            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: AMBER,
+              borderColor: "primary.main",
               borderWidth: "1px",
             },
             "& input::placeholder": { color: TEXT_FAINT },
           }}
         />
 
-        {/* Players */}
         <Typography
           sx={{
             fontFamily: FONT_SANS,
@@ -340,7 +337,7 @@ export default function LogGamesModal({
                 background: selectedPlayers.includes(member.userId)
                   ? "rgba(255,255,255,0.04)"
                   : "transparent",
-                border: `1px solid ${selectedPlayers.includes(member.userId) ? BORDER : "transparent"}`,
+                border: `1px solid ${selectedPlayers.includes(member.userId) ? "divider" : "transparent"}`,
               }}
             >
               <FormControlLabel
@@ -350,8 +347,8 @@ export default function LogGamesModal({
                     onChange={() => togglePlayer(member.userId)}
                     size="small"
                     sx={{
-                      color: BORDER_MED,
-                      "&.Mui-checked": { color: AMBER },
+                      color: BORDER_AMBER,
+                      "&.Mui-checked": { color: "primary.main" },
                       padding: "4px 8px",
                     }}
                   />
@@ -361,7 +358,7 @@ export default function LogGamesModal({
                     sx={{
                       fontFamily: FONT_SANS,
                       fontSize: "14px",
-                      color: selectedPlayers.includes(member.userId) ? TEXT : TEXT_DIM,
+                      color: selectedPlayers.includes(member.userId) ? "text.primary" : TEXT_DIM,
                     }}
                   >
                     {member.username}
@@ -376,9 +373,7 @@ export default function LogGamesModal({
                     size="small"
                     sx={{
                       color: winnerIds.includes(member.userId) ? GOLD : TEXT_FAINT,
-                      background: winnerIds.includes(member.userId)
-                        ? "rgba(232,201,122,0.15)"
-                        : "transparent",
+                      background: winnerIds.includes(member.userId) ? GOLD_FADED : "transparent",
                       border: `1px solid ${winnerIds.includes(member.userId) ? "rgba(232,201,122,0.3)" : "transparent"}`,
                       borderRadius: "6px",
                       "&:hover": { color: GOLD },
@@ -397,15 +392,15 @@ export default function LogGamesModal({
           onClick={handleLog}
           disabled={!selectedGame || submitting}
           sx={{
-            background: AMBER,
+            background: "primary.main",
             borderRadius: "8px",
-            color: "#0f0c08",
+            color: "background.default",
             fontFamily: FONT_SANS,
             fontSize: "15px",
             fontWeight: 500,
             padding: "12px",
             textTransform: "none",
-            "&:hover": { background: AMBER_HOVER },
+            "&:hover": { background: "primary.light" },
             "&.Mui-disabled": { background: "rgba(200,150,42,0.35)", color: "rgba(15,12,8,0.5)" },
           }}
         >

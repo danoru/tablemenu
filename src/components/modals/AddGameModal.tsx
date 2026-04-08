@@ -1,3 +1,11 @@
+import {
+  BG_ELEVATED,
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
@@ -21,30 +29,11 @@ import { LibraryGame } from "@pages/api/games/library";
 import React from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const GREEN_BRIGHT = "#5ec97a";
-const BG_ELEVATED = "#221e14";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface SearchResult {
   bggId: number;
   name: string;
   yearPublished: number | null;
 }
-
-// ─── Helpers ─────────────────────────────────────────────────────────
-
 export function cleanText(input: string): string {
   if (!input) return "";
 
@@ -63,8 +52,6 @@ const SlideUp = React.forwardRef(function SlideUp(
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 interface AddGameModalProps {
   open: boolean;
@@ -86,7 +73,6 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
 
-  // ── Debounced search ───────────────────────────────────────────────────────
   const runSearch = useDebouncedCallback(async (q: string, exact: boolean) => {
     if (q.trim().length < 2) {
       setResults([]);
@@ -130,8 +116,6 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
       runSearch(query, next);
     }
   }
-
-  // ── Add a game ─────────────────────────────────────────────────────────────
   async function handleAdd(result: SearchResult) {
     setAdding(result.bggId);
     try {
@@ -213,14 +197,13 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
       PaperProps={{
         sx: {
           background: BG_ELEVATED,
-          border: `1px solid ${BORDER_MED}`,
+          border: `1px solid ${BORDER_AMBER}`,
           borderRadius: "14px",
           boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
         },
       }}
     >
       <DialogContent sx={{ padding: "28px" }}>
-        {/* Header */}
         <Box
           sx={{
             display: "flex",
@@ -231,7 +214,12 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
         >
           <Box>
             <Typography
-              sx={{ fontFamily: FONT_SERIF, fontSize: "22px", fontWeight: 700, color: TEXT }}
+              sx={{
+                fontFamily: FONT_SERIF,
+                fontSize: "22px",
+                fontWeight: 700,
+                color: "text.primary",
+              }}
             >
               Add a game
             </Typography>
@@ -246,7 +234,6 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
           </IconButton>
         </Box>
 
-        {/* Search input */}
         <OutlinedInput
           autoFocus
           fullWidth
@@ -265,19 +252,18 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
           sx={{
             fontFamily: FONT_SANS,
             fontSize: "14px",
-            color: TEXT,
+            color: "text.primary",
             mb: "10px",
-            "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_MED },
-            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: AMBER },
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
+            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: AMBER,
+              borderColor: "primary.main",
               borderWidth: "1px",
             },
             "& input::placeholder": { color: TEXT_FAINT },
           }}
         />
 
-        {/* Exact match toggle */}
         <Box sx={{ mb: "16px" }}>
           <Chip
             label="Exact match"
@@ -292,16 +278,17 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
               ...(exactMatch
                 ? {
                     background: "rgba(200,150,42,0.18)",
-                    color: AMBER,
+                    color: "primary.main",
                     border: `1px solid rgba(200,150,42,0.45)`,
                   }
                 : {
                     background: "transparent",
                     color: TEXT_FAINT,
-                    border: `1px solid ${BORDER}`,
+                    border: "1px solid",
+                    borderColor: "divider",
                     "&:hover": {
                       background: "rgba(180,140,60,0.06)",
-                      borderColor: BORDER_MED,
+                      borderColor: BORDER_AMBER,
                       color: TEXT_DIM,
                     },
                   }),
@@ -309,7 +296,6 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
           />
         </Box>
 
-        {/* Error */}
         {searchError && (
           <Typography
             sx={{
@@ -323,7 +309,6 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
           </Typography>
         )}
 
-        {/* Empty state */}
         {!searching && query.trim().length < 2 && (
           <Box sx={{ textAlign: "center", py: "32px" }}>
             <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT }}>
@@ -332,7 +317,6 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
           </Box>
         )}
 
-        {/* No results */}
         {!searching && query.trim().length >= 2 && results.length === 0 && !searchError && (
           <Box sx={{ textAlign: "center", py: "32px" }}>
             <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT }}>
@@ -346,7 +330,6 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
           </Box>
         )}
 
-        {/* Results */}
         {results.length > 0 && (
           <Box
             sx={{
@@ -373,7 +356,7 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
                     background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
                     border: `1px solid ${isAdded ? "rgba(94,201,122,0.2)" : "transparent"}`,
                     transition: "all 0.15s",
-                    "&:hover": { background: "rgba(180,140,60,0.06)", borderColor: BORDER },
+                    "&:hover": { background: "rgba(180,140,60,0.06)", borderColor: "divider" },
                   }}
                 >
                   <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -382,7 +365,7 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
                         fontFamily: FONT_SANS,
                         fontSize: "14px",
                         fontWeight: 500,
-                        color: TEXT,
+                        color: "text.primary",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -427,13 +410,13 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
                       ...(isAdded
                         ? {
                             background: "rgba(94,201,122,0.15)",
-                            color: GREEN_BRIGHT,
+                            color: "secondary.light",
                             border: "1px solid rgba(94,201,122,0.25)",
                           }
                         : {
-                            background: AMBER,
-                            color: "#0f0c08",
-                            "&:hover": { background: AMBER_HOVER },
+                            background: "primary.main",
+                            color: "background.default",
+                            "&:hover": { background: "primary.light" },
                           }),
                       "&.Mui-disabled": { opacity: isAdded ? 1 : 0.5 },
                     }}

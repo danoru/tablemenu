@@ -1,3 +1,12 @@
+import {
+  BG_ELEVATED,
+  BORDER_AMBER,
+  FONT_SANS,
+  FONT_SERIF,
+  GOLD,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CloseIcon from "@mui/icons-material/Close";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
@@ -17,21 +26,7 @@ import { TransitionProps } from "@mui/material/transitions";
 import { LibraryGame } from "@pages/api/games/library";
 import React from "react";
 
-import GameArt from "../game/GameArt";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const BG_ELEVATED = "#221e14";
-const BORDER = "rgba(180,140,60,0.15)";
-const BORDER_MED = "rgba(180,140,60,0.28)";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
+import GameArt from "../games/GameArt";
 
 function weightedPick(games: LibraryGame[]): LibraryGame {
   const total = games.length;
@@ -67,13 +62,13 @@ function chipSx(active: boolean) {
     fontWeight: active ? 500 : 400,
     height: "32px",
     background: active ? "rgba(200,150,42,0.2)" : "rgba(255,255,255,0.04)",
-    border: `1px solid ${active ? AMBER : BORDER}`,
+    border: `1px solid ${active ? "primary.main" : "divider"}`,
     color: active ? GOLD : TEXT_DIM,
     cursor: "pointer",
     transition: "all 0.15s",
     "&:hover": {
       background: active ? "rgba(200,150,42,0.3)" : "rgba(255,255,255,0.07)",
-      borderColor: AMBER,
+      borderColor: "primary.main",
     },
     "& .MuiChip-label": { padding: "0 10px" },
   };
@@ -148,7 +143,7 @@ export default function QuickGenModal({
       PaperProps={{
         sx: {
           background: BG_ELEVATED,
-          border: `1px solid ${BORDER_MED}`,
+          border: `1px solid ${BORDER_AMBER}`,
           borderRadius: "14px",
           boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
           overflow: "hidden",
@@ -178,7 +173,12 @@ export default function QuickGenModal({
         >
           <Box>
             <Typography
-              sx={{ fontFamily: FONT_SERIF, fontSize: "22px", fontWeight: 700, color: TEXT }}
+              sx={{
+                fontFamily: FONT_SERIF,
+                fontSize: "22px",
+                fontWeight: 700,
+                color: "text.primary",
+              }}
             >
               Quick Gen
             </Typography>
@@ -242,7 +242,7 @@ export default function QuickGenModal({
           ))}
         </Box>
 
-        <Divider sx={{ borderColor: BORDER, mb: "28px" }} />
+        <Divider sx={{ borderColor: "divider", mb: "28px" }} />
 
         <Box
           sx={{
@@ -318,18 +318,22 @@ export default function QuickGenModal({
             onClick={spin}
             disabled={spinning}
             startIcon={
-              spinning ? <CircularProgress size={16} sx={{ color: "#0f0c08" }} /> : <CasinoIcon />
+              spinning ? (
+                <CircularProgress size={16} sx={{ color: "background.default" }} />
+              ) : (
+                <CasinoIcon />
+              )
             }
             sx={{
-              background: AMBER,
+              background: "primary.main",
               borderRadius: "8px",
-              color: "#0f0c08",
+              color: "background.default",
               fontFamily: FONT_SANS,
               fontSize: "15px",
               fontWeight: 500,
               padding: "12px",
               textTransform: "none",
-              "&:hover": { background: AMBER_HOVER },
+              "&:hover": { background: "primary.light" },
               "&.Mui-disabled": { background: "rgba(200,150,42,0.35)", color: "rgba(15,12,8,0.5)" },
             }}
           >
@@ -341,7 +345,7 @@ export default function QuickGenModal({
               startIcon={<ShuffleIcon />}
               sx={{
                 background: "transparent",
-                border: `1px solid ${BORDER_MED}`,
+                border: `1px solid ${BORDER_AMBER}`,
                 borderRadius: "8px",
                 color: TEXT_DIM,
                 fontFamily: FONT_SANS,
@@ -350,7 +354,7 @@ export default function QuickGenModal({
                 padding: "12px 20px",
                 textTransform: "none",
                 whiteSpace: "nowrap",
-                "&:hover": { background: "rgba(180,140,60,0.08)", color: TEXT },
+                "&:hover": { background: "rgba(180,140,60,0.08)", color: "text.primary" },
               }}
             >
               Re-roll

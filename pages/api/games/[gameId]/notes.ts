@@ -3,11 +3,6 @@ import prisma from "@data/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 
-// ─── PATCH /api/games/[gameId]/notes ─────────────────────────────────────────
-// Updates the notes field on the current user's UserGames entry.
-// Requires the game to already be in the user's library.
-// Called automatically as the user types (debounced on the client).
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "PATCH") return res.status(405).json({ error: "Method not allowed" });
 

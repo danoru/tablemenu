@@ -1,7 +1,5 @@
 import prisma from "@data/db";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 type AchievementCheckContext =
   | { event: "GAME_ADDED" }
   | { event: "GAME_RATED" }
@@ -10,10 +8,6 @@ type AchievementCheckContext =
   | { event: "SESSION_CLOSED"; sessionId: number }
   | { event: "FOLLOWED_USER" }
   | { event: "GAINED_FOLLOWER" };
-
-// ─── Main checker ─────────────────────────────────────────────────────────────
-// Call this after any action that could trigger an achievement.
-// It checks eligibility and upserts UserAchievements rows.
 
 export async function checkAchievements(
   userId: number,
@@ -43,13 +37,9 @@ export async function checkAchievements(
         break;
     }
   } catch (err) {
-    // Achievement checks should never break the main action
     console.error("[achievements] check failed:", err);
   }
 }
-
-// ─── Library achievements ─────────────────────────────────────────────────────
-
 async function checkLibraryAchievements(userId: number) {
   const library = await prisma.userGames.findMany({
     where: { userId, isWishlist: false },
@@ -59,7 +49,6 @@ async function checkLibraryAchievements(userId: number) {
   const wishlist = await prisma.userGames.count({ where: { userId, isWishlist: true } });
   const count = library.length;
 
-  // Size-based
   await maybeAward(userId, "LIBRARY_FIRST", count >= 1, count);
   await maybeAward(userId, "LIBRARY_10", count >= 10, count);
   await maybeAward(userId, "LIBRARY_25", count >= 25, count);
@@ -67,14 +56,12 @@ async function checkLibraryAchievements(userId: number) {
   await maybeAward(userId, "LIBRARY_100", count >= 100, count);
   await maybeAward(userId, "WISHLIST_10", wishlist >= 10, wishlist);
 
-  // Year-based
   const currentYear = new Date().getFullYear();
   const hasVintage = library.some((ug) => (ug.game.yearPublished ?? 9999) < 1990);
   const hasNewRelease = library.some((ug) => (ug.game.yearPublished ?? 0) >= currentYear - 1);
   await maybeAward(userId, "LIBRARY_YEAR_OLD", hasVintage);
   await maybeAward(userId, "LIBRARY_NEW", hasNewRelease);
 
-  // Geography
   const allCountries = library.flatMap((ug) => ug.game.countries);
   const uniqueCountries = new Set(allCountries);
   const CONTINENT_MAP: Record<string, string> = {
@@ -125,7 +112,6 @@ async function checkLibraryAchievements(userId: number) {
   await maybeAward(userId, "GEO_EUROPE", europeanGames >= 5, europeanGames);
   await maybeAward(userId, "GEO_JAPAN", hasJapanese);
 
-  // Categories
   const allCategories = library.flatMap((ug) => ug.game.categories);
   const uniqueCategories = new Set(allCategories);
   const catCount = (cat: string) => library.filter((ug) => ug.game.categories.includes(cat)).length;
@@ -152,7 +138,6 @@ async function checkLibraryAchievements(userId: number) {
   );
   await maybeAward(userId, "CAT_HORROR", catCount("Horror") >= 3);
 
-  // Mechanics
   const mechCount = (mech: string) =>
     library.filter((ug) => ug.game.mechanics.includes(mech)).length;
   const hasMech = (mech: string) => library.some((ug) => ug.game.mechanics.includes(mech));
@@ -190,7 +175,6 @@ async function checkLibraryAchievements(userId: number) {
     mechCount("Traitor Game") >= 2 || mechCount("Hidden Roles") >= 2
   );
 
-  // Complexity
   const weights = library.map((ug) => ug.game.complexity).filter((w): w is number => w !== null);
   const lightCount = weights.filter((w) => w < 2.0).length;
   const mediumCount = weights.filter((w) => w >= 3.0).length;
@@ -206,8 +190,6 @@ async function checkLibraryAchievements(userId: number) {
   await maybeAward(userId, "WEIGHT_HEAVY", hasHeavy);
   await maybeAward(userId, "WEIGHT_SPECTRUM", hasAllTiers);
 }
-
-// ─── Rating achievements ──────────────────────────────────────────────────────
 
 async function checkRatingAchievements(userId: number) {
   const ratings = await prisma.userGameRatings.findMany({ where: { userId } });
@@ -228,14 +210,10 @@ async function checkRatingAchievements(userId: number) {
   );
 }
 
-// ─── Social achievements ──────────────────────────────────────────────────────
-
 async function checkSocialAchievements(userId: number) {
-  // Rooms joined
   const joinedRooms = await prisma.roomInvites.count({ where: { userId, status: "ACCEPTED" } });
   await maybeAward(userId, "SOCIAL_JOIN_ROOM", joinedRooms >= 1);
 
-  // Sessions hosted
   const sessions = await prisma.roomSessions.findMany({
     where: { hostId: userId, status: "CLOSED" },
     include: { room: true },
@@ -246,11 +224,9 @@ async function checkSocialAchievements(userId: number) {
   await maybeAward(userId, "SOCIAL_HOST_5", sessionCount >= 5, sessionCount);
   await maybeAward(userId, "SOCIAL_HOST_25", sessionCount >= 25, sessionCount);
 
-  // Big group night
   const bigNight = sessions.some((s) => (s.playerCount ?? 0) >= 6);
   await maybeAward(userId, "SOCIAL_BIGGROUP", bigNight);
 
-  // Unique players across all hosted rooms
   const hostedRoomIds = await prisma.rooms.findMany({
     where: { hostId: userId },
     select: { id: true },
@@ -263,8 +239,6 @@ async function checkSocialAchievements(userId: number) {
   await maybeAward(userId, "SOCIAL_PLAYERS_10", uniquePlayers.length >= 10, uniquePlayers.length);
 }
 
-// ─── Follow achievements ──────────────────────────────────────────────────────
-
 async function checkFollowAchievements(userId: number, direction: "following" | "followers") {
   if (direction === "following") {
     const count = await prisma.following.count({ where: { userId } });
@@ -275,8 +249,6 @@ async function checkFollowAchievements(userId: number, direction: "following" | 
   }
 }
 
-// ─── Streak achievements ──────────────────────────────────────────────────────
-
 async function checkStreakAchievements(userId: number) {
   const sessions = await prisma.roomSessions.findMany({
     where: { hostId: userId, status: "CLOSED", closedAt: { not: null } },
@@ -285,11 +257,10 @@ async function checkStreakAchievements(userId: number) {
 
   if (sessions.length === 0) return;
 
-  // Calculate current consecutive-week streak
   let streak = 1;
   let maxStreak = 1;
   const MS_WEEK = 7 * 24 * 60 * 60 * 1000;
-  const TOLERANCE = 2 * 24 * 60 * 60 * 1000; // ±2 day tolerance
+  const TOLERANCE = 2 * 24 * 60 * 60 * 1000;
 
   for (let i = 1; i < sessions.length; i++) {
     const prev = sessions[i - 1].closedAt!.getTime();
@@ -300,7 +271,7 @@ async function checkStreakAchievements(userId: number) {
       streak++;
       maxStreak = Math.max(maxStreak, streak);
     } else if (diff > MS_WEEK + TOLERANCE) {
-      break; // streak broken
+      break;
     }
   }
 
@@ -309,8 +280,6 @@ async function checkStreakAchievements(userId: number) {
   await maybeAward(userId, "STREAK_12", streak >= 12, streak);
   await maybeAward(userId, "STREAK_52", streak >= 52, streak);
 }
-
-// ─── Helper: award if not already awarded ─────────────────────────────────────
 
 async function maybeAward(
   userId: number,

@@ -4,10 +4,6 @@ import { customAlphabet } from "nanoid";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 
-// ─── Room code generator ──────────────────────────────────────────────────────
-// Uppercase letters + numbers only, no ambiguous chars (0/O, 1/I/l)
-// 6 characters gives 36^6 = ~2.1 billion combinations — plenty for our scale
-
 const generateCode = customAlphabet("ABCDEFGHJKMNPQRSTUVWXYZ23456789", 6);
 
 interface CreateRoomBody {
@@ -41,7 +37,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    // Generate a unique code — retry up to 5 times on collision (extremely rare)
     let code = "";
     let attempts = 0;
     while (attempts < 5) {
@@ -70,7 +65,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       },
     });
 
-    // Auto-accept the host as a room member via RoomInvites
     await prisma.roomInvites.create({
       data: {
         roomId: room.id,

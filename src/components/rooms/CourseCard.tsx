@@ -1,16 +1,8 @@
+import { FONT_SANS, FONT_SERIF, GOLD, TEXT_FAINT } from "@/styles/theme";
 import { Box, Divider, Typography } from "@mui/material";
 import { LibraryGame } from "@pages/api/games/library";
 
-import { MiniGameCard } from "./MiniGameCard";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const GOLD = "#e8c97a";
-const GREEN_BRIGHT = "#5ec97a";
-const TEXT = "#f0e6cc";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
+import { MiniGameCard } from "../games/MiniGameCard";
 
 const COURSES = [
   {
@@ -20,7 +12,7 @@ const COURSES = [
     subtitle: "While everyone arrives",
     color: "rgba(34,85,48,0.25)",
     border: "rgba(60,160,80,0.2)",
-    accent: GREEN_BRIGHT,
+    accent: "secondary.light",
     filter: (g: LibraryGame) => g.maxPlaytime <= 20,
     picks: 2,
   },
@@ -86,7 +78,6 @@ export default function CourseCard({
         gap: "16px",
       }}
     >
-      {/* Course header */}
       <Box sx={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <Box
           sx={{
@@ -109,7 +100,7 @@ export default function CourseCard({
               fontFamily: FONT_SERIF,
               fontSize: "18px",
               fontWeight: 700,
-              color: TEXT,
+              color: "text.primary",
               lineHeight: 1,
             }}
           >
@@ -125,7 +116,6 @@ export default function CourseCard({
 
       <Divider sx={{ borderColor: course.border }} />
 
-      {/* Games */}
       {empty ? (
         <Box sx={{ textAlign: "center", py: "16px" }}>
           <Typography

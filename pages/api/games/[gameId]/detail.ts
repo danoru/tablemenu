@@ -23,7 +23,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!game) return res.status(404).json({ error: "Not found" });
 
-  // Fetch play sessions for this game by this user
   const sessions = userId
     ? await prisma.gameSessionGames.findMany({
         where: { gameId },

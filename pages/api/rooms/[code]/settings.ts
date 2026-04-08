@@ -28,7 +28,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   const userId = Number((session.user as any).id);
 
-  // Verify the requester is the host
   const room = await prisma.rooms.findUnique({
     where: { code: code.toUpperCase() },
     select: { id: true, hostId: true },
@@ -37,8 +36,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   if (!room) return res.status(404).json({ error: "Room not found" });
   if (room.hostId !== userId)
     return res.status(403).json({ error: "Only the host can modify this room" });
-
-  // ── PUT — update room settings ───────────────────────────────────────────
 
   if (req.method === "PUT") {
     const { name, description, playerCount, timeBudget, type, visibility } =
@@ -62,11 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(200).json({ message: "Room updated" });
   }
 
-  // ── DELETE — archive (soft delete) ───────────────────────────────────────
-
   if (req.method === "DELETE") {
-    // Soft delete — sets isActive to false rather than destroying data.
-    // Hard delete can be added later if needed.
     await prisma.rooms.update({
       where: { id: room.id },
       data: { isActive: false },

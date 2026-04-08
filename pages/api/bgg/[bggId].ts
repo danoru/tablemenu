@@ -17,7 +17,6 @@ export interface BggGameDetail {
   mechanics: string[];
   designers: string[];
   publishers: string[];
-  // Extracted from boardgamefamily links — "Country: Germany" → "Germany"
   countries: string[];
 }
 

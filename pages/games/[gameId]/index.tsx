@@ -1,5 +1,21 @@
-import GameArt from "@/components/game/GameArt";
+import GameArt from "@/components/games/GameArt";
+import StarRating from "@/components/ui/StarRating";
+import StatPill from "@/components/ui/StatPill";
 import { authOptions } from "@/lib/authOptions";
+import {
+  AMBER_DIM,
+  BG_BLUE,
+  BG_GREEN,
+  BLUE,
+  BORDER_AMBER,
+  BORDER_BLUE,
+  BORDER_GREEN,
+  FONT_SANS,
+  FONT_SERIF,
+  RED,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import AddIcon from "@mui/icons-material/Add";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
@@ -11,7 +27,6 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import PeopleIcon from "@mui/icons-material/People";
 import TimerIcon from "@mui/icons-material/Timer";
 import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
   Box,
   Button,
@@ -23,37 +38,13 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { LibraryGame } from "@pages/api/games/library";
 import { UserGameRatings, UserGames } from "@prisma/client";
 import { GetServerSideProps } from "next";
-import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { getServerSession } from "next-auth";
 import React from "react";
-import { LibraryGame } from "@pages/api/games/library";
-
-// ─── Design tokens ────────────────────────────────────────────────────────────
-
-const AMBER = "#c8962a";
-const AMBER_HOVER = "#dba535";
-const AMBER_DIM = "rgba(200,150,42,0.15)";
-const AMBER_BORDER = "rgba(180,140,60,0.28)";
-const AMBER_BORDER_FAINT = "rgba(180,140,60,0.15)";
-const GREEN_BRIGHT = "#5ec97a";
-const GREEN_BG = "rgba(34,85,48,0.25)";
-const GREEN_BORDER = "rgba(60,160,80,0.3)";
-const RED = "#e05c5c";
-const BLUE = "#5c9ee0";
-const BLUE_BG = "rgba(34,60,100,0.25)";
-const BLUE_BORDER = "rgba(60,100,200,0.3)";
-const BG = "#0f0c08";
-const BG_CARD = "#1a1610";
-const TEXT = "#f0e6cc";
-const TEXT_DIM = "rgba(232,223,200,0.55)";
-const TEXT_FAINT = "rgba(232,223,200,0.28)";
-const FONT_SERIF = "'Playfair Display', serif";
-const FONT_SANS = "'DM Sans', sans-serif";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface PlaySession {
   id: number;
@@ -88,8 +79,6 @@ interface Props {
   friendActivity: FriendActivity;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function formatPlaytime(min: number, max: number) {
   if (min === max) return `${min} min`;
   return `${min}–${max} min`;
@@ -112,7 +101,7 @@ function complexityLabel(c: number) {
 }
 
 function complexityColor(c: number) {
-  if (c < 1.5) return "#5ec97a";
+  if (c < 1.5) return "secondary.light";
   if (c < 2.5) return "#8dd47a";
   if (c < 3.5) return "#c8962a";
   if (c < 4.2) return "#e0823a";
@@ -133,65 +122,6 @@ function avatarColour(name: string): string {
   return palette[Math.abs(hash) % palette.length];
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function StatPill({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: "6px",
-        background: "rgba(255,255,255,0.04)",
-        border: `1px solid ${AMBER_BORDER_FAINT}`,
-        borderRadius: "20px",
-        padding: "6px 14px",
-      }}
-    >
-      <Box sx={{ color: AMBER, display: "flex", "& svg": { fontSize: "15px" } }}>{icon}</Box>
-      <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_DIM }}>
-        {label}
-      </Typography>
-    </Box>
-  );
-}
-
-function StarRating({
-  value,
-  onChange,
-  readonly = false,
-}: {
-  value: number;
-  onChange?: (v: number) => void;
-  readonly?: boolean;
-}) {
-  const [hovered, setHovered] = React.useState(0);
-  return (
-    <Box sx={{ display: "flex", gap: "2px" }}>
-      {[1, 2, 3, 4, 5].map((star) => {
-        const filled = (hovered || value) >= star;
-        return (
-          <Box
-            key={star}
-            onMouseEnter={() => !readonly && setHovered(star)}
-            onMouseLeave={() => !readonly && setHovered(0)}
-            onClick={() => !readonly && onChange?.(star)}
-            sx={{
-              cursor: readonly ? "default" : "pointer",
-              color: filled ? AMBER : TEXT_FAINT,
-              display: "flex",
-              transition: "color 0.15s",
-              "& svg": { fontSize: "22px" },
-            }}
-          >
-            {filled ? <StarIcon /> : <StarBorderIcon />}
-          </Box>
-        );
-      })}
-    </Box>
-  );
-}
-
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <Typography
@@ -199,7 +129,7 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
         fontFamily: FONT_SANS,
         fontSize: "11px",
         fontWeight: 600,
-        color: AMBER,
+        color: "primary.main",
         letterSpacing: "1.5px",
         textTransform: "uppercase",
         mb: "16px",
@@ -214,8 +144,8 @@ function Card({ children, sx = {} }: { children: React.ReactNode; sx?: object })
   return (
     <Box
       sx={{
-        background: BG_CARD,
-        border: `1px solid ${AMBER_BORDER_FAINT}`,
+        background: "background.paper",
+        border: "1px solid divider",
         borderRadius: "12px",
         padding: "24px",
         ...sx,
@@ -225,8 +155,6 @@ function Card({ children, sx = {} }: { children: React.ReactNode; sx?: object })
     </Box>
   );
 }
-
-// ─── Friend avatar ────────────────────────────────────────────────────────────
 
 function FriendAvatar({ friend, onClick }: { friend: FriendEntry; onClick: () => void }) {
   return (
@@ -245,7 +173,7 @@ function FriendAvatar({ friend, onClick }: { friend: FriendEntry; onClick: () =>
           cursor: "pointer",
           flexShrink: 0,
           transition: "border-color 0.15s, transform 0.15s",
-          "&:hover": { borderColor: AMBER, transform: "scale(1.1)" },
+          "&:hover": { borderColor: "primary.main", transform: "scale(1.1)" },
           overflow: "hidden",
         }}
       >
@@ -274,8 +202,6 @@ function FriendAvatar({ friend, onClick }: { friend: FriendEntry; onClick: () =>
   );
 }
 
-// ─── Friend activity row ──────────────────────────────────────────────────────
-
 function FriendActivityRow({
   label,
   friends,
@@ -299,7 +225,7 @@ function FriendActivityRow({
         alignItems: "center",
         gap: "12px",
         padding: "10px 0",
-        borderBottom: `1px solid ${AMBER_BORDER_FAINT}`,
+        borderBottom: "1px solid divider",
         "&:last-child": { borderBottom: "none" },
       }}
     >
@@ -316,7 +242,6 @@ function FriendActivityRow({
         {displayLabel}
       </Typography>
 
-      {/* Stacked avatars */}
       <Box sx={{ display: "flex", alignItems: "center" }}>
         {friends.slice(0, 6).map((f, i) => (
           <Box key={f.id} sx={{ ml: i > 0 ? "-6px" : 0, zIndex: friends.length - i }}>
@@ -347,8 +272,6 @@ function FriendActivityRow({
   );
 }
 
-// ─── Play History Row ─────────────────────────────────────────────────────────
-
 function PlayHistoryRow({ session }: { session: PlaySession }) {
   return (
     <Box
@@ -357,19 +280,19 @@ function PlayHistoryRow({ session }: { session: PlaySession }) {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "12px 0",
-        borderBottom: `1px solid ${AMBER_BORDER_FAINT}`,
+        borderBottom: "1px solid divider",
         "&:last-child": { borderBottom: "none" },
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: "12px" }}>
         {session.won === true && (
           <Tooltip title="Won this session">
-            <EmojiEventsIcon sx={{ color: AMBER, fontSize: "18px" }} />
+            <EmojiEventsIcon sx={{ color: "primary.main", fontSize: "18px" }} />
           </Tooltip>
         )}
         {session.won !== true && <Box sx={{ width: "18px" }} />}
         <Box>
-          <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT }}>
+          <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: "text.primary" }}>
             {formatDate(session.playedAt)}
           </Typography>
           {session.notes && (
@@ -389,8 +312,6 @@ function PlayHistoryRow({ session }: { session: PlaySession }) {
     </Box>
   );
 }
-
-// ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivity }: Props) {
   const router = useRouter();
@@ -414,8 +335,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
     friendActivity.owns.length > 0 ||
     friendActivity.wantToPlay.length > 0 ||
     friendActivity.favorited.length > 0;
-
-  // ── Actions ─────────────────────────────────────────────────────────────────
 
   async function handleAddToLibrary() {
     setLibraryLoading(true);
@@ -484,8 +403,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
     }
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────────
-
   const hasDescription = !!game.description;
   const hasSessions = game.playSessions.length > 0;
   const hasCategories = game.categories.length > 0;
@@ -497,7 +414,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
         <title>{game.name} — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: BG, minHeight: "100vh" }}>
+      <Box sx={{ background: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
             position: "fixed",
@@ -539,7 +456,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
             ← Back
           </Typography>
 
-          {/* ── Hero ─────────────────────────────────────────────────────── */}
           <Box
             sx={{
               display: "flex",
@@ -556,7 +472,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 borderRadius: "12px",
                 overflow: "hidden",
                 boxShadow: "0 8px 40px rgba(0,0,0,0.6)",
-                border: `1px solid ${AMBER_BORDER_FAINT}`,
+                border: "1px solid divider",
               }}
             >
               <GameArt game={game} size={200} />
@@ -568,7 +484,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                   sx={{
                     fontFamily: FONT_SANS,
                     fontSize: "12px",
-                    color: AMBER,
+                    color: "primary.main",
                     letterSpacing: "1.5px",
                     textTransform: "uppercase",
                     mb: "8px",
@@ -584,7 +500,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                   fontFamily: FONT_SERIF,
                   fontSize: { xs: "28px", md: "42px" },
                   fontWeight: 900,
-                  color: TEXT,
+                  color: "text.primary",
                   lineHeight: 1.1,
                   letterSpacing: "-0.5px",
                   mb: "8px",
@@ -601,7 +517,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 </Typography>
               )}
 
-              {/* Stat pills */}
               <Box
                 sx={{
                   display: "flex",
@@ -630,7 +545,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       alignItems: "center",
                       gap: "6px",
                       background: "rgba(255,255,255,0.04)",
-                      border: `1px solid ${AMBER_BORDER_FAINT}`,
+                      border: "1px solid divider",
                       borderRadius: "20px",
                       padding: "6px 14px",
                     }}
@@ -657,12 +572,12 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       alignItems: "center",
                       gap: "6px",
                       background: "rgba(255,255,255,0.04)",
-                      border: `1px solid ${AMBER_BORDER_FAINT}`,
+                      border: "1px solid divider",
                       borderRadius: "20px",
                       padding: "6px 14px",
                     }}
                   >
-                    <StarIcon sx={{ color: AMBER, fontSize: "15px" }} />
+                    <StarIcon sx={{ color: "primary.main", fontSize: "15px" }} />
                     <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_DIM }}>
                       {game.bggRating.toFixed(1)} BGG
                     </Typography>
@@ -670,7 +585,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 )}
               </Box>
 
-              {/* Action buttons */}
               <Box
                 sx={{
                   display: "flex",
@@ -685,15 +599,15 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     disabled={libraryLoading}
                     startIcon={libraryLoading ? <CircularProgress size={14} /> : <AddIcon />}
                     sx={{
-                      background: AMBER,
+                      background: "primary.main",
                       borderRadius: "8px",
-                      color: "#0f0c08",
+                      color: "background.default",
                       fontFamily: FONT_SANS,
                       fontSize: "14px",
                       fontWeight: 600,
                       padding: "9px 20px",
                       textTransform: "none",
-                      "&:hover": { background: AMBER_HOVER },
+                      "&:hover": { background: "primary.light" },
                     }}
                   >
                     Add to Library
@@ -704,18 +618,18 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       display: "flex",
                       alignItems: "center",
                       gap: "6px",
-                      background: GREEN_BG,
-                      border: `1px solid ${GREEN_BORDER}`,
+                      background: BG_GREEN,
+                      border: `1px solid ${BORDER_GREEN}`,
                       borderRadius: "8px",
                       padding: "9px 16px",
                     }}
                   >
-                    <CheckIcon sx={{ color: GREEN_BRIGHT, fontSize: "16px" }} />
+                    <CheckIcon sx={{ color: "secondary.light", fontSize: "16px" }} />
                     <Typography
                       sx={{
                         fontFamily: FONT_SANS,
                         fontSize: "14px",
-                        color: GREEN_BRIGHT,
+                        color: "secondary.light",
                         fontWeight: 500,
                       }}
                     >
@@ -729,7 +643,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     <IconButton
                       onClick={handleToggleFavorite}
                       sx={{
-                        border: `1px solid ${isFavorite ? "rgba(224,92,92,0.4)" : AMBER_BORDER_FAINT}`,
+                        border: `1px solid ${isFavorite ? "rgba(224,92,92,0.4)" : "divider"}`,
                         borderRadius: "8px",
                         color: isFavorite ? RED : TEXT_FAINT,
                         padding: "9px",
@@ -753,12 +667,12 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     <IconButton
                       onClick={handleToggleWantToPlay}
                       sx={{
-                        border: `1px solid ${isWantToPlay ? BLUE_BORDER : AMBER_BORDER_FAINT}`,
+                        border: `1px solid ${isWantToPlay ? BORDER_BLUE : "divider"}`,
                         borderRadius: "8px",
                         color: isWantToPlay ? BLUE : TEXT_FAINT,
                         padding: "9px",
                         transition: "all 0.2s",
-                        "&:hover": { color: BLUE, borderColor: BLUE_BORDER, background: BLUE_BG },
+                        "&:hover": { color: BLUE, borderColor: BORDER_BLUE, background: BG_BLUE },
                       }}
                     >
                       {isWantToPlay ? <BookmarkIcon /> : <BookmarkBorderIcon />}
@@ -774,11 +688,11 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        border: `1px solid ${AMBER_BORDER_FAINT}`,
+                        border: "1px solid divider",
                         borderRadius: "8px",
                         color: TEXT_FAINT,
                         padding: "9px",
-                        "&:hover": { color: TEXT_DIM, borderColor: AMBER_BORDER },
+                        "&:hover": { color: TEXT_DIM, borderColor: BORDER_AMBER },
                       }}
                     >
                       <OpenInNewIcon sx={{ fontSize: "18px" }} />
@@ -788,8 +702,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
               </Box>
             </Box>
           </Box>
-
-          {/* ── Body grid ────────────────────────────────────────────────── */}
           <Box
             sx={{
               display: "grid",
@@ -798,7 +710,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
               alignItems: "start",
             }}
           >
-            {/* ── Left column ───────────────────────────────────────────── */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
               {hasDescription && (
                 <Card>
@@ -837,7 +748,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                               fontFamily: FONT_SANS,
                               fontSize: "12px",
                               background: AMBER_DIM,
-                              color: AMBER,
+                              color: "primary.main",
                               border: `1px solid rgba(200,150,42,0.25)`,
                               borderRadius: "6px",
                               height: "26px",
@@ -848,7 +759,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     </>
                   )}
                   {hasCategories && hasMechanics && (
-                    <Divider sx={{ borderColor: AMBER_BORDER_FAINT, mb: "20px" }} />
+                    <Divider sx={{ borderColor: "divider", mb: "20px" }} />
                   )}
                   {hasMechanics && (
                     <>
@@ -864,7 +775,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                               fontSize: "12px",
                               background: "rgba(255,255,255,0.04)",
                               color: TEXT_DIM,
-                              border: `1px solid ${AMBER_BORDER_FAINT}`,
+                              border: "1px solid divider",
                               borderRadius: "6px",
                               height: "26px",
                             }}
@@ -876,7 +787,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 </Card>
               )}
 
-              {/* Play history */}
               <Card>
                 <Box
                   sx={{
@@ -905,7 +815,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     sx={{
                       textAlign: "center",
                       py: "32px",
-                      border: `1px dashed ${AMBER_BORDER_FAINT}`,
+                      border: "1px dashed divider",
                       borderRadius: "8px",
                     }}
                   >
@@ -930,16 +840,14 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
               </Card>
             </Box>
 
-            {/* ── Right column ──────────────────────────────────────────── */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-              {/* ── Friends activity ──────────────────────────────────── */}
               {hasFriendActivity && (
                 <Card>
                   <SectionHeading>Friends</SectionHeading>
                   <FriendActivityRow
                     label="own this"
                     friends={friendActivity.owns}
-                    accentColor={GREEN_BRIGHT}
+                    accentColor={"secondary.light"}
                     onNavigate={(username) => router.push(`/players/${username}`)}
                   />
                   <FriendActivityRow
@@ -957,7 +865,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 </Card>
               )}
 
-              {/* Personal notes */}
               {isSelf && inLibrary && (
                 <Card>
                   <Box
@@ -973,7 +880,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       sx={{
                         fontFamily: FONT_SANS,
                         fontSize: "11px",
-                        color: notesSaved ? GREEN_BRIGHT : TEXT_FAINT,
+                        color: notesSaved ? "primary.light" : TEXT_FAINT,
                         transition: "color 0.3s",
                       }}
                     >
@@ -988,9 +895,9 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     style={{
                       width: "100%",
                       background: "rgba(255,255,255,0.03)",
-                      border: `1px solid ${AMBER_BORDER_FAINT}`,
+                      border: "1px solid divider",
                       borderRadius: "8px",
-                      color: TEXT,
+                      color: "text.primary",
                       fontFamily: FONT_SANS,
                       fontSize: "13px",
                       lineHeight: 1.65,
@@ -1003,7 +910,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 </Card>
               )}
 
-              {/* Rating */}
               {isSelf && inLibrary && (
                 <Card>
                   <SectionHeading>My Rating</SectionHeading>
@@ -1039,9 +945,9 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     style={{
                       width: "100%",
                       background: "rgba(255,255,255,0.03)",
-                      border: `1px solid ${AMBER_BORDER_FAINT}`,
+                      border: "1px solid divider",
                       borderRadius: "8px",
-                      color: TEXT,
+                      color: "text.primary",
                       fontFamily: FONT_SANS,
                       fontSize: "13px",
                       lineHeight: 1.65,
@@ -1057,16 +963,18 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     disabled={ratingLoading || stars === 0}
                     fullWidth
                     sx={{
-                      background: stars > 0 ? AMBER : "rgba(255,255,255,0.04)",
+                      background: stars > 0 ? "primary.main" : "rgba(255,255,255,0.04)",
                       borderRadius: "8px",
-                      color: stars > 0 ? "#0f0c08" : TEXT_FAINT,
+                      color: stars > 0 ? "primary.contrastText" : TEXT_FAINT,
                       fontFamily: FONT_SANS,
                       fontSize: "14px",
                       fontWeight: 600,
                       padding: "10px",
                       textTransform: "none",
                       transition: "all 0.2s",
-                      "&:hover": { background: stars > 0 ? AMBER_HOVER : "rgba(255,255,255,0.07)" },
+                      "&:hover": {
+                        background: stars > 0 ? "primary.light" : "rgba(255,255,255,0.07)",
+                      },
                     }}
                   >
                     {ratingLoading ? (
@@ -1080,7 +988,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 </Card>
               )}
 
-              {/* Publishers */}
               {game.publishers.length > 0 && (
                 <Card>
                   <SectionHeading>Publishers</SectionHeading>
@@ -1101,8 +1008,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
     </>
   );
 }
-
-// ─── Server-side props ────────────────────────────────────────────────────────
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { gameId } = context.params as { gameId: string };
@@ -1149,7 +1054,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       won: s.gameSession.players[0]?.won ?? null,
     }));
 
-  // ── Friend activity ───────────────────────────────────────────────────────
   const friendActivity: FriendActivity = { owns: [], wantToPlay: [], favorited: [] };
 
   if (currentUserId) {
