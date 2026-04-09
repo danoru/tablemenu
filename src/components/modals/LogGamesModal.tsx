@@ -1,3 +1,4 @@
+import { gameColor, initials } from "@/lib/helpers";
 import {
   AMBER_DIM,
   BG_ELEVATED,
@@ -32,26 +33,6 @@ import { TransitionProps } from "@mui/material/transitions";
 import { RoomMember, RoomSuggestion } from "@pages/api/rooms/[code]";
 import React from "react";
 
-function gameColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.5)",
-    "rgba(100,60,20,0.5)",
-    "rgba(60,40,80,0.5)",
-    "rgba(20,60,90,0.5)",
-    "rgba(90,30,30,0.5)",
-    "rgba(40,70,60,0.5)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-}
-
-function initials(name: string): string {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
 const SlideUp = React.forwardRef(function SlideUp(
   props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>
@@ -65,6 +46,7 @@ export default function LogGamesModal({
   suggestions,
   members,
   code,
+  isCompetitive,
   onLogged,
 }: {
   open: boolean;
@@ -72,6 +54,7 @@ export default function LogGamesModal({
   suggestions: RoomSuggestion[];
   members: RoomMember[];
   code: string;
+  isCompetitive: boolean;
   onLogged: () => void;
 }) {
   const acceptedMembers = members.filter((m) => m.status === "ACCEPTED");
@@ -239,7 +222,7 @@ export default function LogGamesModal({
                     width: "32px",
                     height: "32px",
                     borderRadius: "6px",
-                    background: gameColour(s.name),
+                    background: gameColor(s.name),
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -366,7 +349,7 @@ export default function LogGamesModal({
                 }
                 sx={{ margin: 0 }}
               />
-              {selectedPlayers.includes(member.userId) && (
+              {isCompetitive && selectedPlayers.includes(member.userId) && (
                 <Tooltip title="Mark as winner" placement="left">
                   <IconButton
                     onClick={() => toggleWinner(member.userId)}

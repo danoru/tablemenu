@@ -1,4 +1,6 @@
 import GameArt from "@/components/games/GameArt";
+import GameDetailFriendActivity from "@/components/games/GameDetailFriendActivity";
+import GameDetailPlayHistory from "@/components/games/GameDetailPlayHistory";
 import StarRating from "@/components/ui/StarRating";
 import StatPill from "@/components/ui/StatPill";
 import { authOptions } from "@/lib/authOptions";
@@ -20,7 +22,6 @@ import AddIcon from "@mui/icons-material/Add";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CheckIcon from "@mui/icons-material/Check";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -52,6 +53,8 @@ interface PlaySession {
   durationMin: number | null;
   notes: string | null;
   won: boolean | null;
+  roomName: string | null;
+  roomCode: string | null;
 }
 
 interface FriendEntry {
@@ -83,15 +86,6 @@ function formatPlaytime(min: number, max: number) {
   if (min === max) return `${min} min`;
   return `${min}–${max} min`;
 }
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
 function complexityLabel(c: number) {
   if (c < 1.5) return "Light";
   if (c < 2.5) return "Medium-Light";
@@ -106,20 +100,6 @@ function complexityColor(c: number) {
   if (c < 3.5) return "#c8962a";
   if (c < 4.2) return "#e0823a";
   return "#e05c5c";
-}
-
-function avatarColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.8)",
-    "rgba(100,60,20,0.8)",
-    "rgba(60,40,80,0.8)",
-    "rgba(20,60,90,0.8)",
-    "rgba(90,30,30,0.8)",
-    "rgba(40,70,60,0.8)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
@@ -153,163 +133,6 @@ function Card({ children, sx = {} }: { children: React.ReactNode; sx?: object })
       }}
     >
       {children}
-    </Box>
-  );
-}
-
-function FriendAvatar({ friend, onClick }: { friend: FriendEntry; onClick: () => void }) {
-  return (
-    <Tooltip title={friend.username}>
-      <Box
-        onClick={onClick}
-        sx={{
-          width: "28px",
-          height: "28px",
-          borderRadius: "50%",
-          background: friend.image ? "transparent" : avatarColour(friend.username),
-          border: `1.5px solid rgba(180,140,60,0.25)`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          flexShrink: 0,
-          transition: "border-color 0.15s, transform 0.15s",
-          "&:hover": { borderColor: "primary.main", transform: "scale(1.1)" },
-          overflow: "hidden",
-        }}
-      >
-        {friend.image ? (
-          <Box
-            component="img"
-            src={friend.image}
-            alt={friend.username}
-            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          <Typography
-            sx={{
-              fontFamily: FONT_SERIF,
-              fontSize: "11px",
-              fontWeight: 700,
-              color: "rgba(232,223,200,0.7)",
-              userSelect: "none",
-            }}
-          >
-            {friend.username.slice(0, 1).toUpperCase()}
-          </Typography>
-        )}
-      </Box>
-    </Tooltip>
-  );
-}
-
-function FriendActivityRow({
-  label,
-  friends,
-  accentColor,
-  onNavigate,
-}: {
-  label: string;
-  friends: FriendEntry[];
-  accentColor: string;
-  onNavigate: (username: string) => void;
-}) {
-  if (friends.length === 0) return null;
-
-  const displayLabel =
-    friends.length === 1 ? `1 friend ${label}` : `${friends.length} friends ${label}`;
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        padding: "10px 0",
-        borderBottom: "1px solid divider",
-        "&:last-child": { borderBottom: "none" },
-      }}
-    >
-      <Typography
-        sx={{
-          fontFamily: FONT_SANS,
-          fontSize: "12px",
-          color: accentColor,
-          fontWeight: 500,
-          flex: 1,
-          minWidth: 0,
-        }}
-      >
-        {displayLabel}
-      </Typography>
-
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        {friends.slice(0, 6).map((f, i) => (
-          <Box key={f.id} sx={{ ml: i > 0 ? "-6px" : 0, zIndex: friends.length - i }}>
-            <FriendAvatar friend={f} onClick={() => onNavigate(f.username)} />
-          </Box>
-        ))}
-        {friends.length > 6 && (
-          <Box
-            sx={{
-              ml: "-6px",
-              width: "28px",
-              height: "28px",
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.06)",
-              border: `1.5px solid rgba(180,140,60,0.25)`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "9px", color: TEXT_FAINT }}>
-              +{friends.length - 6}
-            </Typography>
-          </Box>
-        )}
-      </Box>
-    </Box>
-  );
-}
-
-function PlayHistoryRow({ session }: { session: PlaySession }) {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "12px 0",
-        borderBottom: "1px solid divider",
-        "&:last-child": { borderBottom: "none" },
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        {session.won === true && (
-          <Tooltip title="Won this session">
-            <EmojiEventsIcon sx={{ color: "primary.main", fontSize: "18px" }} />
-          </Tooltip>
-        )}
-        {session.won !== true && <Box sx={{ width: "18px" }} />}
-        <Box>
-          <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: "text.primary" }}>
-            {formatDate(session.playedAt)}
-          </Typography>
-          {session.notes && (
-            <Typography
-              sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_DIM, mt: "2px" }}
-            >
-              {session.notes}
-            </Typography>
-          )}
-        </Box>
-      </Box>
-      {session.durationMin && (
-        <Typography sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT }}>
-          {session.durationMin} min
-        </Typography>
-      )}
     </Box>
   );
 }
@@ -839,7 +662,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 ) : (
                   <Box>
                     {game.playSessions.map((s) => (
-                      <PlayHistoryRow key={s.id} session={s} />
+                      <GameDetailPlayHistory key={s.id} session={s} />
                     ))}
                   </Box>
                 )}
@@ -850,20 +673,25 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
               {hasFriendActivity && (
                 <Card>
                   <SectionHeading>Friends</SectionHeading>
-                  <FriendActivityRow
-                    label="own this"
+                  <GameDetailFriendActivity
+                    label={{ singular: "owns this", plural: "own this" }}
                     friends={friendActivity.owns}
                     accentColor={"secondary.light"}
                     onNavigate={(username) => router.push(`/players/${username}`)}
                   />
-                  <FriendActivityRow
-                    label="want to play this"
+
+                  <GameDetailFriendActivity
+                    label={{ singular: "wants to play this", plural: "want to play this" }}
                     friends={friendActivity.wantToPlay}
                     accentColor={BLUE}
                     onNavigate={(username) => router.push(`/players/${username}`)}
                   />
-                  <FriendActivityRow
-                    label="have this as a favorite"
+
+                  <GameDetailFriendActivity
+                    label={{
+                      singular: "has this as a favorite",
+                      plural: "have this as a favorite",
+                    }}
                     friends={friendActivity.favorited}
                     accentColor={RED}
                     onNavigate={(username) => router.push(`/players/${username}`)}
@@ -1047,7 +875,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const rawSessions = currentUserId
     ? await prisma.gameSessionGames.findMany({
         where: { gameId: id },
-        include: { gameSession: { include: { players: { where: { userId: currentUserId } } } } },
+        include: {
+          gameSession: {
+            include: {
+              players: { where: { userId: currentUserId } },
+              roomSession: {
+                include: {
+                  room: { select: { name: true, code: true } },
+                },
+              },
+            },
+          },
+        },
         orderBy: { gameSession: { playedAt: "desc" } },
       })
     : [];
@@ -1060,6 +899,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       durationMin: s.gameSession.durationMin,
       notes: s.gameSession.notes,
       won: s.gameSession.players[0]?.won ?? null,
+      roomName: s.gameSession.roomSession?.room?.name ?? null,
+      roomCode: s.gameSession.roomSession?.room?.code ?? null,
     }));
 
   const friendActivity: FriendActivity = { owns: [], wantToPlay: [], favorited: [] };

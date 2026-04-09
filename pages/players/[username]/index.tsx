@@ -1,6 +1,7 @@
 import GameArt from "@/components/games/GameArt";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
+import { avatarColor } from "@/lib/helpers";
 import {
   AMBER_DIM,
   BLUE,
@@ -28,20 +29,6 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
 import superjson from "superjson";
-
-function avatarColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.6)",
-    "rgba(100,60,20,0.6)",
-    "rgba(60,40,80,0.6)",
-    "rgba(20,60,90,0.6)",
-    "rgba(90,30,30,0.6)",
-    "rgba(40,70,60,0.6)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-}
 
 function PlayerPill({ value, label }: { value: number; label: string }) {
   return (
@@ -169,7 +156,7 @@ export default function UserProfilePage({
                   width: { xs: "64px", md: "80px" },
                   height: { xs: "64px", md: "80px" },
                   borderRadius: "50%",
-                  background: avatarColour(profileUser.username),
+                  background: avatarColor(profileUser.username),
                   border: `2px solid ${BORDER_AMBER}`,
                   display: "flex",
                   alignItems: "center",

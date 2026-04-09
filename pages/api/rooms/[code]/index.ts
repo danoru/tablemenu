@@ -22,6 +22,7 @@ export interface RoomSuggestion {
   vetoCount: number;
   myVote: boolean | null;
   bringing: boolean;
+  wishlistedBy: string[];
 }
 
 export interface RoomData {
@@ -32,9 +33,11 @@ export interface RoomData {
   playerCount: number | null;
   timeBudget: number | null;
   isActive: boolean;
+  isCompetitive: boolean;
   hostId: number;
   hostUsername: string;
   activeSessionId: number | null;
+  lastSessionGameIds: number[];
   members: RoomMember[];
   suggestions: RoomSuggestion[];
 }
@@ -73,11 +76,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(404).json({ error: "Room not found" });
     }
 
+    const lastClosedSession = await prisma.roomSessions.findFirst({
+      where: { roomId: room.id, status: "CLOSED" },
+      orderBy: { closedAt: "desc" },
+      include: {
+        gamePlayed: {
+          include: { games: { select: { gameId: true } } },
+        },
+      },
+    });
+
+    const lastSessionGameIds =
+      lastClosedSession?.gamePlayed.flatMap((gs) => gs.games.map((g) => g.gameId)) ?? [];
     const members: RoomMember[] = room.invites.map((inv) => ({
       userId: inv.user.id,
       username: inv.user.username,
       status: inv.status,
     }));
+
+    const memberIds = room.invites.map((inv) => inv.userId);
+    const wishlistEntries = await prisma.userGames.findMany({
+      where: {
+        gameId: { in: room.gameSuggs.map((s) => s.gameId) },
+        userId: { in: memberIds },
+        isWishlist: true,
+      },
+      select: { gameId: true, user: { select: { username: true } } },
+    });
+
+    const wishlistMap = new Map<number, string[]>();
+    for (const entry of wishlistEntries) {
+      const existing = wishlistMap.get(entry.gameId) ?? [];
+      existing.push(entry.user.username);
+      wishlistMap.set(entry.gameId, existing);
+    }
 
     const suggestions: RoomSuggestion[] = room.gameSuggs.map((sugg) => {
       const gameVotes = room.votes.filter((v) => v.gameId === sugg.gameId);
@@ -98,6 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         vetoCount,
         myVote: myVoteRecord ? myVoteRecord.interested : null,
         bringing: sugg.suggestedBy !== null,
+        wishlistedBy: wishlistMap.get(sugg.game.id) ?? [],
       };
     });
 
@@ -109,9 +142,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       playerCount: room.playerCount,
       timeBudget: room.timeBudget,
       isActive: room.isActive,
+      isCompetitive: room.isCompetitive,
       hostId: room.host.id,
       hostUsername: room.host.username,
       activeSessionId: room.sessions?.[0]?.id ?? null,
+      lastSessionGameIds,
       members,
       suggestions,
     };

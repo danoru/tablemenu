@@ -1,3 +1,4 @@
+import { gameColor, initials } from "@/lib/helpers";
 import {
   BG_ELEVATED,
   BORDER_AMBER,
@@ -24,27 +25,6 @@ import {
 import { TransitionProps } from "@mui/material/transitions";
 import { RoomSuggestion } from "@pages/api/rooms/[code]";
 import React from "react";
-
-function gameColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.5)",
-    "rgba(100,60,20,0.5)",
-    "rgba(60,40,80,0.5)",
-    "rgba(20,60,90,0.5)",
-    "rgba(90,30,30,0.5)",
-    "rgba(40,70,60,0.5)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-}
-
-function initials(name: string): string {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
 function weightedPick(suggestions: RoomSuggestion[]): RoomSuggestion {
   const weighted = suggestions.flatMap((s) => {
     const weight = Math.max(1, s.interestedCount - s.vetoCount + 1);
@@ -192,7 +172,7 @@ export default function RoomQuickGenModal({
                         width: "100px",
                         height: "100px",
                         borderRadius: "12px",
-                        background: gameColour(result.name),
+                        background: gameColor(result.name),
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

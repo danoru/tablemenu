@@ -116,7 +116,7 @@ function ToggleOption({
   );
 }
 
-interface RoomData {
+interface RoomSettingsData {
   id: number;
   name: string;
   description: string;
@@ -125,10 +125,11 @@ interface RoomData {
   visibility: "PUBLIC" | "INVITE_ONLY";
   playerCount: number;
   timeBudget: number;
+  isCompetitive: boolean;
 }
 
 interface Props {
-  room: RoomData;
+  room: RoomSettingsData;
   username: string;
 }
 
@@ -147,6 +148,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
   const [timeBudget, setTimeBudget] = React.useState(room.timeBudget || 120);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
+  const [isCompetitive, setIsCompetitive] = React.useState(room.isCompetitive);
 
   const [snackbar, setSnackbar] = React.useState<{
     open: boolean;
@@ -176,6 +178,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
           timeBudget,
           type: roomType,
           visibility,
+          isCompetitive,
         }),
       });
 
@@ -267,7 +270,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
               mb: "6px",
             }}
           >
-            Room settings
+            Room Settings
           </Typography>
           <Box sx={{ display: "inline-flex", alignItems: "center", gap: "6px", mb: "32px" }}>
             <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT }}>
@@ -303,7 +306,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
                     mb: "16px",
                   }}
                 >
-                  <Typography sx={sectionLabel}>Room details</Typography>
+                  <Typography sx={sectionLabel}>Room Details</Typography>
 
                   <TextField
                     fullWidth
@@ -343,7 +346,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
                     mb: "16px",
                   }}
                 >
-                  <Typography sx={sectionLabel}>Room type</Typography>
+                  <Typography sx={sectionLabel}>Room Type</Typography>
                   <Box sx={{ display: "flex", gap: "10px" }}>
                     <ToggleOption
                       label="Casual"
@@ -387,7 +390,33 @@ export default function RoomSettingsPage({ room, username }: Props) {
                     />
                   </Box>
                 </Box>
-
+                <Box
+                  sx={{
+                    backgroundColor: "background.paper",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: "14px",
+                    padding: { xs: "24px", md: "28px 32px" },
+                    mb: "16px",
+                  }}
+                >
+                  <Typography sx={sectionLabel}>Play Style</Typography>
+                  <Box sx={{ display: "flex", gap: "10px" }}>
+                    <ToggleOption
+                      label="Competitive"
+                      sublabel="Track winners when logging games"
+                      active={isCompetitive}
+                      onClick={() => setIsCompetitive(true)}
+                    />
+                    <ToggleOption
+                      label="Casual"
+                      sublabel="Just log who played, no scores"
+                      active={!isCompetitive}
+                      onClick={() => setIsCompetitive(false)}
+                      accent="secondary.light"
+                    />
+                  </Box>
+                </Box>
                 <Box
                   sx={{
                     backgroundColor: "background.paper",
@@ -709,6 +738,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       timeBudget: true,
       hostId: true,
       isActive: true,
+      isCompetitive: true,
     },
   });
 
@@ -730,6 +760,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         visibility: room.visibility,
         playerCount: room.playerCount ?? 4,
         timeBudget: room.timeBudget ?? 120,
+        isCompetitive: room.isCompetitive,
       },
     },
   };

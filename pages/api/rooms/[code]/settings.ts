@@ -11,6 +11,7 @@ interface UpdateRoomBody {
   timeBudget?: number | null;
   type?: "CASUAL" | "RECURRING";
   visibility?: "PUBLIC" | "INVITE_ONLY";
+  isCompetitive?: boolean;
 }
 
 interface ApiResponse {
@@ -38,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(403).json({ error: "Only the host can modify this room" });
 
   if (req.method === "PUT") {
-    const { name, description, playerCount, timeBudget, type, visibility } =
+    const { name, description, playerCount, timeBudget, type, visibility, isCompetitive } =
       req.body as UpdateRoomBody;
 
     if (name !== undefined && !name.trim())
@@ -53,6 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         ...(timeBudget !== undefined && { timeBudget }),
         ...(type !== undefined && { type }),
         ...(visibility !== undefined && { visibility }),
+        ...(isCompetitive !== undefined && { isCompetitive }),
       },
     });
 

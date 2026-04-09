@@ -1,4 +1,5 @@
 import { authOptions } from "@/lib/authOptions";
+import { avatarColor } from "@/lib/helpers";
 import { BORDER_AMBER, FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
 import {
   Box,
@@ -74,20 +75,6 @@ export default function EditProfilePage({ username, initial }: Props) {
     message: string;
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
-
-  function avatarColour(name: string): string {
-    const palette = [
-      "rgba(34,85,48,0.6)",
-      "rgba(100,60,20,0.6)",
-      "rgba(60,40,80,0.6)",
-      "rgba(20,60,90,0.6)",
-      "rgba(90,30,30,0.6)",
-      "rgba(40,70,60,0.6)",
-    ];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    return palette[Math.abs(hash) % palette.length];
-  }
 
   async function handleSubmit(values: ProfileValues, { setSubmitting }: any) {
     try {
@@ -189,7 +176,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                 width: "64px",
                 height: "64px",
                 borderRadius: "50%",
-                background: avatarColour(username),
+                background: avatarColor(username),
                 border: `2px solid ${BORDER_AMBER}`,
                 display: "flex",
                 alignItems: "center",

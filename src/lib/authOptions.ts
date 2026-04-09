@@ -5,7 +5,7 @@ import prisma from "@data/db";
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 7 },
-  pages: { error: "/404", signIn: "/login" },
+  pages: { error: "/login", signIn: "/login" },
   providers: [
     CredentialsProvider({
       credentials: {
@@ -13,12 +13,13 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        if (!credentials?.username || !credentials?.password) return null;
         try {
           const user = await prisma.users.findUnique({
-            where: { username: credentials?.username },
+            where: { username: credentials.username },
           });
           if (!user) return null;
-          const passwordCorrect = await compare(credentials?.password || "", user.password || "");
+          const passwordCorrect = await compare(credentials.password, user.password || "");
           if (passwordCorrect) return { id: user.id.toString(), username: user.username };
           return null;
         } catch (error) {

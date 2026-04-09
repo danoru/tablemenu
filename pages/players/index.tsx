@@ -1,4 +1,5 @@
 import { authOptions } from "@/lib/authOptions";
+import { avatarColor } from "@/lib/helpers";
 import { getAllUsers } from "@data/users";
 import {
   AMBER_DIM,
@@ -23,27 +24,13 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import type { Users } from "@prisma/client";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
 import superjson from "superjson";
-import type { Users } from "@prisma/client";
-
-function avatarColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.6)",
-    "rgba(100,60,20,0.6)",
-    "rgba(60,40,80,0.6)",
-    "rgba(20,60,90,0.6)",
-    "rgba(90,30,30,0.6)",
-    "rgba(40,70,60,0.6)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-}
 
 function avatarInitial(name: string): string {
   return name.slice(0, 1).toUpperCase();
@@ -242,7 +229,7 @@ export default function UsersPage({
                         width: "40px",
                         height: "40px",
                         borderRadius: "50%",
-                        background: avatarColour(user.username),
+                        background: avatarColor(user.username),
                         border: "1px solid",
                         borderColor: "divider",
                         display: "flex",

@@ -2,14 +2,7 @@ import { PrismaClient, AchievementCategory } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// ─── Achievement definitions ──────────────────────────────────────────────────
-// key:         unique code used in achievement-checking logic
-// threshold:   numeric target for tiered achievements (null = one-off)
-// isSecret:    hidden until earned (used for surprise/easter egg achievements)
-// points:      displayed on profile, used for leaderboard sorting
-
 const ACHIEVEMENTS = [
-  // ── Library ────────────────────────────────────────────────────────────────
   {
     key: "LIBRARY_FIRST",
     name: "First Edition",
@@ -91,7 +84,6 @@ const ACHIEVEMENTS = [
     sortOrder: 8,
   },
 
-  // ── Geography ──────────────────────────────────────────────────────────────
   {
     key: "GEO_COUNTRIES_3",
     name: "Passport Stamp",
@@ -163,7 +155,6 @@ const ACHIEVEMENTS = [
     sortOrder: 7,
   },
 
-  // ── Category ───────────────────────────────────────────────────────────────
   {
     key: "CAT_DIVERSE_5",
     name: "Renaissance Gamer",
@@ -255,7 +246,6 @@ const ACHIEVEMENTS = [
     sortOrder: 9,
   },
 
-  // ── Mechanics ──────────────────────────────────────────────────────────────
   {
     key: "MECH_DECK_BUILD",
     name: "Deck Builder",
@@ -337,7 +327,6 @@ const ACHIEVEMENTS = [
     sortOrder: 8,
   },
 
-  // ── Complexity ─────────────────────────────────────────────────────────────
   {
     key: "WEIGHT_LIGHT",
     name: "Casual Friday",
@@ -379,7 +368,6 @@ const ACHIEVEMENTS = [
     sortOrder: 4,
   },
 
-  // ── Ratings ────────────────────────────────────────────────────────────────
   {
     key: "RATE_FIRST",
     name: "Critic",
@@ -432,7 +420,6 @@ const ACHIEVEMENTS = [
     isSecret: true,
   },
 
-  // ── Social ─────────────────────────────────────────────────────────────────
   {
     key: "SOCIAL_JOIN_ROOM",
     name: "Pull Up a Chair",
@@ -514,7 +501,6 @@ const ACHIEVEMENTS = [
     sortOrder: 8,
   },
 
-  // ── Play history ───────────────────────────────────────────────────────────
   {
     key: "PLAY_FIRST",
     name: "First Roll",
@@ -606,7 +592,6 @@ const ACHIEVEMENTS = [
     sortOrder: 9,
   },
 
-  // ── Streaks ────────────────────────────────────────────────────────────────
   {
     key: "STREAK_4",
     name: "Weekly Ritual",

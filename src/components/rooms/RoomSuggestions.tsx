@@ -1,37 +1,20 @@
+import { gameColor, initials } from "@/lib/helpers";
 import { FONT_SANS, FONT_SERIF, TEXT_FAINT } from "@/styles/theme";
 import type { RoomSuggestion } from "@api/rooms/[code]/index";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import GameStatusChip from "../games/GameStatusChip";
 
-function gameColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.5)",
-    "rgba(100,60,20,0.5)",
-    "rgba(60,40,80,0.5)",
-    "rgba(20,60,90,0.5)",
-    "rgba(90,30,30,0.5)",
-    "rgba(40,70,60,0.5)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-}
-
-function initials(name: string): string {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
-export default function SuggestionRow({
+export default function GameDetailSuggestions({
   suggestion,
   isHost,
   currentUserId,
   onVote,
   onToggleBring,
   loadingGameId,
+  playedLastSession,
 }: {
   suggestion: RoomSuggestion;
   isHost: boolean;
@@ -39,6 +22,7 @@ export default function SuggestionRow({
   onVote: (gameId: number, interested: boolean) => void;
   onToggleBring: (gameId: number) => void;
   loadingGameId: number | null;
+  playedLastSession?: boolean;
 }) {
   const isBringing = suggestion.suggestedBy === currentUserId;
   const isLoading = loadingGameId === suggestion.gameId;
@@ -57,29 +41,34 @@ export default function SuggestionRow({
         mb: "8px",
       }}
     >
-      <Box
-        sx={{
-          width: "44px",
-          height: "44px",
-          borderRadius: "8px",
-          background: gameColour(suggestion.name),
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
-        <Typography
+      <Box sx={{ position: "relative", flexShrink: 0 }}>
+        <Box
           sx={{
-            fontFamily: FONT_SERIF,
-            fontSize: "14px",
-            fontWeight: 700,
-            color: "rgba(232,223,200,0.5)",
-            userSelect: "none",
+            width: "44px",
+            height: "44px",
+            borderRadius: "8px",
+            background: gameColor(suggestion.name),
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          {initials(suggestion.name)}
-        </Typography>
+          <Typography
+            sx={{
+              fontFamily: FONT_SERIF,
+              fontSize: "14px",
+              fontWeight: 700,
+              color: "rgba(232,223,200,0.5)",
+              userSelect: "none",
+            }}
+          >
+            {initials(suggestion.name)}
+          </Typography>
+        </Box>
+        <GameStatusChip
+          wishlisted={suggestion.wishlistedBy?.length > 0}
+          username={suggestion.wishlistedBy?.length === 1 ? suggestion.wishlistedBy[0] : undefined}
+        />
       </Box>
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
@@ -99,6 +88,22 @@ export default function SuggestionRow({
           {suggestion.bringing && (
             <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: "secondary.light" }}>
               ✓ In the pool
+            </Typography>
+          )}
+          {playedLastSession && (
+            <Typography
+              sx={{
+                fontFamily: FONT_SANS,
+                fontSize: "11px",
+                color: "rgba(200,150,42,0.7)",
+                background: "rgba(200,150,42,0.08)",
+                border: "1px solid rgba(200,150,42,0.18)",
+                borderRadius: "4px",
+                padding: "0px 5px",
+                lineHeight: "18px",
+              }}
+            >
+              played last session
             </Typography>
           )}
           <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: TEXT_FAINT }}>

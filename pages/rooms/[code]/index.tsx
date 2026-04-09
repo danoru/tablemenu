@@ -1,8 +1,9 @@
 import LogGamesModal from "@/components/modals/LogGamesModal";
 import RoomQuickGenModal from "@/components/modals/RoomQuickGenModal";
-import SuggestionRow from "@/components/games/SuggestionsRow";
+import RoomSuggestions from "@/components/rooms/RoomSuggestions";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
+import { avatarColor, gameColor, initials } from "@/lib/helpers";
 import {
   AMBER_DIM,
   BORDER_AMBER,
@@ -28,38 +29,6 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
-
-function gameColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.5)",
-    "rgba(100,60,20,0.5)",
-    "rgba(60,40,80,0.5)",
-    "rgba(20,60,90,0.5)",
-    "rgba(90,30,30,0.5)",
-    "rgba(40,70,60,0.5)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-}
-
-function initials(name: string): string {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
-function avatarColour(name: string): string {
-  const palette = [
-    "rgba(34,85,48,0.6)",
-    "rgba(100,60,20,0.6)",
-    "rgba(60,40,80,0.6)",
-    "rgba(20,60,90,0.6)",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-}
 
 interface Props {
   initialRoom: RoomData;
@@ -561,7 +530,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                 </Box>
               ) : (
                 room.suggestions.map((s) => (
-                  <SuggestionRow
+                  <RoomSuggestions
                     key={s.gameId}
                     suggestion={s}
                     isHost={isHost}
@@ -569,6 +538,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                     onVote={handleVote}
                     onToggleBring={handleToggleBring}
                     loadingGameId={loadingGameId}
+                    playedLastSession={room.lastSessionGameIds.includes(s.gameId)}
                   />
                 ))
               )}
@@ -611,7 +581,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                             width: "36px",
                             height: "36px",
                             borderRadius: "6px",
-                            background: gameColour(game.name),
+                            background: gameColor(game.name),
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -706,7 +676,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                             width: "34px",
                             height: "34px",
                             borderRadius: "50%",
-                            background: avatarColour(member.username),
+                            background: avatarColor(member.username),
                             border: "1px solid",
                             borderColor: "divider",
                             display: "flex",
@@ -844,6 +814,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
         suggestions={room.suggestions}
         members={room.members}
         code={code}
+        isCompetitive={room.isCompetitive}
         onLogged={() => setLogOpen(false)}
       />
 
@@ -898,12 +869,34 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const library = await getUserLibrary(currentUserId);
 
+  const lastClosedSession = await prisma.roomSessions.findFirst({
+    where: { roomId: room.id, status: "CLOSED" },
+    orderBy: { closedAt: "desc" },
+    include: {
+      gamePlayed: {
+        include: { games: { select: { gameId: true } } },
+      },
+    },
+  });
+
+  const lastSessionGameIds =
+    lastClosedSession?.gamePlayed.flatMap((gs) => gs.games.map((g) => g.gameId)) ?? [];
+
   return {
-    props: { initialRoom: buildRoomData(room, currentUserId), currentUserId, library, username },
+    props: {
+      initialRoom: buildRoomData(room, currentUserId, lastSessionGameIds),
+      currentUserId,
+      library,
+      username,
+    },
   };
 };
 
-function buildRoomData(room: any, currentUserId: number): RoomData {
+function buildRoomData(
+  room: any,
+  currentUserId: number,
+  lastSessionGameIds: number[] = []
+): RoomData {
   const members = room.invites.map((inv: any) => ({
     userId: inv.user.id,
     username: inv.user.username,
@@ -939,9 +932,11 @@ function buildRoomData(room: any, currentUserId: number): RoomData {
     playerCount: room.playerCount,
     timeBudget: room.timeBudget,
     isActive: room.isActive,
+    isCompetitive: room.isCompetitive,
     hostId: room.host.id,
     hostUsername: room.host.username,
     activeSessionId: room.sessions?.[0]?.id ?? null,
+    lastSessionGameIds,
     members,
     suggestions,
   };
