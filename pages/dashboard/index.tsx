@@ -96,7 +96,7 @@ export default function DashboardPage({
         <title>Dashboard — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -196,7 +196,7 @@ export default function DashboardPage({
               startIcon={<CasinoIcon />}
               onClick={() => router.push(`/players/${username}/library`)}
               sx={{
-                background: "primary.main",
+                backgroundColor: "primary.main",
                 borderRadius: "8px",
                 color: "background.default",
                 fontFamily: FONT_SANS,
@@ -205,7 +205,7 @@ export default function DashboardPage({
                 padding: "12px 24px",
                 textTransform: "none",
                 flexShrink: 0,
-                "&:hover": { background: "primary.light" },
+                "&:hover": { backgroundColor: "primary.light" },
               }}
             >
               Quick Gen
@@ -252,7 +252,7 @@ export default function DashboardPage({
               />
               <Box
                 sx={{
-                  background: "background.paper",
+                  backgroundColor: "background.paper",
                   border: "1px solid",
                   borderColor: "divider",
                   borderRadius: "12px",
@@ -296,7 +296,7 @@ export default function DashboardPage({
 
             <Box
               sx={{
-                background: "background.paper",
+                backgroundColor: "background.paper",
                 border: "1px solid",
                 borderColor: "divider",
                 borderRadius: "12px",
@@ -402,7 +402,8 @@ export default function DashboardPage({
                             room.type === "RECURRING"
                               ? "rgba(34,85,48,0.3)"
                               : "rgba(255,255,255,0.05)",
-                          border: `1px solid ${room.type === "RECURRING" ? "rgba(60,160,80,0.25)" : "divider"}`,
+                          border: "1px solid",
+                          borderColor: `${room.type === "RECURRING" ? "rgba(60,160,80,0.25)" : "divider"}`,
                           padding: "2px 8px",
                           borderRadius: "10px",
                           flexShrink: 0,
@@ -424,7 +425,7 @@ export default function DashboardPage({
             <SectionHeader title="Friend activity" />
             <Box
               sx={{
-                background: "background.paper",
+                backgroundColor: "background.paper",
                 border: "1px solid",
                 borderColor: "divider",
                 borderRadius: "12px",

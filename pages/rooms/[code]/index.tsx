@@ -226,7 +226,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
         <title>{room.name} — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -332,7 +332,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                 onClick={() => setQuickGenOpen(true)}
                 startIcon={<CasinoIcon />}
                 sx={{
-                  background: "primary.main",
+                  backgroundColor: "primary.main",
                   borderRadius: "8px",
                   color: "background.default",
                   fontFamily: FONT_SANS,
@@ -340,7 +340,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                   fontWeight: 500,
                   padding: "9px 18px",
                   textTransform: "none",
-                  "&:hover": { background: "primary.light" },
+                  "&:hover": { backgroundColor: "primary.light" },
                 }}
               >
                 Spin
@@ -395,7 +395,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                         width: "8px",
                         height: "8px",
                         borderRadius: "50%",
-                        background: "secondary.light",
+                        backgroundColor: "secondary.light",
                         "@keyframes pulse": { "0%,100%": { opacity: 1 }, "50%": { opacity: 0.3 } },
                         animation: "pulse 2s infinite",
                       }}
@@ -502,7 +502,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                       )
                     }
                     sx={{
-                      background: "primary.main",
+                      backgroundColor: "primary.main",
                       borderRadius: "8px",
                       color: "background.default",
                       fontFamily: FONT_SANS,
@@ -510,7 +510,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
                       fontWeight: 500,
                       padding: "8px 18px",
                       textTransform: "none",
-                      "&:hover": { background: "primary.light" },
+                      "&:hover": { backgroundColor: "primary.light" },
                       "&.Mui-disabled": {
                         background: "rgba(200,150,42,0.35)",
                         color: "rgba(15,12,8,0.5)",
@@ -547,7 +547,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
               {room.suggestions.length === 0 ? (
                 <Box
                   sx={{
-                    background: "background.paper",
+                    backgroundColor: "background.paper",
                     border: "1px solid",
                     borderColor: "divider",
                     borderRadius: "12px",
@@ -681,7 +681,7 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
               </Typography>
               <Box
                 sx={{
-                  background: "background.paper",
+                  backgroundColor: "background.paper",
                   border: "1px solid",
                   borderColor: "divider",
                   borderRadius: "12px",

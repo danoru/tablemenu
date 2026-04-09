@@ -41,8 +41,9 @@ function FilterChip({
         display: "inline-flex",
         alignItems: "center",
         padding: "5px 14px",
+        border: "1px solid",
+        borderColor: `${active ? BORDER_AMBER : "divider"}`,
         borderRadius: "20px",
-        border: `1px solid ${active ? BORDER_AMBER : "divider"}`,
         background: active ? AMBER_DIM : "transparent",
         color: active ? "primary.main" : TEXT_FAINT,
         fontFamily: FONT_SANS,
@@ -171,7 +172,7 @@ export default function GamesIndexPage() {
         <title>Games — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: "background.default", minHeight: "100vh" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
             position: "fixed",
@@ -230,7 +231,8 @@ export default function GamesIndexPage() {
               startIcon={<TuneIcon />}
               sx={{
                 background: hasActiveFilters ? AMBER_DIM : "transparent",
-                border: `1px solid ${hasActiveFilters ? BORDER_AMBER : "divider"}`,
+                border: "1px solid",
+                borderColor: `${hasActiveFilters ? BORDER_AMBER : "divider"}`,
                 borderRadius: "8px",
                 color: hasActiveFilters ? "primary.main" : TEXT_DIM,
                 fontFamily: FONT_SANS,
@@ -275,7 +277,8 @@ export default function GamesIndexPage() {
             <Box
               sx={{
                 background: BG_ELEVATED,
-                border: "1px solid divider",
+                border: "1px solid",
+                borderColor: "divider",
                 borderRadius: "12px",
                 padding: "24px",
                 mb: "20px",
@@ -409,8 +412,9 @@ export default function GamesIndexPage() {
                 <Box
                   key={i}
                   sx={{
-                    background: "background.paper",
-                    border: "1px solid divider",
+                    backgroundColor: "background.paper",
+                    border: "1px solid",
+                    borderColor: "divider",
                     borderRadius: "10px",
                     height: "200px",
                     opacity: 1 - i * 0.03,

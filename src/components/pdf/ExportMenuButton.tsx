@@ -113,7 +113,7 @@ export default function ExportMenuButton({ menu, courses }: Props) {
         fullWidth
         PaperProps={{
           sx: {
-            background: "background.paper",
+            backgroundColor: "background.paper",
             border: "1px solid",
             borderColor: "divider",
             borderRadius: "14px",
@@ -172,7 +172,7 @@ export default function ExportMenuButton({ menu, courses }: Props) {
                       )
                     }
                     sx={{
-                      background: "primary.main",
+                      backgroundColor: "primary.main",
                       borderRadius: "8px",
                       color: "background.default",
                       fontFamily: FONT_SANS,
@@ -180,7 +180,7 @@ export default function ExportMenuButton({ menu, courses }: Props) {
                       fontWeight: 500,
                       padding: "7px 16px",
                       textTransform: "none",
-                      "&:hover": { background: "primary.light" },
+                      "&:hover": { backgroundColor: "primary.light" },
                       "&.Mui-disabled": {
                         background: "rgba(200,150,42,0.4)",
                         color: "rgba(15,12,8,0.5)",

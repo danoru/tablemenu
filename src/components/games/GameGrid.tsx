@@ -1,4 +1,4 @@
-import { Box, Link } from "@mui/material";
+import { Box } from "@mui/material";
 import { LibraryGame } from "@pages/api/games/library";
 
 import GameCard from "./GameCard";
@@ -17,9 +17,7 @@ export default function GameGrid({ games }: { games: LibraryGame[] }) {
       }}
     >
       {games.map((game) => (
-        <Link key={game.gameId} href={`/games/${game.gameId}`} style={{ textDecoration: "none" }}>
-          <GameCard game={game} />
-        </Link>
+        <GameCard game={game} />
       ))}
     </Box>
   );

@@ -43,7 +43,7 @@ function avatarColour(name: string): string {
   return palette[Math.abs(hash) % palette.length];
 }
 
-function StatPill({ value, label }: { value: number; label: string }) {
+function PlayerPill({ value, label }: { value: number; label: string }) {
   return (
     <Box sx={{ textAlign: "center" }}>
       <Typography
@@ -122,7 +122,7 @@ export default function UserProfilePage({
         <title>{profileUser.username} — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -148,7 +148,7 @@ export default function UserProfilePage({
         >
           <Box
             sx={{
-              background: "background.paper",
+              backgroundColor: "background.paper",
               border: "1px solid",
               borderColor: "divider",
               borderRadius: "16px",
@@ -364,10 +364,10 @@ export default function UserProfilePage({
                             },
                           }
                         : {
-                            background: "primary.main",
+                            backgroundColor: "primary.main",
                             border: "none",
                             color: "background.default",
-                            "&:hover": { background: "primary.light" },
+                            "&:hover": { backgroundColor: "primary.light" },
                           }),
                       "&.Mui-disabled": { opacity: 0.5 },
                     }}
@@ -380,10 +380,12 @@ export default function UserProfilePage({
 
             <Divider sx={{ borderColor: "divider", my: "24px" }} />
             <Box sx={{ display: "flex", gap: "32px" }}>
-              <StatPill value={followerCount} label="followers" />
-              <StatPill value={followingCount} label="following" />
-              <StatPill value={library.length} label="games owned" />
-              {wantToPlay.length > 0 && <StatPill value={wantToPlay.length} label="want to play" />}
+              <PlayerPill value={followerCount} label="followers" />
+              <PlayerPill value={followingCount} label="following" />
+              <PlayerPill value={library.length} label="games owned" />
+              {wantToPlay.length > 0 && (
+                <PlayerPill value={wantToPlay.length} label="want to play" />
+              )}
             </Box>
           </Box>
 
@@ -435,7 +437,7 @@ export default function UserProfilePage({
                   onClick={() => router.push(`/players/${profileUser.username}/library`)}
                   sx={{
                     position: "relative",
-                    background: "background.paper",
+                    backgroundColor: "background.paper",
                     border: "1px solid",
                     borderColor: "divider",
                     borderRadius: "10px",
@@ -528,7 +530,7 @@ export default function UserProfilePage({
                     onClick={() => router.push(`/games/${game.gameId}`)}
                     sx={{
                       position: "relative",
-                      background: "background.paper",
+                      backgroundColor: "background.paper",
                       border: `1px solid ${BORDER_BLUE}`,
                       borderRadius: "10px",
                       overflow: "hidden",

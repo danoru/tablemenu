@@ -124,7 +124,7 @@ export default function NewRoomPage({ username }: Props) {
         <title>Create a Room — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -173,7 +173,7 @@ export default function NewRoomPage({ username }: Props) {
 
           <Box
             sx={{
-              background: "background.paper",
+              backgroundColor: "background.paper",
               border: "1px solid",
               borderColor: "divider",
               borderRadius: "14px",
@@ -247,7 +247,7 @@ export default function NewRoomPage({ username }: Props) {
                       sx={{
                         color: "primary.main",
                         "& .MuiSlider-thumb": {
-                          background: "primary.main",
+                          backgroundColor: "primary.main",
                           "&:hover": { boxShadow: `0 0 0 8px rgba(200,150,42,0.15)` },
                         },
                         "& .MuiSlider-rail": { background: BORDER_AMBER },
@@ -299,7 +299,7 @@ export default function NewRoomPage({ username }: Props) {
                       sx={{
                         color: "primary.main",
                         "& .MuiSlider-thumb": {
-                          background: "primary.main",
+                          backgroundColor: "primary.main",
                           "&:hover": { boxShadow: `0 0 0 8px rgba(200,150,42,0.15)` },
                         },
                         "& .MuiSlider-rail": { background: BORDER_AMBER },
@@ -321,7 +321,7 @@ export default function NewRoomPage({ username }: Props) {
                       type="submit"
                       disabled={isSubmitting}
                       sx={{
-                        background: "primary.main",
+                        backgroundColor: "primary.main",
                         borderRadius: "8px",
                         color: "background.default",
                         fontFamily: FONT_SANS,
@@ -329,7 +329,7 @@ export default function NewRoomPage({ username }: Props) {
                         fontWeight: 500,
                         padding: "13px",
                         textTransform: "none",
-                        "&:hover": { background: "primary.light" },
+                        "&:hover": { backgroundColor: "primary.light" },
                         "&.Mui-disabled": {
                           background: "rgba(200,150,42,0.35)",
                           color: "rgba(15,12,8,0.5)",

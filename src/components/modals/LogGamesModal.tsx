@@ -392,7 +392,7 @@ export default function LogGamesModal({
           onClick={handleLog}
           disabled={!selectedGame || submitting}
           sx={{
-            background: "primary.main",
+            backgroundColor: "primary.main",
             borderRadius: "8px",
             color: "background.default",
             fontFamily: FONT_SANS,
@@ -400,7 +400,7 @@ export default function LogGamesModal({
             fontWeight: 500,
             padding: "12px",
             textTransform: "none",
-            "&:hover": { background: "primary.light" },
+            "&:hover": { backgroundColor: "primary.light" },
             "&.Mui-disabled": { background: "rgba(200,150,42,0.35)", color: "rgba(15,12,8,0.5)" },
           }}
         >

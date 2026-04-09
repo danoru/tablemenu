@@ -13,7 +13,7 @@ export default function StatCard({
   return (
     <Box
       sx={{
-        background: "background.paper",
+        backgroundColor: "background.paper",
         border: "1px solid",
         borderColor: "divider",
         borderRadius: "12px",

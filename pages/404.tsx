@@ -23,7 +23,7 @@ export default function NotFoundPage() {
 
       <Box
         sx={{
-          background: "background.default",
+          backgroundColor: "background.default",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -126,7 +126,7 @@ export default function NotFoundPage() {
             <Button
               onClick={() => router.push(session ? "/dashboard" : "/")}
               sx={{
-                background: "primary.main",
+                backgroundColor: "primary.main",
                 borderRadius: "8px",
                 color: "primary.contrastText",
                 fontFamily: FONT_SANS,
@@ -134,7 +134,7 @@ export default function NotFoundPage() {
                 fontWeight: 500,
                 padding: "11px 24px",
                 textTransform: "none",
-                "&:hover": { background: "primary.light" },
+                "&:hover": { backgroundColor: "primary.light" },
               }}
             >
               Back to the table
@@ -142,7 +142,7 @@ export default function NotFoundPage() {
             <Button
               onClick={() => router.back()}
               sx={{
-                background: "transparent",
+                backgroundColor: "transparent",
                 border: "1px solid",
                 borderColor: "divider",
                 borderRadius: "8px",

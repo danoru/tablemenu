@@ -414,9 +414,9 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
                             border: "1px solid rgba(94,201,122,0.25)",
                           }
                         : {
-                            background: "primary.main",
+                            backgroundColor: "primary.main",
                             color: "background.default",
-                            "&:hover": { background: "primary.light" },
+                            "&:hover": { backgroundColor: "primary.light" },
                           }),
                       "&.Mui-disabled": { opacity: isAdded ? 1 : 0.5 },
                     }}

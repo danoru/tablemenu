@@ -111,7 +111,7 @@ export default function RegistrationForm() {
   return (
     <Box
       sx={{
-        background: "background.default",
+        backgroundColor: "background.default",
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
@@ -162,7 +162,7 @@ export default function RegistrationForm() {
 
         <Box
           sx={{
-            background: "background.paper",
+            backgroundColor: "background.paper",
             border: "1px solid",
             borderColor: "divider",
             borderRadius: "14px",
@@ -244,7 +244,7 @@ export default function RegistrationForm() {
                   disabled={isSubmitting}
                   type="submit"
                   sx={{
-                    background: "primary.main",
+                    backgroundColor: "primary.main",
                     borderRadius: "8px",
                     color: "background.default",
                     fontFamily: FONT_SANS,
@@ -253,7 +253,7 @@ export default function RegistrationForm() {
                     padding: "12px",
                     textTransform: "none",
                     mb: "20px",
-                    "&:hover": { background: "primary.light" },
+                    "&:hover": { backgroundColor: "primary.light" },
                     "&.Mui-disabled": {
                       background: "rgba(200,150,42,0.35)",
                       color: "rgba(15,12,8,0.5)",

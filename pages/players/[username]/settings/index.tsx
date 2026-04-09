@@ -121,7 +121,7 @@ export default function EditProfilePage({ username, initial }: Props) {
         <title>Edit Profile — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -225,7 +225,7 @@ export default function EditProfilePage({ username, initial }: Props) {
 
           <Box
             sx={{
-              background: "background.paper",
+              backgroundColor: "background.paper",
               border: "1px solid",
               borderColor: "divider",
               borderRadius: "14px",
@@ -368,7 +368,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                       type="submit"
                       disabled={isSubmitting}
                       sx={{
-                        background: "primary.main",
+                        backgroundColor: "primary.main",
                         borderRadius: "8px",
                         color: "background.default",
                         fontFamily: FONT_SANS,
@@ -376,7 +376,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                         fontWeight: 500,
                         padding: "12px",
                         textTransform: "none",
-                        "&:hover": { background: "primary.light" },
+                        "&:hover": { backgroundColor: "primary.light" },
                         "&.Mui-disabled": {
                           background: "rgba(200,150,42,0.35)",
                           color: "rgba(15,12,8,0.5)",

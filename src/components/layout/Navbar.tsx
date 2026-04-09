@@ -75,7 +75,8 @@ export default function Navbar() {
       component="nav"
       sx={{
         backgroundColor: "background.default",
-        borderBottom: "1px solid divider",
+        borderBottom: "1px solid",
+        borderColor: "divider",
         position: "sticky",
         top: 0,
         zIndex: 100,
@@ -143,7 +144,7 @@ export default function Navbar() {
                     key={page.id}
                     onClick={() => handlePageClick(page)}
                     sx={{
-                      background: "primary.main",
+                      backgroundColor: "primary.main",
                       borderRadius: "6px",
                       color: "background.default",
                       fontFamily: FONT_SANS,
@@ -153,7 +154,7 @@ export default function Navbar() {
                       ml: "4px",
                       padding: "7px 18px",
                       textTransform: "none",
-                      "&:hover": { background: "primary.light" },
+                      "&:hover": { backgroundColor: "primary.light" },
                     }}
                   >
                     {page.title}
@@ -241,7 +242,8 @@ export default function Navbar() {
               sx={{
                 "& .MuiPaper-root": {
                   backgroundColor: "#1a1610",
-                  border: "1px solid divider",
+                  border: "1px solid",
+                  borderColor: "divider",
                   borderRadius: "10px",
                   boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
                   minWidth: "200px",

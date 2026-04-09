@@ -269,7 +269,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                 )
               }
               sx={{
-                background: "primary.main",
+                backgroundColor: "primary.main",
                 borderRadius: "8px",
                 color: "background.default",
                 fontFamily: FONT_SANS,
@@ -277,7 +277,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                 fontWeight: 500,
                 padding: "12px",
                 textTransform: "none",
-                "&:hover": { background: "primary.light" },
+                "&:hover": { backgroundColor: "primary.light" },
                 "&.Mui-disabled": {
                   background: "rgba(200,150,42,0.35)",
                   color: "rgba(15,12,8,0.5)",
@@ -350,7 +350,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
               sx={{
                 maxHeight: "280px",
                 overflowY: "auto",
-                background: "background.paper",
+                backgroundColor: "background.paper",
                 border: "1px solid",
                 borderColor: "divider",
                 borderRadius: "10px",
@@ -432,7 +432,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
               onClick={handleImport}
               startIcon={<DownloadIcon />}
               sx={{
-                background: "primary.main",
+                backgroundColor: "primary.main",
                 borderRadius: "8px",
                 color: "background.default",
                 fontFamily: FONT_SANS,
@@ -440,7 +440,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                 fontWeight: 500,
                 padding: "12px",
                 textTransform: "none",
-                "&:hover": { background: "primary.light" },
+                "&:hover": { backgroundColor: "primary.light" },
               }}
             >
               Import all {games.length} games
@@ -470,8 +470,8 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
             <LinearProgress
               sx={{
                 borderRadius: "4px",
-                background: "divider",
-                "& .MuiLinearProgress-bar": { background: "primary.main" },
+                borderColor: "divider",
+                "& .MuiLinearProgress-bar": { backgroundColor: "primary.main" },
               }}
             />
           </Box>
@@ -541,7 +541,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
               fullWidth
               onClick={handleClose}
               sx={{
-                background: "primary.main",
+                backgroundColor: "primary.main",
                 borderRadius: "8px",
                 color: "background.default",
                 fontFamily: FONT_SANS,
@@ -549,7 +549,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                 fontWeight: 500,
                 padding: "12px",
                 textTransform: "none",
-                "&:hover": { background: "primary.light" },
+                "&:hover": { backgroundColor: "primary.light" },
               }}
             >
               Done

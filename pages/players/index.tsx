@@ -113,7 +113,7 @@ export default function UsersPage({
         <title>Players — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -204,7 +204,7 @@ export default function UsersPage({
 
           <Box
             sx={{
-              background: "background.paper",
+              backgroundColor: "background.paper",
               border: "1px solid",
               borderColor: "divider",
               borderRadius: "14px",
@@ -381,10 +381,10 @@ export default function UsersPage({
                                 },
                               }
                             : {
-                                background: "primary.main",
+                                backgroundColor: "primary.main",
                                 border: "none",
                                 color: "background.default",
-                                "&:hover": { background: "primary.light" },
+                                "&:hover": { backgroundColor: "primary.light" },
                               }),
                           "&.Mui-disabled": {
                             opacity: 0.5,

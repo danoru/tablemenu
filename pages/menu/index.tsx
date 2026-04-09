@@ -216,7 +216,7 @@ export default function MenuPage({ library, username }: Props) {
         <title>The Menu — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -265,7 +265,7 @@ export default function MenuPage({ library, username }: Props) {
 
           <Box
             sx={{
-              background: "background.paper",
+              backgroundColor: "background.paper",
               border: "1px solid",
               borderColor: "divider",
               borderRadius: "14px",
@@ -392,7 +392,7 @@ export default function MenuPage({ library, username }: Props) {
                   onClick={handleRoomConnect}
                   disabled={roomLoading || !roomCode.trim()}
                   sx={{
-                    background: "primary.main",
+                    backgroundColor: "primary.main",
                     borderRadius: "8px",
                     color: "background.default",
                     fontFamily: FONT_SANS,
@@ -400,7 +400,7 @@ export default function MenuPage({ library, username }: Props) {
                     fontWeight: 500,
                     padding: "9px 18px",
                     textTransform: "none",
-                    "&:hover": { background: "primary.light" },
+                    "&:hover": { backgroundColor: "primary.light" },
                     "&.Mui-disabled": {
                       background: "rgba(200,150,42,0.35)",
                       color: "rgba(15,12,8,0.5)",
@@ -436,7 +436,7 @@ export default function MenuPage({ library, username }: Props) {
                     width: "8px",
                     height: "8px",
                     borderRadius: "50%",
-                    background: "secondary.light",
+                    backgroundColor: "secondary.light",
                     flexShrink: 0,
                     "@keyframes pulse": { "0%, 100%": { opacity: 1 }, "50%": { opacity: 0.3 } },
                     animation: "pulse 2s infinite",
@@ -469,7 +469,7 @@ export default function MenuPage({ library, username }: Props) {
               )
             }
             sx={{
-              background: "primary.main",
+              backgroundColor: "primary.main",
               borderRadius: "10px",
               color: "background.default",
               fontFamily: FONT_SERIF,
@@ -479,7 +479,7 @@ export default function MenuPage({ library, username }: Props) {
               padding: "14px",
               textTransform: "none",
               mb: "36px",
-              "&:hover": { background: "primary.light" },
+              "&:hover": { backgroundColor: "primary.light" },
               "&.Mui-disabled": { background: "rgba(200,150,42,0.35)", color: "rgba(15,12,8,0.5)" },
             }}
           >

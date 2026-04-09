@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 
-export default function StatPill({ icon, label }: { icon: React.ReactNode; label: string }) {
+export default function GamePill({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
     <Box
       sx={{

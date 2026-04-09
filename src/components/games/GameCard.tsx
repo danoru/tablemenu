@@ -11,8 +11,9 @@ export default function GameCard({ game }: { game: LibraryGame }) {
     <Link href={`/games/${game.gameId}`} style={{ textDecoration: "none" }}>
       <Box
         sx={{
-          background: "background.paper",
-          border: "1px solid divider",
+          backgroundColor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
           borderRadius: "10px",
           overflow: "hidden",
           display: "flex",

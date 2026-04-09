@@ -50,7 +50,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
         <title>{profileUsername}'s Library — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
           sx={{
             position: "fixed",
@@ -147,7 +147,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
                     onClick={() => setAddOpen(true)}
                     startIcon={<AddIcon />}
                     sx={{
-                      background: "primary.main",
+                      backgroundColor: "primary.main",
                       borderRadius: "8px",
                       color: "background.default",
                       fontFamily: FONT_SANS,
@@ -155,7 +155,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
                       fontWeight: 500,
                       padding: "9px 18px",
                       textTransform: "none",
-                      "&:hover": { background: "primary.light" },
+                      "&:hover": { backgroundColor: "primary.light" },
                     }}
                   >
                     Add Game

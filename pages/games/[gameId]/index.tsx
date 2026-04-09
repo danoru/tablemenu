@@ -144,8 +144,9 @@ function Card({ children, sx = {} }: { children: React.ReactNode; sx?: object })
   return (
     <Box
       sx={{
-        background: "background.paper",
-        border: "1px solid divider",
+        backgroundColor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: "12px",
         padding: "24px",
         ...sx,
@@ -414,7 +415,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
         <title>{game.name} — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ background: "background.default", minHeight: "100vh" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
             position: "fixed",
@@ -472,7 +473,8 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 borderRadius: "12px",
                 overflow: "hidden",
                 boxShadow: "0 8px 40px rgba(0,0,0,0.6)",
-                border: "1px solid divider",
+                border: "1px solid",
+                borderColor: "divider",
               }}
             >
               <GameArt game={game} size={200} />
@@ -545,7 +547,8 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       alignItems: "center",
                       gap: "6px",
                       background: "rgba(255,255,255,0.04)",
-                      border: "1px solid divider",
+                      border: "1px solid",
+                      borderColor: "divider",
                       borderRadius: "20px",
                       padding: "6px 14px",
                     }}
@@ -572,7 +575,8 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       alignItems: "center",
                       gap: "6px",
                       background: "rgba(255,255,255,0.04)",
-                      border: "1px solid divider",
+                      border: "1px solid",
+                      borderColor: "divider",
                       borderRadius: "20px",
                       padding: "6px 14px",
                     }}
@@ -599,7 +603,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     disabled={libraryLoading}
                     startIcon={libraryLoading ? <CircularProgress size={14} /> : <AddIcon />}
                     sx={{
-                      background: "primary.main",
+                      backgroundColor: "primary.main",
                       borderRadius: "8px",
                       color: "background.default",
                       fontFamily: FONT_SANS,
@@ -607,7 +611,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       fontWeight: 600,
                       padding: "9px 20px",
                       textTransform: "none",
-                      "&:hover": { background: "primary.light" },
+                      "&:hover": { backgroundColor: "primary.light" },
                     }}
                   >
                     Add to Library
@@ -688,7 +692,8 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        border: "1px solid divider",
+                        border: "1px solid",
+                        borderColor: "divider",
                         borderRadius: "8px",
                         color: TEXT_FAINT,
                         padding: "9px",
@@ -775,7 +780,8 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                               fontSize: "12px",
                               background: "rgba(255,255,255,0.04)",
                               color: TEXT_DIM,
-                              border: "1px solid divider",
+                              border: "1px solid",
+                              borderColor: "divider",
                               borderRadius: "6px",
                               height: "26px",
                             }}
@@ -895,7 +901,8 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     style={{
                       width: "100%",
                       background: "rgba(255,255,255,0.03)",
-                      border: "1px solid divider",
+                      border: "1px solid",
+                      borderColor: "divider",
                       borderRadius: "8px",
                       color: "text.primary",
                       fontFamily: FONT_SANS,
@@ -945,7 +952,8 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     style={{
                       width: "100%",
                       background: "rgba(255,255,255,0.03)",
-                      border: "1px solid divider",
+                      border: "1px solid",
+                      borderColor: "divider",
                       borderRadius: "8px",
                       color: "text.primary",
                       fontFamily: FONT_SANS,

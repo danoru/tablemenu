@@ -10,7 +10,7 @@ import { authOptions } from "./api/auth/[...nextauth]";
 
 const styles = {
   root: {
-    background: "background.primary",
+    backgroundColor: "background.primary",
     minHeight: "100vh",
     position: "relative" as const,
     overflowX: "hidden" as const,
@@ -106,7 +106,7 @@ const styles = {
   eyebrowDot: {
     width: "6px",
     height: "6px",
-    background: "secondary.light",
+    backgroundColor: "secondary.light",
     borderRadius: "50%",
     flexShrink: 0,
   },
@@ -406,7 +406,7 @@ export default function HomePage() {
                   padding: "13px 28px",
                   textTransform: "none",
                   "&:hover": {
-                    background: "primary.light",
+                    backgroundColor: "primary.light",
                     transform: "translateY(-1px)",
                   },
                   transition: "all 0.2s",
@@ -533,7 +533,7 @@ export default function HomePage() {
                     padding: "10px 20px",
                     textTransform: "none",
                     whiteSpace: "nowrap",
-                    "&:hover": { background: "primary.light" },
+                    "&:hover": { backgroundColor: "primary.light" },
                     "&.Mui-disabled": {
                       background: "rgba(200,150,42,0.35)",
                       color: "rgba(15,12,8,0.5)",
