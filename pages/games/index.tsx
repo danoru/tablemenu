@@ -1,4 +1,5 @@
 import GameGrid from "@/components/games/GameGrid";
+import FilterChip from "@/components/ui/FilterChip";
 import {
   BORDER_AMBER,
   BG_ELEVATED,
@@ -22,42 +23,10 @@ interface Filters {
   q: string;
   players: string;
   maxTime: string;
-  complexity: string;
-}
-
-function FilterChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <Box
-      onClick={onClick}
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "5px 14px",
-        border: "1px solid",
-        borderColor: `${active ? BORDER_AMBER : "divider"}`,
-        borderRadius: "20px",
-        background: active ? AMBER_DIM : "transparent",
-        color: active ? "primary.main" : TEXT_FAINT,
-        fontFamily: FONT_SANS,
-        fontSize: "13px",
-        fontWeight: active ? 600 : 400,
-        cursor: "pointer",
-        transition: "all 0.15s",
-        userSelect: "none",
-        "&:hover": { borderColor: BORDER_AMBER, color: TEXT_DIM },
-      }}
-    >
-      {label}
-    </Box>
-  );
+  minComplexity: string;
+  maxComplexity: string;
+  sortBy: string;
+  sortDir: "asc" | "desc";
 }
 
 function FilterLabel({ children }: { children: React.ReactNode }) {
@@ -89,7 +58,10 @@ export default function GamesIndexPage() {
     q: "",
     players: "",
     maxTime: "",
-    complexity: "",
+    minComplexity: "",
+    maxComplexity: "",
+    sortBy: "name",
+    sortDir: "asc",
   });
 
   const searchTimeout = React.useRef<NodeJS.Timeout | null>(null);
@@ -117,18 +89,15 @@ export default function GamesIndexPage() {
       if (f.q) params.set("q", f.q);
       if (f.players) params.set("players", f.players === "6+" ? "6" : f.players);
       if (f.maxTime) params.set("maxTime", f.maxTime);
-      if (f.complexity) params.set("complexity", f.complexity);
+      if (f.minComplexity) params.set("minComplexity", f.minComplexity);
+      if (f.maxComplexity) params.set("complexity", f.maxComplexity);
+      params.set("sortBy", f.sortBy);
+      params.set("sortDir", f.sortDir);
       params.set("page", String(p));
 
       const res = await fetch(`/api/games?${params.toString()}`);
       const data = await res.json();
-
-      setGames(
-        data.games.map((g: LibraryGame) => ({
-          ...g,
-          gameId: g.gameId,
-        }))
-      );
+      setGames((prev) => (append ? [...prev, ...data.games] : data.games));
       setTotal(data.total);
       setPage(p);
     } finally {
@@ -154,7 +123,15 @@ export default function GamesIndexPage() {
   }
 
   function handleClearFilters() {
-    const cleared = { q: filters.q, players: "", maxTime: "", complexity: "" };
+    const cleared = {
+      q: filters.q,
+      players: "",
+      maxTime: "",
+      minComplexity: "",
+      maxComplexity: "",
+      sortBy: "name",
+      sortDir: "asc" as const,
+    };
     setFilters(cleared);
     fetchGames(cleared, 0);
   }
@@ -163,7 +140,13 @@ export default function GamesIndexPage() {
     fetchGames(filters, page + 1, true);
   }
 
-  const hasActiveFilters = !!(filters.players || filters.maxTime || filters.complexity);
+  const hasActiveFilters = !!(
+    filters.players ||
+    filters.maxTime ||
+    filters.minComplexity ||
+    filters.maxComplexity ||
+    filters.sortBy !== "name"
+  );
   const hasMore = games.length < total;
 
   return (
@@ -326,15 +309,61 @@ export default function GamesIndexPage() {
                   <FilterListIcon sx={{ fontSize: "12px", mr: "4px", verticalAlign: "middle" }} />
                   Complexity
                 </FilterLabel>
-                <Box sx={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                  {complexityOptions.map((c) => (
-                    <FilterChip
-                      key={c.value}
-                      label={c.label}
-                      active={filters.complexity === c.value}
-                      onClick={() => handleFilterChange("complexity", c.value)}
-                    />
-                  ))}
+                <Box sx={{ mb: "8px" }}>
+                  <Typography
+                    sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: TEXT_FAINT, mb: "6px" }}
+                  >
+                    Min
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                    {[
+                      { label: "Light+", value: "1" },
+                      { label: "Medium+", value: "2" },
+                      { label: "Heavy+", value: "3.5" },
+                    ].map((c) => (
+                      <FilterChip
+                        key={c.value}
+                        label={c.label}
+                        active={filters.minComplexity === c.value}
+                        onClick={() => {
+                          const next = {
+                            ...filters,
+                            minComplexity: filters.minComplexity === c.value ? "" : c.value,
+                          };
+                          setFilters(next);
+                          fetchGames(next, 0);
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+                <Box>
+                  <Typography
+                    sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: TEXT_FAINT, mb: "6px" }}
+                  >
+                    Max
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                    {[
+                      { label: "≤ Light", value: "1.5" },
+                      { label: "≤ Medium", value: "2.5" },
+                      { label: "≤ Heavy", value: "5" },
+                    ].map((c) => (
+                      <FilterChip
+                        key={c.value}
+                        label={c.label}
+                        active={filters.maxComplexity === c.value}
+                        onClick={() => {
+                          const next = {
+                            ...filters,
+                            maxComplexity: filters.maxComplexity === c.value ? "" : c.value,
+                          };
+                          setFilters(next);
+                          fetchGames(next, 0);
+                        }}
+                      />
+                    ))}
+                  </Box>
                 </Box>
               </Box>
             </Box>
@@ -355,6 +384,63 @@ export default function GamesIndexPage() {
                 </Typography>
               </Box>
             )}
+            <Box
+              sx={{
+                borderTop: "1px solid",
+                borderColor: "divider",
+                pt: "20px",
+                mt: "4px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                flexWrap: "wrap",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontFamily: FONT_SANS,
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  color: "primary.main",
+                  letterSpacing: "1.2px",
+                  textTransform: "uppercase",
+                  flexShrink: 0,
+                }}
+              >
+                Sort by
+              </Typography>
+              <Box sx={{ display: "flex", gap: "6px", flexWrap: "wrap", flex: 1 }}>
+                {[
+                  { label: "Name", value: "name" },
+                  { label: "BGG Rating", value: "bggRating" },
+                  { label: "Complexity", value: "complexity" },
+                  { label: "Play time", value: "minPlaytime" },
+                  { label: "Year", value: "yearPublished" },
+                  { label: "Players", value: "minPlayers" },
+                ].map((opt) => (
+                  <FilterChip
+                    key={opt.value}
+                    label={
+                      filters.sortBy === opt.value
+                        ? `${opt.label} ${filters.sortDir === "asc" ? "↑" : "↓"}`
+                        : opt.label
+                    }
+                    active={filters.sortBy === opt.value}
+                    onClick={() => {
+                      const next = {
+                        ...filters,
+                        sortBy: opt.value,
+                        sortDir: (filters.sortBy === opt.value && filters.sortDir === "asc"
+                          ? "desc"
+                          : "asc") as "asc" | "desc",
+                      };
+                      setFilters(next);
+                      fetchGames(next, 0);
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
           </Collapse>
 
           {!loading && games.length === 0 && (

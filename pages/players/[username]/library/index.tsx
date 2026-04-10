@@ -2,6 +2,7 @@ import GameGrid from "@/components/games/GameGrid";
 import AddGameModal from "@/components/modals/AddGameModal";
 import BGGImportModal from "@/components/modals/BGGImportModal";
 import QuickGenModal from "@/components/modals/QuickGenModal";
+import FilterChip from "@/components/ui/FilterChip";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import { BORDER_AMBER, FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
@@ -30,12 +31,35 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
   const [addOpen, setAddOpen] = React.useState(false);
   const [quickGenOpen, setQuickGenOpen] = React.useState(false);
   const [importOpen, setImportOpen] = React.useState(false);
+  const [sortBy, setSortBy] = React.useState("name");
+  const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
 
   const filtered = React.useMemo(() => {
-    if (!search.trim()) return library;
-    const q = search.toLowerCase();
-    return library.filter((g) => g.name.toLowerCase().includes(q));
-  }, [library, search]);
+    let result = library;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter((g) => g.name.toLowerCase().includes(q));
+    }
+    return [...result].sort((a, b) => {
+      const dir = sortDir === "asc" ? 1 : -1;
+      switch (sortBy) {
+        case "bggRating":
+          return ((a.bggRating ?? 0) - (b.bggRating ?? 0)) * dir;
+        case "complexity":
+          return ((a.complexity ?? 0) - (b.complexity ?? 0)) * dir;
+        case "minPlaytime":
+          return (a.minPlaytime - b.minPlaytime) * dir;
+        case "yearPublished":
+          return ((a.yearPublished ?? 0) - (b.yearPublished ?? 0)) * dir;
+        case "userStars":
+          return ((a.userStars ?? 0) - (b.userStars ?? 0)) * dir;
+        case "addedAt":
+          return (new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime()) * dir;
+        default:
+          return a.name.localeCompare(b.name) * dir;
+      }
+    });
+  }, [library, search, sortBy, sortDir]);
 
   function handleAddGame(game: LibraryGame) {
     setLibrary((prev) => {
@@ -212,6 +236,55 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
               "& input::placeholder": { color: TEXT_FAINT },
             }}
           />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              mb: "24px",
+              flexWrap: "wrap",
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: FONT_SANS,
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "primary.main",
+                letterSpacing: "1.2px",
+                textTransform: "uppercase",
+                flexShrink: 0,
+                mr: "4px",
+              }}
+            >
+              Sort
+            </Typography>
+            {[
+              { label: "Name", value: "name" },
+              { label: "BGG Rating", value: "bggRating" },
+              { label: "Complexity", value: "complexity" },
+              { label: "Play time", value: "minPlaytime" },
+              { label: "Year", value: "yearPublished" },
+              { label: "My Rating", value: "userStars" },
+              { label: "Date Added", value: "addedAt" },
+            ].map((opt) => (
+              <FilterChip
+                key={opt.value}
+                label={
+                  sortBy === opt.value ? `${opt.label} ${sortDir === "asc" ? "↑" : "↓"}` : opt.label
+                }
+                active={sortBy === opt.value}
+                onClick={() => {
+                  if (sortBy === opt.value) {
+                    setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                  } else {
+                    setSortBy(opt.value);
+                    setSortDir("asc");
+                  }
+                }}
+              />
+            ))}
+          </Box>
 
           {filtered.length === 0 && (
             <Box sx={{ textAlign: "center", py: "64px" }}>

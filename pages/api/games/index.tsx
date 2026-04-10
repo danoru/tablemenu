@@ -10,46 +10,62 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     minTime,
     maxTime,
     complexity,
+    minComplexity,
+    sortBy = "name",
+    sortDir = "asc",
     page = "0",
   } = req.query as Record<string, string>;
 
   const pageNum = parseInt(page);
   const PAGE_SIZE = 48;
 
-  const dbGames = await prisma.games.findMany({
-    where: {
-      ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
-      ...(players
-        ? { minPlayers: { lte: parseInt(players) }, maxPlayers: { gte: parseInt(players) } }
-        : {}),
-      ...(minTime ? { minPlaytime: { gte: parseInt(minTime) } } : {}),
-      ...(maxTime ? { maxPlaytime: { lte: parseInt(maxTime) } } : {}),
-      ...(complexity ? { complexity: { lte: parseFloat(complexity) } } : {}),
-    },
-    orderBy: { name: "asc" },
-    take: PAGE_SIZE,
-    skip: pageNum * PAGE_SIZE,
-    select: {
-      id: true,
-      name: true,
-      imageUrl: true,
-      bggId: true,
-      minPlayers: true,
-      maxPlayers: true,
-      minPlaytime: true,
-      maxPlaytime: true,
-      complexity: true,
-      bggRating: true,
-      categories: true,
-      yearPublished: true,
-    },
-  });
+  const where = {
+    ...(q ? { name: { contains: q, mode: "insensitive" as const } } : {}),
+    ...(players
+      ? { minPlayers: { lte: parseInt(players) }, maxPlayers: { gte: parseInt(players) } }
+      : {}),
+    ...(minTime ? { minPlaytime: { gte: parseInt(minTime) } } : {}),
+    ...(maxTime ? { maxPlaytime: { lte: parseInt(maxTime) } } : {}),
+    ...(complexity ? { complexity: { lte: parseFloat(complexity) } } : {}),
+    ...(minComplexity ? { complexity: { gte: parseFloat(minComplexity) } } : {}),
+  };
 
-  const total = await prisma.games.count({
-    where: {
-      ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
-    },
-  });
+  const orderBy: any =
+    sortBy === "bggRating"
+      ? { bggRating: sortDir }
+      : sortBy === "complexity"
+        ? { complexity: sortDir }
+        : sortBy === "minPlaytime"
+          ? { minPlaytime: sortDir }
+          : sortBy === "yearPublished"
+            ? { yearPublished: sortDir }
+            : sortBy === "minPlayers"
+              ? { minPlayers: sortDir }
+              : { name: sortDir };
+
+  const [dbGames, total] = await Promise.all([
+    prisma.games.findMany({
+      where,
+      orderBy,
+      take: PAGE_SIZE,
+      skip: pageNum * PAGE_SIZE,
+      select: {
+        id: true,
+        name: true,
+        imageUrl: true,
+        bggId: true,
+        minPlayers: true,
+        maxPlayers: true,
+        minPlaytime: true,
+        maxPlaytime: true,
+        complexity: true,
+        bggRating: true,
+        categories: true,
+        yearPublished: true,
+      },
+    }),
+    prisma.games.count({ where }),
+  ]);
 
   const games = dbGames.map((g) => ({
     gameId: g.id,
