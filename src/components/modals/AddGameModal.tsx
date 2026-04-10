@@ -152,14 +152,15 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
       });
 
       const addData = await addRes.json();
+      const gameName = cleanText(game.name);
 
       if (addRes.ok) {
         setAdded((prev) => new Set(prev).add(result.bggId));
         setSnackbar({
           open: true,
           message: addData.alreadyInLibrary
-            ? `${game.name} is already in your library.`
-            : `${game.name} added to your library!`,
+            ? `${cleanText(gameName)} is already in your library.`
+            : `${cleanText(gameName)} added to your library!`,
           severity: "success",
         });
         if (!addData.alreadyInLibrary) onAdded(game);
