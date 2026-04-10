@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   try {
     const userGames = await prisma.userGames.findMany({
-      where: { userId },
+      where: { userId, isWishlist: false },
       orderBy: { addedAt: "desc" },
       include: {
         game: true,

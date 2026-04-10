@@ -16,7 +16,7 @@ export async function getUserLibrary(userId: number) {
         name: "asc",
       },
     },
-    where: { userId },
+    where: { userId, isWishlist: false },
   });
 
   const ratings = await prisma.userGameRatings.findMany({
