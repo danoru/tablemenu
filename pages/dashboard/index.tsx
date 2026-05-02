@@ -86,7 +86,6 @@ export default function DashboardPage({
   const stats = {
     gamesOwned: library.length,
     nightsHosted: nightsHosted,
-    following: 0,
     activeRooms: activeRooms.length,
   };
 
@@ -449,7 +448,7 @@ export default function DashboardPage({
                 Follow other players to see their activity here
               </Typography>
               <Button
-                onClick={() => router.push("/users")}
+                onClick={() => router.push("/players")}
                 sx={{
                   background: "transparent",
                   border: `1px solid ${BORDER_AMBER}`,

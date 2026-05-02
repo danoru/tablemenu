@@ -38,9 +38,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       },
     });
 
-    console.log("BGG status:", bggRes.status);
-    console.log("BGG ok:", bggRes.ok);
-
     if (!bggRes.ok) {
       return res.status(502).json({ error: "BGG API unavailable" });
     }

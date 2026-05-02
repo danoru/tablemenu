@@ -1,4 +1,4 @@
-import { GOLD, GOLD_LIGHT } from "@/styles/theme";
+import { GOLD } from "@/styles/theme";
 import { Box, Button, OutlinedInput, Typography } from "@mui/material";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
@@ -340,7 +340,7 @@ export default function HomePage() {
     try {
       const res = await fetch(`/api/rooms/${roomCode.toUpperCase()}`);
       if (res.ok) {
-        router.push(`/room/${roomCode.toUpperCase()}`);
+        router.push(`/rooms/${roomCode.toUpperCase()}`);
       } else {
         setError("Room not found. Check your code and try again.");
       }
@@ -413,23 +413,6 @@ export default function HomePage() {
                 }}
               >
                 Build my library
-              </Button>
-              <Button
-                onClick={() => router.push("/tablegen")}
-                sx={{
-                  background: "transparent",
-                  border: "1px solid rgba(180,140,60,0.35)",
-                  borderRadius: "8px",
-                  color: GOLD_LIGHT,
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: "15px",
-                  fontWeight: 500,
-                  padding: "13px 28px",
-                  textTransform: "none",
-                  "&:hover": { background: "rgba(180,140,60,0.1)" },
-                }}
-              >
-                Quick gen — no account
               </Button>
             </Box>
           </Box>
