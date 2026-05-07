@@ -33,21 +33,54 @@ import { useRouter } from "next/router";
 import React from "react";
 import superjson from "superjson";
 
-function PlayerPill({ value, label }: { value: number; label: string }) {
+function PlayerPill({
+  value,
+  label,
+  onClick,
+}: {
+  value: number;
+  label: string;
+  onClick?: () => void;
+}) {
   return (
-    <Box sx={{ textAlign: "center" }}>
+    <Box
+      onClick={onClick}
+      sx={{
+        textAlign: "center",
+        cursor: onClick ? "pointer" : "default",
+        transition: "transform 0.15s",
+        "&:hover": onClick
+          ? {
+              transform: "translateY(-1px)",
+              "& .pill-value": { color: GOLD },
+              "& .pill-label": { color: TEXT_DIM },
+            }
+          : undefined,
+      }}
+    >
       <Typography
+        className="pill-value"
         sx={{
           fontFamily: FONT_SERIF,
           fontSize: "22px",
           fontWeight: 700,
           color: "text.primary",
           lineHeight: 1,
+          transition: "color 0.15s",
         }}
       >
         {value}
       </Typography>
-      <Typography sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT, mt: "3px" }}>
+      <Typography
+        className="pill-label"
+        sx={{
+          fontFamily: FONT_SANS,
+          fontSize: "12px",
+          color: TEXT_FAINT,
+          mt: "3px",
+          transition: "color 0.15s",
+        }}
+      >
         {label}
       </Typography>
     </Box>
@@ -388,11 +421,27 @@ export default function UserProfilePage({
 
             <Divider sx={{ borderColor: "divider", my: "24px" }} />
             <Box sx={{ display: "flex", gap: "32px" }}>
-              <PlayerPill value={followerCount} label="followers" />
-              <PlayerPill value={followingCount} label="following" />
-              <PlayerPill value={library.length} label="games owned" />
+              <PlayerPill
+                label="followers"
+                value={followerCount}
+                onClick={() => router.push(`/players/${profileUser.username}/followers`)}
+              />
+              <PlayerPill
+                label="following"
+                value={followingCount}
+                onClick={() => router.push(`/players/${profileUser.username}/following`)}
+              />
+              <PlayerPill
+                label="games owned"
+                value={library.length}
+                onClick={() => router.push(`/players/${profileUser.username}/library`)}
+              />
               {wantToPlay.length > 0 && (
-                <PlayerPill value={wantToPlay.length} label="want to play" />
+                <PlayerPill
+                  label="want to play"
+                  value={wantToPlay.length}
+                  onClick={() => router.push(`/players/${profileUser.username}/library`)}
+                />
               )}
             </Box>
           </Box>
