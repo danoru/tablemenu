@@ -1,7 +1,7 @@
+import Header from "@/components/layout/Header";
 import { GOLD } from "@/styles/theme";
 import { Box, Button, OutlinedInput, Typography } from "@mui/material";
 import { GetServerSideProps } from "next";
-import Head from "next/head";
 import { getServerSession } from "next-auth";
 import { useRouter } from "next/router";
 import React from "react";
@@ -353,13 +353,10 @@ export default function HomePage() {
 
   return (
     <>
-      <Head>
-        <title>Tablekeeper — Board game night, sorted</title>
-        <meta
-          name="description"
-          content="Stop arguing about what to play. Tablekeeper picks the perfect game for your group in seconds."
-        />
-      </Head>
+      <Header
+        title="Tablekeeper — Board game night, sorted"
+        description="Stop arguing about what to play. Tablekeeper picks the perfect game for your group in seconds."
+      />
 
       <Box sx={styles.root}>
         <Box sx={styles.ambientTop} />

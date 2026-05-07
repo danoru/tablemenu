@@ -25,6 +25,8 @@ import { useRouter } from "next/router";
 import React from "react";
 import * as Yup from "yup";
 
+import { safeNextPath } from "@/lib/redirect";
+
 const inputSx = {
   mb: "16px",
   "& .MuiInputLabel-root": {
@@ -84,7 +86,7 @@ export default function LoginForm() {
       setSnackbarMessage("Welcome back! Redirecting…");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
-      router.replace("/dashboard");
+      router.replace(safeNextPath(router.query) ?? "/dashboard");
     }
 
     setSubmitting(false);

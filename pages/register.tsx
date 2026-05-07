@@ -22,6 +22,8 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import * as Yup from "yup";
 
+import { safeNextPath } from "@/lib/redirect";
+
 const inputSx = {
   mb: "16px",
   "& .MuiInputLabel-root": {
@@ -90,7 +92,9 @@ export default function RegistrationForm() {
       if (res.ok) {
         setSnackbar({ open: true, message: "Account created! Redirecting…", severity: "success" });
         resetForm();
-        setTimeout(() => router.push("/login"), 1500);
+        const next = safeNextPath(router.query);
+        const loginUrl = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
+        setTimeout(() => router.push(loginUrl), 1500);
       } else {
         if (data.error === "Username already exists.") {
           setFieldError("username", data.error);

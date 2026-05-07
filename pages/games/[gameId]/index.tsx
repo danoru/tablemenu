@@ -39,10 +39,10 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import Header from "@/components/layout/Header";
 import { LibraryGame } from "@pages/api/games/library";
 import { UserGameRatings, UserGames } from "@prisma/client";
 import { GetServerSideProps } from "next";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import { getServerSession } from "next-auth";
 import React from "react";
@@ -234,9 +234,20 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
 
   return (
     <>
-      <Head>
-        <title>{game.name} — Tablekeeper</title>
-      </Head>
+      <Header
+        title={`${game.name} — Tablekeeper`}
+        description={`${
+          game.minPlayers === game.maxPlayers
+            ? `${game.minPlayers} ${game.minPlayers === 1 ? "player" : "players"}`
+            : `${game.minPlayers}–${game.maxPlayers} players`
+        } · ${
+          game.minPlaytime === game.maxPlaytime
+            ? `${game.maxPlaytime} min`
+            : `${game.minPlaytime}–${game.maxPlaytime} min`
+        }${game.complexity ? ` · weight ${game.complexity.toFixed(1)}/5` : ""}. Track ${game.name} on Tablekeeper.`}
+        image={game.imageUrl ?? undefined}
+        type="article"
+      />
 
       <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
