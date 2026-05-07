@@ -1,7 +1,36 @@
+import type { GameForCompat } from "@/services/compatibility";
+
 import prisma from "./db";
 
 export async function getGameById(id: number) {
   return prisma.games.findUnique({ where: { id } });
+}
+
+export async function getUserGamesForTaste(userId: number): Promise<GameForCompat[]> {
+  const userGames = await prisma.userGames.findMany({
+    where: { userId, isWishlist: false },
+    include: { game: true },
+  });
+  const ratings = await prisma.userGameRatings.findMany({
+    where: { userId },
+    select: { gameId: true, stars: true },
+  });
+  const ratingMap = new Map(ratings.map((r) => [r.gameId, r.stars]));
+  return userGames.map((ug) => ({
+    gameId: ug.gameId,
+    name: ug.game.name,
+    imageUrl: ug.game.imageUrl,
+    complexity: ug.game.complexity,
+    minPlaytime: ug.game.minPlaytime,
+    maxPlaytime: ug.game.maxPlaytime,
+    minPlayers: ug.game.minPlayers,
+    maxPlayers: ug.game.maxPlayers,
+    yearPublished: ug.game.yearPublished,
+    categories: ug.game.categories,
+    mechanics: ug.game.mechanics,
+    isFavorite: ug.isFavorite,
+    userStars: ratingMap.get(ug.gameId) ?? null,
+  }));
 }
 
 export async function getGameByName(name: string) {

@@ -1,7 +1,10 @@
 import GameArt from "@/components/games/GameArt";
-import { getUserLibrary } from "@/data/games";
+import CompatibilityCard from "@/components/players/CompatibilityCard";
+import TasteProfileCard from "@/components/players/TasteProfileCard";
+import { getUserGamesForTaste, getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import { avatarColor } from "@/lib/helpers";
+import { buildTasteProfile, type TasteProfile } from "@/services/tasteProfile";
 import {
   AMBER_DIM,
   BLUE,
@@ -21,11 +24,11 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import { Box, Button, CircularProgress, Divider, Typography } from "@mui/material";
+import Header from "@/components/layout/Header";
 import { LibraryGame } from "@pages/api/games/library";
 import type { Users } from "@prisma/client";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
 import superjson from "superjson";
@@ -61,6 +64,8 @@ interface Props {
   followingCount: number;
   library: LibraryGame[];
   wantToPlay: LibraryGame[];
+  tasteProfile: TasteProfile;
+  showCompatibility: boolean;
 }
 
 export default function UserProfilePage({
@@ -71,13 +76,23 @@ export default function UserProfilePage({
   followingCount,
   library,
   wantToPlay,
+  tasteProfile,
+  showCompatibility,
 }: Props) {
   const router = useRouter();
   const [isFollowing, setIsFollowing] = React.useState(initialIsFollowing);
   const [followerCount, setFollowerCount] = React.useState(initialFollowerCount);
   const [followLoading, setFollowLoading] = React.useState(false);
 
-  const libraryPreview = library.slice(0, 6);
+  const libraryPreview = [...library]
+    .sort((a, b) => {
+      if (a.isFavorite !== b.isFavorite) return a.isFavorite ? -1 : 1;
+      const aStars = a.userStars ?? -1;
+      const bStars = b.userStars ?? -1;
+      if (aStars !== bStars) return bStars - aStars;
+      return b.addedAt.localeCompare(a.addedAt);
+    })
+    .slice(0, 6);
   const wantToPlayPreview = wantToPlay.slice(0, 6);
 
   async function handleFollow() {
@@ -105,9 +120,15 @@ export default function UserProfilePage({
 
   return (
     <>
-      <Head>
-        <title>{profileUser.username} — Tablekeeper</title>
-      </Head>
+      <Header
+        title={`${profileUser.username} — Tablekeeper`}
+        description={
+          profileUser.bio
+            ? profileUser.bio
+            : `${profileUser.username}'s board game library on Tablekeeper — ${library.length} ${library.length === 1 ? "game" : "games"}${wantToPlay.length > 0 ? `, ${wantToPlay.length} on the wishlist` : ""}.`
+        }
+        type="profile"
+      />
 
       <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
@@ -376,6 +397,28 @@ export default function UserProfilePage({
             </Box>
           </Box>
 
+          <Box
+            sx={{
+              display: "flex",
+              gap: "12px",
+              flexDirection: { xs: "column", sm: "row" },
+              mb: "28px",
+            }}
+          >
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <TasteProfileCard
+                isSelf={isSelf}
+                profile={tasteProfile}
+                username={profileUser.username}
+              />
+            </Box>
+            {showCompatibility && (
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <CompatibilityCard username={profileUser.username} />
+              </Box>
+            )}
+          </Box>
+
           <Box sx={{ mb: "28px" }}>
             <Box
               sx={{
@@ -421,7 +464,7 @@ export default function UserProfilePage({
               {libraryPreview.map((game) => (
                 <Box
                   key={game.gameId}
-                  onClick={() => router.push(`/players/${profileUser.username}/library`)}
+                  onClick={() => router.push(`/games/${game.gameId}`)}
                   sx={{
                     position: "relative",
                     backgroundColor: "background.paper",
@@ -592,8 +635,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { notFound: true };
   }
 
-  const library = await getUserLibrary(user.id);
+  const [library, tasteGames] = await Promise.all([
+    getUserLibrary(user.id),
+    getUserGamesForTaste(user.id),
+  ]);
   const wantToPlay = library.filter((g) => g.isWishlist);
+  const tasteProfile = buildTasteProfile(tasteGames);
 
   let isFollowing = false;
   if (currentUserId && currentUserId !== user.id) {
@@ -608,16 +655,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     isFollowing = !!follow;
   }
 
+  const isSelf = currentUsername === username;
+  const showCompatibility = !!currentUserId && !isSelf;
+
   const { _count, ...profileUser } = user;
 
   const serialized = superjson.serialize({
     profileUser: { ...profileUser },
-    isSelf: currentUsername === username,
+    isSelf,
     isFollowing,
     followerCount: _count.followedBy,
     followingCount: _count.following,
     library,
     wantToPlay,
+    tasteProfile,
+    showCompatibility,
   });
 
   return {

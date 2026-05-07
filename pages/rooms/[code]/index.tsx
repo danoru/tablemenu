@@ -14,6 +14,7 @@ import {
   TEXT_DIM,
   TEXT_FAINT,
 } from "@/styles/theme";
+import Header from "@/components/layout/Header";
 import type { RoomData } from "@api/rooms/[code]/index";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CheckIcon from "@mui/icons-material/Check";
@@ -26,18 +27,172 @@ import { Alert, Box, Button, CircularProgress, Divider, Snackbar, Typography } f
 import { LibraryGame } from "@pages/api/games/library";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
 
-interface Props {
+interface PreviewRoom {
+  name: string;
+  code: string;
+  hostUsername: string;
+  memberCount: number;
+  suggestionCount: number;
+}
+
+type Props =
+  | { preview: true; room: PreviewRoom }
+  | {
+      preview: false;
+      initialRoom: RoomData;
+      currentUserId: number;
+      library: LibraryGame[];
+      username: string;
+    };
+
+function RoomPreview({ room }: { room: PreviewRoom }) {
+  const router = useRouter();
+  const next = encodeURIComponent(`/rooms/${room.code}`);
+
+  return (
+    <>
+      <Header
+        title={`${room.name} — Tablekeeper`}
+        description={`Game night hosted by ${room.hostUsername} · code ${room.code}. ${room.suggestionCount} ${room.suggestionCount === 1 ? "game" : "games"} on the table, ${room.memberCount} ${room.memberCount === 1 ? "player" : "players"} invited.`}
+      />
+      <Box
+        sx={{
+          backgroundColor: "background.default",
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: { xs: "32px 16px", md: "48px 32px" },
+        }}
+      >
+        <Box
+          sx={{
+            maxWidth: "480px",
+            width: "100%",
+            background: "rgba(255,255,255,0.03)",
+            border: `1px solid ${BORDER_AMBER}`,
+            borderRadius: "14px",
+            padding: { xs: "32px 24px", md: "44px 36px" },
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: FONT_SANS,
+              fontSize: "11px",
+              fontWeight: 500,
+              letterSpacing: "1.5px",
+              textTransform: "uppercase",
+              color: TEXT_FAINT,
+              mb: "10px",
+            }}
+          >
+            You're invited to
+          </Typography>
+
+          <Typography
+            sx={{
+              fontFamily: FONT_SERIF,
+              fontSize: { xs: "30px", md: "36px" },
+              fontWeight: 900,
+              color: "text.primary",
+              lineHeight: 1.1,
+              letterSpacing: "-0.5px",
+              mb: "12px",
+            }}
+          >
+            {room.name}
+          </Typography>
+
+          <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM, mb: "4px" }}>
+            Hosted by {room.hostUsername}
+          </Typography>
+
+          <Typography
+            sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_FAINT, mb: "28px" }}
+          >
+            {room.suggestionCount} {room.suggestionCount === 1 ? "game" : "games"} ·{" "}
+            {room.memberCount} {room.memberCount === 1 ? "player" : "players"} invited · code{" "}
+            {room.code}
+          </Typography>
+
+          <Button
+            onClick={() => router.push(`/login?next=${next}`)}
+            sx={{
+              backgroundColor: "primary.main",
+              borderRadius: "8px",
+              color: "background.default",
+              fontFamily: FONT_SANS,
+              fontSize: "14px",
+              fontWeight: 500,
+              padding: "10px 22px",
+              textTransform: "none",
+              width: "100%",
+              mb: "10px",
+              "&:hover": { backgroundColor: "primary.light" },
+            }}
+          >
+            Sign in to join
+          </Button>
+
+          <Button
+            onClick={() => router.push(`/register?next=${next}`)}
+            sx={{
+              background: "transparent",
+              border: `1px solid ${BORDER_AMBER}`,
+              borderRadius: "8px",
+              color: TEXT_DIM,
+              fontFamily: FONT_SANS,
+              fontSize: "14px",
+              fontWeight: 500,
+              padding: "10px 22px",
+              textTransform: "none",
+              width: "100%",
+              "&:hover": {
+                background: "rgba(180,140,60,0.08)",
+                color: "text.primary",
+                borderColor: "primary.main",
+              },
+            }}
+          >
+            Create an account
+          </Button>
+        </Box>
+      </Box>
+    </>
+  );
+}
+
+interface AuthedRoomPageProps {
   initialRoom: RoomData;
   currentUserId: number;
   library: LibraryGame[];
   username: string;
 }
 
-export default function RoomPage({ initialRoom, currentUserId, library, username }: Props) {
+export default function RoomPage(props: Props) {
+  if (props.preview) {
+    return <RoomPreview room={props.room} />;
+  }
+  return (
+    <AuthenticatedRoomPage
+      initialRoom={props.initialRoom}
+      currentUserId={props.currentUserId}
+      library={props.library}
+      username={props.username}
+    />
+  );
+}
+
+function AuthenticatedRoomPage({
+  initialRoom,
+  currentUserId,
+  library,
+  username,
+}: AuthedRoomPageProps) {
   const router = useRouter();
   const { code } = router.query as { code: string };
 
@@ -191,9 +346,10 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
 
   return (
     <>
-      <Head>
-        <title>{room.name} — Tablekeeper</title>
-      </Head>
+      <Header
+        title={`${room.name} — Tablekeeper`}
+        description={`Game night hosted by ${room.hostUsername} · code ${room.code}. ${room.suggestions.length} ${room.suggestions.length === 1 ? "game" : "games"} on the table, ${room.members.length} ${room.members.length === 1 ? "player" : "players"} invited.`}
+      />
 
       <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
         <Box
@@ -835,14 +991,35 @@ export default function RoomPage({ initialRoom, currentUserId, library, username
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { code } = context.params as { code: string };
   const session = await getServerSession(context.req, context.res, authOptions);
+  const { default: prisma } = await import("@data/db");
 
-  if (!session?.user)
-    return { redirect: { destination: `/login?next=/rooms/${code}`, permanent: false } };
+  if (!session?.user) {
+    const room = await prisma.rooms.findUnique({
+      where: { code: code.toUpperCase() },
+      select: {
+        name: true,
+        code: true,
+        host: { select: { username: true } },
+        _count: { select: { invites: true, gameSuggs: true } },
+      },
+    });
+    if (!room) return { notFound: true };
+    return {
+      props: {
+        preview: true as const,
+        room: {
+          name: room.name,
+          code: room.code,
+          hostUsername: room.host.username,
+          memberCount: room._count.invites,
+          suggestionCount: room._count.gameSuggs,
+        },
+      },
+    };
+  }
 
   const currentUserId = Number((session.user as any).id);
   const username = (session.user as any).username ?? "";
-
-  const { default: prisma } = await import("@data/db");
 
   const queryArgs = {
     where: { code: code.toUpperCase() },
@@ -884,6 +1061,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
+      preview: false as const,
       initialRoom: buildRoomData(room, currentUserId, lastSessionGameIds),
       currentUserId,
       library,
