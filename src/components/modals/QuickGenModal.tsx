@@ -1,12 +1,4 @@
-import {
-  BG_ELEVATED,
-  BORDER_AMBER,
-  FONT_SANS,
-  FONT_SERIF,
-  GOLD,
-  TEXT_DIM,
-  TEXT_FAINT,
-} from "@/styles/theme";
+import { BRICK, FONT_SANS, FONT_SERIF, INK, MUSTARD, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CloseIcon from "@mui/icons-material/Close";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
@@ -59,16 +51,16 @@ function chipSx(active: boolean) {
   return {
     fontFamily: FONT_SANS,
     fontSize: "13px",
-    fontWeight: active ? 500 : 400,
+    fontWeight: active ? 700 : 500,
     height: "32px",
-    background: active ? "rgba(200,150,42,0.2)" : "rgba(255,255,255,0.04)",
-    border: `1px solid ${active ? "primary.main" : "divider"}`,
-    color: active ? GOLD : TEXT_DIM,
+    background: active ? MUSTARD : "transparent",
+    border: `2px solid ${active ? INK : "rgba(51,39,26,0.3)"}`,
+    color: active ? INK : TEXT_DIM,
     cursor: "pointer",
-    transition: "all 0.15s",
+    transition: "all 0.12s ease",
     "&:hover": {
-      background: active ? "rgba(200,150,42,0.3)" : "rgba(255,255,255,0.07)",
-      borderColor: "primary.main",
+      background: active ? MUSTARD : "rgba(51,39,26,0.05)",
+      borderColor: INK,
     },
     "& .MuiChip-label": { padding: "0 10px" },
   };
@@ -134,34 +126,7 @@ export default function QuickGenModal({
   const pool = getPool();
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      TransitionComponent={SlideUp}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        sx: {
-          background: BG_ELEVATED,
-          border: `1px solid ${BORDER_AMBER}`,
-          borderRadius: "14px",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
-          overflow: "hidden",
-        },
-      }}
-    >
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "50%",
-          background:
-            "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(34,85,48,0.18) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
+    <Dialog open={open} onClose={handleClose} TransitionComponent={SlideUp} fullWidth maxWidth="sm">
       <DialogContent sx={{ padding: "28px", position: "relative" }}>
         <Box
           sx={{
@@ -268,7 +233,7 @@ export default function QuickGenModal({
           )}
           {noResults && (
             <Typography
-              sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: "rgba(220,100,100,0.8)" }}
+              sx={{ fontFamily: FONT_SANS, fontSize: "14px", fontWeight: 500, color: "error.main" }}
             >
               No games match those filters.
             </Typography>
@@ -290,7 +255,7 @@ export default function QuickGenModal({
                   fontFamily: FONT_SERIF,
                   fontSize: "24px",
                   fontWeight: 700,
-                  color: spinning ? TEXT_DIM : GOLD,
+                  color: spinning ? TEXT_DIM : BRICK,
                   textAlign: "center",
                   maxWidth: "320px",
                 }}
@@ -315,47 +280,22 @@ export default function QuickGenModal({
         <Box sx={{ display: "flex", gap: "10px", mt: "24px" }}>
           <Button
             fullWidth
+            variant="contained"
             onClick={spin}
             disabled={spinning}
             startIcon={
-              spinning ? (
-                <CircularProgress size={16} sx={{ color: "background.default" }} />
-              ) : (
-                <CasinoIcon />
-              )
+              spinning ? <CircularProgress size={16} sx={{ color: "inherit" }} /> : <CasinoIcon />
             }
-            sx={{
-              backgroundColor: "primary.main",
-              borderRadius: "8px",
-              color: "background.default",
-              fontFamily: FONT_SANS,
-              fontSize: "15px",
-              fontWeight: 500,
-              padding: "12px",
-              textTransform: "none",
-              "&:hover": { backgroundColor: "primary.light" },
-              "&.Mui-disabled": { background: "rgba(200,150,42,0.35)", color: "rgba(15,12,8,0.5)" },
-            }}
+            sx={{ fontSize: "15px", padding: "10px" }}
           >
             {spinning ? "Picking…" : result ? "Spin again" : "Spin"}
           </Button>
           {result && !spinning && (
             <Button
+              variant="outlined"
               onClick={spin}
               startIcon={<ShuffleIcon />}
-              sx={{
-                background: "transparent",
-                border: `1px solid ${BORDER_AMBER}`,
-                borderRadius: "8px",
-                color: TEXT_DIM,
-                fontFamily: FONT_SANS,
-                fontSize: "15px",
-                fontWeight: 500,
-                padding: "12px 20px",
-                textTransform: "none",
-                whiteSpace: "nowrap",
-                "&:hover": { background: "rgba(180,140,60,0.08)", color: "text.primary" },
-              }}
+              sx={{ fontSize: "15px", padding: "10px 20px", whiteSpace: "nowrap" }}
             >
               Re-roll
             </Button>

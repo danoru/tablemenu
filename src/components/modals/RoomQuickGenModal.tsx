@@ -1,12 +1,13 @@
 import { gameColor, initials } from "@/lib/helpers";
 import {
-  BG_ELEVATED,
-  BORDER_AMBER,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
-  GOLD,
+  INK,
+  OLIVE,
   TEXT_DIM,
   TEXT_FAINT,
+  TINT_OLIVE,
 } from "@/styles/theme";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CloseIcon from "@mui/icons-material/Close";
@@ -74,34 +75,7 @@ export default function RoomQuickGenModal({
   }
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      TransitionComponent={SlideUp}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        sx: {
-          background: BG_ELEVATED,
-          border: `1px solid ${BORDER_AMBER}`,
-          borderRadius: "14px",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
-          overflow: "hidden",
-        },
-      }}
-    >
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "50%",
-          background:
-            "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(34,85,48,0.2) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
+    <Dialog open={open} onClose={handleClose} TransitionComponent={SlideUp} fullWidth maxWidth="sm">
       <DialogContent sx={{ padding: "32px", position: "relative" }}>
         <Box
           sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: "8px" }}
@@ -176,15 +150,15 @@ export default function RoomQuickGenModal({
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        border: `1px solid ${BORDER_AMBER}`,
+                        border: `2px solid ${INK}`,
                       }}
                     >
                       <Typography
                         sx={{
                           fontFamily: FONT_SERIF,
                           fontSize: "28px",
-                          fontWeight: 700,
-                          color: "rgba(232,223,200,0.5)",
+                          fontWeight: 900,
+                          color: "rgba(255,251,240,0.9)",
                           userSelect: "none",
                         }}
                       >
@@ -197,7 +171,7 @@ export default function RoomQuickGenModal({
                       fontFamily: FONT_SERIF,
                       fontSize: "28px",
                       fontWeight: 700,
-                      color: spinning ? TEXT_DIM : GOLD,
+                      color: spinning ? TEXT_DIM : BRICK,
                       textAlign: "center",
                       maxWidth: "340px",
                       lineHeight: 1.1,
@@ -214,9 +188,10 @@ export default function RoomQuickGenModal({
                         sx={{
                           fontFamily: FONT_SANS,
                           fontSize: "12px",
-                          background: "rgba(94,201,122,0.15)",
-                          color: "secondary.light",
-                          border: "1px solid rgba(94,201,122,0.2)",
+                          fontWeight: 700,
+                          background: TINT_OLIVE,
+                          color: OLIVE,
+                          border: `1.5px solid ${OLIVE}`,
                         }}
                       />
                       <Chip
@@ -225,10 +200,10 @@ export default function RoomQuickGenModal({
                         sx={{
                           fontFamily: FONT_SANS,
                           fontSize: "12px",
-                          background: "rgba(255,255,255,0.05)",
+                          fontWeight: 500,
+                          background: "transparent",
                           color: TEXT_DIM,
-                          border: "1px solid",
-                          borderColor: "divider",
+                          border: "1.5px solid rgba(51,39,26,0.3)",
                         }}
                       />
                     </Box>
@@ -239,48 +214,26 @@ export default function RoomQuickGenModal({
             <Box sx={{ display: "flex", gap: "10px" }}>
               <Button
                 fullWidth
+                variant="contained"
                 onClick={spin}
                 disabled={spinning}
                 startIcon={
                   spinning ? (
-                    <CircularProgress size={16} sx={{ color: "background.default" }} />
+                    <CircularProgress size={16} sx={{ color: "inherit" }} />
                   ) : (
                     <CasinoIcon />
                   )
                 }
-                sx={{
-                  backgroundColor: "primary.main",
-                  borderRadius: "8px",
-                  color: "background.default",
-                  fontFamily: FONT_SANS,
-                  fontSize: "15px",
-                  fontWeight: 500,
-                  padding: "12px",
-                  textTransform: "none",
-                  "&:hover": { backgroundColor: "primary.light" },
-                  "&.Mui-disabled": {
-                    background: "rgba(200,150,42,0.35)",
-                    color: "rgba(15,12,8,0.5)",
-                  },
-                }}
+                sx={{ fontSize: "15px", padding: "10px" }}
               >
                 {spinning ? "Picking…" : result ? "Spin again" : "Spin"}
               </Button>
               {result && !spinning && (
                 <Button
+                  variant="outlined"
                   onClick={spin}
                   startIcon={<ShuffleIcon />}
-                  sx={{
-                    background: "transparent",
-                    border: `1px solid ${BORDER_AMBER}`,
-                    borderRadius: "8px",
-                    color: TEXT_DIM,
-                    fontFamily: FONT_SANS,
-                    fontSize: "15px",
-                    padding: "12px 20px",
-                    textTransform: "none",
-                    "&:hover": { background: "rgba(180,140,60,0.08)", color: "text.primary" },
-                  }}
+                  sx={{ fontSize: "15px", padding: "10px 20px", whiteSpace: "nowrap" }}
                 >
                   Re-roll
                 </Button>

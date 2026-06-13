@@ -1,5 +1,5 @@
 import { avatarColor } from "@/lib/helpers";
-import { FONT_SERIF } from "@/styles/theme";
+import { FONT_SERIF, INK } from "@/styles/theme";
 import { Box, Tooltip, Typography } from "@mui/material";
 
 interface FriendEntry {
@@ -24,14 +24,14 @@ export default function FriendMiniAvatar({
           height: "28px",
           borderRadius: "50%",
           background: friend.image ? "transparent" : avatarColor(friend.username),
-          border: `1.5px solid rgba(180,140,60,0.25)`,
+          border: `2px solid ${INK}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
           flexShrink: 0,
-          transition: "border-color 0.15s, transform 0.15s",
-          "&:hover": { borderColor: "primary.main", transform: "scale(1.1)" },
+          transition: "transform 0.15s",
+          "&:hover": { transform: "scale(1.1)" },
           overflow: "hidden",
         }}
       >
@@ -48,7 +48,7 @@ export default function FriendMiniAvatar({
               fontFamily: FONT_SERIF,
               fontSize: "11px",
               fontWeight: 700,
-              color: "rgba(232,223,200,0.7)",
+              color: "rgba(255,251,240,0.9)",
               userSelect: "none",
             }}
           >

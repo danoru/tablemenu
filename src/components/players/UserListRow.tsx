@@ -1,5 +1,16 @@
 import { avatarColor } from "@/lib/helpers";
-import { BORDER_AMBER, FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
+import {
+  BORDER_INK,
+  BRICK,
+  FONT_SANS,
+  FONT_SERIF,
+  INK,
+  SHADOW_HARD,
+  SHADOW_HARD_HOVER,
+  SURFACE,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
@@ -59,13 +70,13 @@ export default function UserListRow({ entry, isSelf, isAuthenticated }: Props) {
         alignItems: "center",
         gap: "16px",
         backgroundColor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: "12px",
+        border: BORDER_INK,
+        borderRadius: "13px",
+        boxShadow: SHADOW_HARD,
         padding: "14px 18px",
         cursor: "pointer",
-        transition: "border-color 0.15s, transform 0.15s",
-        "&:hover": { borderColor: BORDER_AMBER, transform: "translateY(-1px)" },
+        transition: "box-shadow 0.15s, transform 0.15s",
+        "&:hover": { boxShadow: SHADOW_HARD_HOVER, transform: "translate(-2px, -2px)" },
       }}
     >
       <Box
@@ -74,7 +85,7 @@ export default function UserListRow({ entry, isSelf, isAuthenticated }: Props) {
           height: "44px",
           borderRadius: "50%",
           background: entry.image ? "transparent" : avatarColor(entry.username),
-          border: `1.5px solid ${BORDER_AMBER}`,
+          border: `2px solid ${INK}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -95,7 +106,7 @@ export default function UserListRow({ entry, isSelf, isAuthenticated }: Props) {
               fontFamily: FONT_SERIF,
               fontSize: "18px",
               fontWeight: 700,
-              color: "rgba(232,223,200,0.7)",
+              color: "rgba(255,251,240,0.9)",
               userSelect: "none",
             }}
           >
@@ -160,10 +171,10 @@ export default function UserListRow({ entry, isSelf, isAuthenticated }: Props) {
           }
           onClick={handleFollow}
           sx={{
-            borderRadius: "8px",
+            borderRadius: "999px",
             fontFamily: FONT_SANS,
             fontSize: "12px",
-            fontWeight: 500,
+            fontWeight: 700,
             padding: "6px 14px",
             textTransform: "none",
             flexShrink: 0,
@@ -171,18 +182,19 @@ export default function UserListRow({ entry, isSelf, isAuthenticated }: Props) {
             ...(isFollowing
               ? {
                   background: "transparent",
-                  border: `1px solid ${BORDER_AMBER}`,
+                  border: "1.5px solid rgba(51,39,26,0.4)",
                   color: TEXT_DIM,
                   "&:hover": {
-                    borderColor: "rgba(220,80,80,0.4)",
-                    color: "rgba(220,120,120,0.9)",
-                    background: "rgba(220,80,80,0.06)",
+                    borderColor: BRICK,
+                    color: BRICK,
+                    background: "rgba(192,69,44,0.06)",
                   },
                 }
               : {
                   backgroundColor: "primary.main",
-                  border: "none",
-                  color: "background.default",
+                  border: `1.5px solid ${INK}`,
+                  boxShadow: `2px 2px 0 ${INK}`,
+                  color: SURFACE,
                   "&:hover": { backgroundColor: "primary.light" },
                 }),
             "&.Mui-disabled": { opacity: 0.5 },

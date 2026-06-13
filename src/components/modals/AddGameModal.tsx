@@ -1,10 +1,12 @@
 import {
-  BG_ELEVATED,
-  BORDER_AMBER,
   FONT_SANS,
   FONT_SERIF,
+  INK,
+  OLIVE,
   TEXT_DIM,
   TEXT_FAINT,
+  TINT_MUSTARD,
+  TINT_OLIVE,
 } from "@/styles/theme";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
@@ -189,21 +191,7 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
   }
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      TransitionComponent={SlideUp}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        sx: {
-          background: BG_ELEVATED,
-          border: `1px solid ${BORDER_AMBER}`,
-          borderRadius: "14px",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
-        },
-      }}
-    >
+    <Dialog open={open} onClose={handleClose} TransitionComponent={SlideUp} fullWidth maxWidth="sm">
       <DialogContent sx={{ padding: "28px" }}>
         <Box
           sx={{
@@ -255,13 +243,6 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
             fontSize: "14px",
             color: "text.primary",
             mb: "10px",
-            "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
-            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "primary.main",
-              borderWidth: "1px",
-            },
-            "& input::placeholder": { color: TEXT_FAINT },
           }}
         />
 
@@ -278,18 +259,20 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
               transition: "all 0.15s",
               ...(exactMatch
                 ? {
-                    background: "rgba(200,150,42,0.18)",
-                    color: "primary.main",
-                    border: `1px solid rgba(200,150,42,0.45)`,
+                    background: TINT_MUSTARD,
+                    color: INK,
+                    fontWeight: 500,
+                    border: `1.5px solid ${INK}`,
+                    "&:hover": { background: TINT_MUSTARD },
                   }
                 : {
                     background: "transparent",
                     color: TEXT_FAINT,
-                    border: "1px solid",
+                    border: "1.5px solid",
                     borderColor: "divider",
                     "&:hover": {
-                      background: "rgba(180,140,60,0.06)",
-                      borderColor: BORDER_AMBER,
+                      background: "rgba(51,39,26,0.05)",
+                      borderColor: INK,
                       color: TEXT_DIM,
                     },
                   }),
@@ -302,7 +285,7 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "13px",
-              color: "rgba(220,100,100,0.9)",
+              color: "error.main",
               mb: "12px",
             }}
           >
@@ -354,10 +337,10 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
                     gap: "12px",
                     padding: "10px 12px",
                     borderRadius: "8px",
-                    background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
-                    border: `1px solid ${isAdded ? "rgba(94,201,122,0.2)" : "transparent"}`,
+                    background: i % 2 === 0 ? "rgba(51,39,26,0.03)" : "transparent",
+                    border: `1px solid ${isAdded ? OLIVE : "transparent"}`,
                     transition: "all 0.15s",
-                    "&:hover": { background: "rgba(180,140,60,0.06)", borderColor: "divider" },
+                    "&:hover": { background: "rgba(51,39,26,0.05)" },
                   }}
                 >
                   <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -405,18 +388,19 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
                       fontSize: "12px",
                       fontWeight: 500,
                       textTransform: "none",
-                      borderRadius: "6px",
+                      borderRadius: "999px",
                       padding: "5px 12px",
                       flexShrink: 0,
                       ...(isAdded
                         ? {
-                            background: "rgba(94,201,122,0.15)",
-                            color: "secondary.light",
-                            border: "1px solid rgba(94,201,122,0.25)",
+                            background: TINT_OLIVE,
+                            color: INK,
+                            border: `1.5px solid ${OLIVE}`,
                           }
                         : {
                             backgroundColor: "primary.main",
-                            color: "background.default",
+                            color: "primary.contrastText",
+                            border: `1.5px solid ${INK}`,
                             "&:hover": { backgroundColor: "primary.light" },
                           }),
                       "&.Mui-disabled": { opacity: isAdded ? 1 : 0.5 },

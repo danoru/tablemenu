@@ -1,11 +1,15 @@
 import {
-  BORDER_AMBER,
+  BORDER_INK,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
-  GOLD,
-  GOLD_FADED,
+  INK,
+  OLIVE,
+  SHADOW_HARD,
+  SHADOW_HARD_HOVER,
   TEXT_DIM,
   TEXT_FAINT,
+  TINT_OLIVE,
 } from "@/styles/theme";
 import StatCard from "@/components/ui/StatCard";
 import GameArt from "@/components/games/GameArt";
@@ -46,9 +50,10 @@ function SectionHeader({
           sx={{
             fontFamily: FONT_SANS,
             fontSize: "13px",
-            color: GOLD_FADED,
+            fontWeight: 700,
+            color: BRICK,
             cursor: "pointer",
-            "&:hover": { color: GOLD },
+            "&:hover": { textDecoration: "underline" },
             transition: "color 0.15s",
           }}
         >
@@ -95,25 +100,9 @@ export default function DashboardPage({
         <title>Dashboard — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "40vh",
-            background:
-              "radial-gradient(ellipse 80% 50% at 50% -5%, rgba(34,85,48,0.16) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "1100px",
             margin: "0 auto",
             padding: { xs: "28px 16px", md: "44px 32px" },
@@ -123,10 +112,10 @@ export default function DashboardPage({
             <Typography
               sx={{
                 fontFamily: FONT_SANS,
-                fontSize: "13px",
-                fontWeight: 500,
-                color: TEXT_FAINT,
-                letterSpacing: "1px",
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "text.secondary",
+                letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 mb: "6px",
               }}
@@ -149,9 +138,10 @@ export default function DashboardPage({
 
           <Box
             sx={{
-              background: "rgba(34,85,48,0.14)",
-              border: "1px solid rgba(60,160,80,0.22)",
-              borderRadius: "14px",
+              backgroundColor: TINT_OLIVE,
+              border: BORDER_INK,
+              borderRadius: "13px",
+              boxShadow: SHADOW_HARD,
               padding: { xs: "24px", md: "28px 36px" },
               display: "flex",
               alignItems: "center",
@@ -159,22 +149,8 @@ export default function DashboardPage({
               flexWrap: "wrap",
               gap: "20px",
               mb: "32px",
-              position: "relative",
-              overflow: "hidden",
             }}
           >
-            <Box
-              sx={{
-                position: "absolute",
-                right: "-20px",
-                top: "-20px",
-                width: "140px",
-                height: "140px",
-                borderRadius: "50%",
-                background: "rgba(94,201,122,0.05)",
-                pointerEvents: "none",
-              }}
-            />
             <Box>
               <Typography
                 sx={{
@@ -192,19 +168,13 @@ export default function DashboardPage({
               </Typography>
             </Box>
             <Button
+              variant="contained"
               startIcon={<CasinoIcon />}
               onClick={() => router.push(`/players/${username}/library`)}
               sx={{
-                backgroundColor: "primary.main",
-                borderRadius: "8px",
-                color: "background.default",
-                fontFamily: FONT_SANS,
                 fontSize: "15px",
-                fontWeight: 500,
                 padding: "12px 24px",
-                textTransform: "none",
                 flexShrink: 0,
-                "&:hover": { backgroundColor: "primary.light" },
               }}
             >
               Quick Gen
@@ -252,9 +222,9 @@ export default function DashboardPage({
               <Box
                 sx={{
                   backgroundColor: "background.paper",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: "12px",
+                  border: BORDER_INK,
+                  borderRadius: "13px",
+                  boxShadow: SHADOW_HARD,
                   overflow: "hidden",
                 }}
               >
@@ -266,7 +236,7 @@ export default function DashboardPage({
                         alignItems: "center",
                         gap: "14px",
                         padding: "14px 18px",
-                        "&:hover": { background: "rgba(255,255,255,0.025)" },
+                        "&:hover": { background: "rgba(51,39,26,0.05)" },
                         transition: "background 0.15s",
                       }}
                     >
@@ -295,16 +265,17 @@ export default function DashboardPage({
 
             <Box
               sx={{
-                backgroundColor: "background.paper",
-                border: "1px solid",
-                borderColor: "divider",
-                borderRadius: "12px",
-                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
               }}
             >
               {activeRooms.length === 0 ? (
                 <Box
                   sx={{
+                    backgroundColor: "background.paper",
+                    border: "2px solid rgba(51,39,26,0.15)",
+                    borderRadius: "13px",
                     padding: "40px 24px",
                     display: "flex",
                     flexDirection: "column",
@@ -324,23 +295,12 @@ export default function DashboardPage({
                     No active rooms
                   </Typography>
                   <Button
+                    variant="outlined"
                     onClick={() => router.push("/rooms/new")}
                     sx={{
-                      background: "transparent",
-                      border: `1px solid ${BORDER_AMBER}`,
-                      borderRadius: "8px",
-                      color: TEXT_DIM,
-                      fontFamily: FONT_SANS,
                       fontSize: "13px",
-                      fontWeight: 500,
                       padding: "8px 18px",
-                      textTransform: "none",
                       mt: "4px",
-                      "&:hover": {
-                        background: "rgba(180,140,60,0.08)",
-                        color: "text.primary",
-                        borderColor: "primary.main",
-                      },
                     }}
                   >
                     Host a game night
@@ -352,17 +312,23 @@ export default function DashboardPage({
                     <Box
                       onClick={() => router.push(`/rooms/${room.code}`)}
                       sx={{
+                        backgroundColor: "background.paper",
+                        border: BORDER_INK,
+                        borderRadius: "13px",
+                        boxShadow: SHADOW_HARD,
                         display: "flex",
                         alignItems: "center",
                         gap: "14px",
                         padding: "14px 18px",
                         cursor: "pointer",
-                        "&:hover": { background: "rgba(255,255,255,0.025)" },
+                        transition: "transform 0.12s ease, box-shadow 0.12s ease",
+                        "&:hover": {
+                          boxShadow: SHADOW_HARD_HOVER,
+                          transform: "translate(-2px, -2px)",
+                        },
                       }}
                     >
-                      <MeetingRoomIcon
-                        sx={{ fontSize: "18px", color: TEXT_FAINT, flexShrink: 0 }}
-                      />
+                      <MeetingRoomIcon sx={{ fontSize: "18px", color: BRICK, flexShrink: 0 }} />
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Typography
                           sx={{
@@ -393,27 +359,21 @@ export default function DashboardPage({
                         sx={{
                           fontFamily: FONT_SANS,
                           fontSize: "10px",
-                          fontWeight: 500,
+                          fontWeight: 700,
                           letterSpacing: "0.8px",
                           textTransform: "uppercase",
-                          color: room.type === "RECURRING" ? "secondary.light" : TEXT_FAINT,
-                          background:
-                            room.type === "RECURRING"
-                              ? "rgba(34,85,48,0.3)"
-                              : "rgba(255,255,255,0.05)",
-                          border: "1px solid",
-                          borderColor: `${room.type === "RECURRING" ? "rgba(60,160,80,0.25)" : "divider"}`,
+                          color: room.type === "RECURRING" ? INK : "text.secondary",
+                          background: room.type === "RECURRING" ? TINT_OLIVE : "transparent",
+                          border: "1.5px solid",
+                          borderColor: `${room.type === "RECURRING" ? OLIVE : "rgba(51,39,26,0.3)"}`,
                           padding: "2px 8px",
-                          borderRadius: "10px",
+                          borderRadius: "999px",
                           flexShrink: 0,
                         }}
                       >
                         {room.type === "RECURRING" ? "Recurring" : "Casual"}
                       </Box>
                     </Box>
-                    {i < activeRooms.length - 1 && (
-                      <Divider sx={{ borderColor: "divider", mx: "18px" }} />
-                    )}
                   </Box>
                 ))
               )}
@@ -425,9 +385,8 @@ export default function DashboardPage({
             <Box
               sx={{
                 backgroundColor: "background.paper",
-                border: "1px solid",
-                borderColor: "divider",
-                borderRadius: "12px",
+                border: "2px solid rgba(51,39,26,0.15)",
+                borderRadius: "13px",
                 padding: "40px 24px",
                 display: "flex",
                 flexDirection: "column",
@@ -448,23 +407,12 @@ export default function DashboardPage({
                 Follow other players to see their activity here
               </Typography>
               <Button
+                variant="outlined"
                 onClick={() => router.push("/players")}
                 sx={{
-                  background: "transparent",
-                  border: `1px solid ${BORDER_AMBER}`,
-                  borderRadius: "8px",
-                  color: TEXT_DIM,
-                  fontFamily: FONT_SANS,
                   fontSize: "13px",
-                  fontWeight: 500,
                   padding: "8px 18px",
-                  textTransform: "none",
                   mt: "4px",
-                  "&:hover": {
-                    background: "rgba(180,140,60,0.08)",
-                    color: "text.primary",
-                    borderColor: "primary.main",
-                  },
                 }}
               >
                 Find players

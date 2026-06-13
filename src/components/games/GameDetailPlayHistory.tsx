@@ -1,4 +1,4 @@
-import { FONT_SANS, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
+import { FONT_SANS, MUSTARD, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { Box, Tooltip, Typography } from "@mui/material";
 import { useRouter } from "next/router";
@@ -37,14 +37,14 @@ export default function PlayHistoryRow({
         alignItems: "center",
         justifyContent: "space-between",
         padding: "12px 0",
-        borderBottom: "1px solid divider",
+        borderBottom: "1px solid rgba(51,39,26,0.18)",
         "&:last-child": { borderBottom: "none" },
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: "12px" }}>
         {isCompetitive !== false && session.won === true ? (
           <Tooltip title="Won this session">
-            <EmojiEventsIcon sx={{ color: "primary.main", fontSize: "18px" }} />
+            <EmojiEventsIcon sx={{ color: MUSTARD, fontSize: "18px" }} />
           </Tooltip>
         ) : (
           <Box sx={{ width: "18px" }} />

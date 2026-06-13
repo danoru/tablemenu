@@ -5,7 +5,16 @@ import QuickGenModal from "@/components/modals/QuickGenModal";
 import FilterChip from "@/components/ui/FilterChip";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
-import { BORDER_AMBER, FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
+import {
+  BORDER_INK,
+  FONT_SANS,
+  FONT_SERIF,
+  INK,
+  SHADOW_HARD,
+  SURFACE,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import { LibraryGame } from "@pages/api/games/library";
 import AddIcon from "@mui/icons-material/Add";
 import CasinoIcon from "@mui/icons-material/Casino";
@@ -74,25 +83,9 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
         <title>{profileUsername}'s Library — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "40vh",
-            background:
-              "radial-gradient(ellipse 70% 50% at 50% -5%, rgba(34,85,48,0.18) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "1200px",
             margin: "0 auto",
             padding: { xs: "24px 16px", md: "40px 32px" },
@@ -151,16 +144,17 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
                 onClick={() => setQuickGenOpen(true)}
                 startIcon={<CasinoIcon />}
                 sx={{
-                  background: "rgba(34,85,48,0.25)",
-                  border: "1px solid rgba(60,160,80,0.3)",
-                  borderRadius: "8px",
-                  color: "secondary.light",
+                  backgroundColor: "secondary.main",
+                  border: BORDER_INK,
+                  borderRadius: "999px",
+                  boxShadow: SHADOW_HARD,
+                  color: SURFACE,
                   fontFamily: FONT_SANS,
                   fontSize: "14px",
-                  fontWeight: 500,
+                  fontWeight: 700,
                   padding: "9px 18px",
                   textTransform: "none",
-                  "&:hover": { background: "rgba(34,85,48,0.4)" },
+                  "&:hover": { backgroundColor: "secondary.dark" },
                 }}
               >
                 Quick Gen
@@ -172,11 +166,13 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
                     startIcon={<AddIcon />}
                     sx={{
                       backgroundColor: "primary.main",
-                      borderRadius: "8px",
-                      color: "background.default",
+                      border: BORDER_INK,
+                      borderRadius: "999px",
+                      boxShadow: SHADOW_HARD,
+                      color: SURFACE,
                       fontFamily: FONT_SANS,
                       fontSize: "14px",
-                      fontWeight: 500,
+                      fontWeight: 700,
                       padding: "9px 18px",
                       textTransform: "none",
                       "&:hover": { backgroundColor: "primary.light" },
@@ -188,19 +184,20 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
                     onClick={() => setImportOpen(true)}
                     startIcon={<DownloadIcon />}
                     sx={{
-                      background: "transparent",
-                      border: `1px solid ${BORDER_AMBER}`,
-                      borderRadius: "8px",
-                      color: TEXT_DIM,
+                      backgroundColor: "background.paper",
+                      border: BORDER_INK,
+                      borderRadius: "999px",
+                      boxShadow: SHADOW_HARD,
+                      color: "text.primary",
                       fontFamily: FONT_SANS,
                       fontSize: "14px",
-                      fontWeight: 500,
+                      fontWeight: 700,
                       padding: "9px 18px",
                       textTransform: "none",
                       "&:hover": {
-                        background: "rgba(180,140,60,0.08)",
-                        color: "text.primary",
-                        borderColor: "primary.main",
+                        backgroundColor: "background.paper",
+                        boxShadow: `4px 4px 0 ${INK}`,
+                        transform: "translate(-1px, -1px)",
                       },
                     }}
                   >
@@ -226,14 +223,6 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
               fontSize: "14px",
               color: "text.primary",
               mb: "28px",
-              background: "rgba(255,255,255,0.03)",
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: "primary.main",
-                borderWidth: "1px",
-              },
-              "& input::placeholder": { color: TEXT_FAINT },
             }}
           />
           <Box

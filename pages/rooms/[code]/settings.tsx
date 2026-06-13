@@ -1,4 +1,15 @@
-import { BORDER_AMBER, FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
+import {
+  BORDER_INK,
+  BRICK,
+  FONT_SANS,
+  FONT_SERIF,
+  INK,
+  SHADOW_HARD,
+  TEXT_DIM,
+  TEXT_FAINT,
+  TINT_BRICK,
+  TINT_OLIVE,
+} from "@/styles/theme";
 import {
   Alert,
   Box,
@@ -37,18 +48,11 @@ const inputSx = {
     fontFamily: FONT_SANS,
     fontSize: "15px",
     color: "text.primary",
-    background: "rgba(255,255,255,0.03)",
-    "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
-    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "primary.main",
-      borderWidth: "1px",
-    },
   },
   "& .MuiFormHelperText-root": {
     fontFamily: FONT_SANS,
     fontSize: "12px",
-    color: "rgba(220,100,100,0.9)",
+    color: "error.main",
     ml: 0,
   },
 };
@@ -56,9 +60,9 @@ const inputSx = {
 const sectionLabel = {
   fontFamily: FONT_SANS,
   fontSize: "11px",
-  fontWeight: 500,
-  color: TEXT_FAINT,
-  letterSpacing: "1px",
+  fontWeight: 700,
+  color: "text.secondary",
+  letterSpacing: "0.1em",
   textTransform: "uppercase" as const,
   mb: "12px",
 };
@@ -92,11 +96,13 @@ function ToggleOption({
         borderRadius: "10px",
         cursor: "pointer",
         background: active
-          ? `rgba(${accent === "secondary.light" ? "34,85,48" : "180,110,30"},0.2)`
-          : "rgba(255,255,255,0.03)",
-        border: `1px solid ${active ? (accent === "secondary.light" ? "rgba(60,160,80,0.35)" : BORDER_AMBER) : "divider"}`,
+          ? accent === "secondary.light"
+            ? TINT_OLIVE
+            : TINT_BRICK
+          : "transparent",
+        border: active ? BORDER_INK : "2px solid rgba(51,39,26,0.15)",
         transition: "all 0.15s",
-        "&:hover": { borderColor: active ? undefined : BORDER_AMBER },
+        "&:hover": { borderColor: INK },
       }}
     >
       <Typography
@@ -229,25 +235,9 @@ export default function RoomSettingsPage({ room, username }: Props) {
         <title>Room Settings — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "40vh",
-            background:
-              "radial-gradient(ellipse 70% 40% at 50% -5%, rgba(34,85,48,0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "600px",
             margin: "0 auto",
             padding: { xs: "28px 16px", md: "44px 32px" },
@@ -255,7 +245,12 @@ export default function RoomSettingsPage({ room, username }: Props) {
         >
           <Typography
             onClick={() => router.push(`/rooms/${code}`)}
-            sx={{ ...sectionLabel, mb: "12px", cursor: "pointer", "&:hover": { color: TEXT_DIM } }}
+            sx={{
+              ...sectionLabel,
+              mb: "12px",
+              cursor: "pointer",
+              "&:hover": { color: "text.primary" },
+            }}
           >
             ← Back to room
           </Typography>
@@ -299,9 +294,9 @@ export default function RoomSettingsPage({ room, username }: Props) {
                 <Box
                   sx={{
                     backgroundColor: "background.paper",
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: "14px",
+                    border: BORDER_INK,
+                    borderRadius: "13px",
+                    boxShadow: SHADOW_HARD,
                     padding: { xs: "24px", md: "28px 32px" },
                     mb: "16px",
                   }}
@@ -339,9 +334,9 @@ export default function RoomSettingsPage({ room, username }: Props) {
                 <Box
                   sx={{
                     backgroundColor: "background.paper",
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: "14px",
+                    border: BORDER_INK,
+                    borderRadius: "13px",
+                    boxShadow: SHADOW_HARD,
                     padding: { xs: "24px", md: "28px 32px" },
                     mb: "16px",
                   }}
@@ -367,9 +362,9 @@ export default function RoomSettingsPage({ room, username }: Props) {
                 <Box
                   sx={{
                     backgroundColor: "background.paper",
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: "14px",
+                    border: BORDER_INK,
+                    borderRadius: "13px",
+                    boxShadow: SHADOW_HARD,
                     padding: { xs: "24px", md: "28px 32px" },
                     mb: "16px",
                   }}
@@ -393,9 +388,9 @@ export default function RoomSettingsPage({ room, username }: Props) {
                 <Box
                   sx={{
                     backgroundColor: "background.paper",
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: "14px",
+                    border: BORDER_INK,
+                    borderRadius: "13px",
+                    boxShadow: SHADOW_HARD,
                     padding: { xs: "24px", md: "28px 32px" },
                     mb: "16px",
                   }}
@@ -420,9 +415,9 @@ export default function RoomSettingsPage({ room, username }: Props) {
                 <Box
                   sx={{
                     backgroundColor: "background.paper",
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: "14px",
+                    border: BORDER_INK,
+                    borderRadius: "13px",
+                    boxShadow: SHADOW_HARD,
                     padding: { xs: "24px", md: "28px 32px" },
                     mb: "16px",
                   }}
@@ -456,9 +451,9 @@ export default function RoomSettingsPage({ room, username }: Props) {
                         color: "primary.main",
                         "& .MuiSlider-thumb": {
                           backgroundColor: "primary.main",
-                          "&:hover": { boxShadow: "0 0 0 8px rgba(200,150,42,0.15)" },
+                          "&:hover": { boxShadow: "0 0 0 8px rgba(192,69,44,0.15)" },
                         },
-                        "& .MuiSlider-rail": { background: BORDER_AMBER },
+                        "& .MuiSlider-rail": { background: "rgba(51,39,26,0.25)" },
                       }}
                     />
                     <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -503,10 +498,10 @@ export default function RoomSettingsPage({ room, username }: Props) {
                         color: "primary.main",
                         "& .MuiSlider-thumb": {
                           backgroundColor: "primary.main",
-                          "&:hover": { boxShadow: "0 0 0 8px rgba(200,150,42,0.15)" },
+                          "&:hover": { boxShadow: "0 0 0 8px rgba(192,69,44,0.15)" },
                         },
-                        "& .MuiSlider-rail": { background: BORDER_AMBER },
-                        "& .MuiSlider-mark": { background: BORDER_AMBER },
+                        "& .MuiSlider-rail": { background: "rgba(51,39,26,0.25)" },
+                        "& .MuiSlider-mark": { background: "rgba(51,39,26,0.25)" },
                         "& .MuiSlider-markLabel": {
                           fontFamily: FONT_SANS,
                           fontSize: "11px",
@@ -522,46 +517,19 @@ export default function RoomSettingsPage({ room, username }: Props) {
                     fullWidth
                     type="submit"
                     disabled={isSubmitting}
-                    sx={{
-                      backgroundColor: "primary.main",
-                      borderRadius: "8px",
-                      color: "background.default",
-                      fontFamily: FONT_SANS,
-                      fontSize: "15px",
-                      fontWeight: 500,
-                      padding: "13px",
-                      textTransform: "none",
-                      "&:hover": { backgroundColor: "primary.light" },
-                      "&.Mui-disabled": {
-                        background: "rgba(200,150,42,0.35)",
-                        color: "rgba(15,12,8,0.5)",
-                      },
-                    }}
+                    variant="contained"
+                    sx={{ fontSize: "15px", padding: "13px" }}
                   >
                     {isSubmitting ? (
-                      <CircularProgress size={20} sx={{ color: "rgba(15,12,8,0.5)" }} />
+                      <CircularProgress size={20} sx={{ color: "inherit" }} />
                     ) : (
                       "Save changes"
                     )}
                   </Button>
                   <Button
+                    variant="outlined"
                     onClick={() => router.push(`/rooms/${code}`)}
-                    sx={{
-                      background: "transparent",
-                      border: `1px solid ${BORDER_AMBER}`,
-                      borderRadius: "8px",
-                      color: TEXT_DIM,
-                      fontFamily: FONT_SANS,
-                      fontSize: "15px",
-                      fontWeight: 500,
-                      padding: "13px 20px",
-                      textTransform: "none",
-                      "&:hover": {
-                        background: "rgba(180,140,60,0.08)",
-                        color: "text.primary",
-                        borderColor: "primary.main",
-                      },
-                    }}
+                    sx={{ fontSize: "15px", padding: "13px 20px" }}
                   >
                     Cancel
                   </Button>
@@ -569,15 +537,13 @@ export default function RoomSettingsPage({ room, username }: Props) {
 
                 <Box
                   sx={{
-                    background: "rgba(220,80,80,0.05)",
-                    border: "1px solid rgba(220,80,80,0.2)",
-                    borderRadius: "14px",
+                    backgroundColor: "background.paper",
+                    border: `2px solid ${BRICK}`,
+                    borderRadius: "13px",
                     padding: { xs: "24px", md: "28px 32px" },
                   }}
                 >
-                  <Typography sx={{ ...sectionLabel, color: "rgba(220,120,120,0.6)" }}>
-                    Danger Zone
-                  </Typography>
+                  <Typography sx={{ ...sectionLabel, color: BRICK }}>Danger Zone</Typography>
                   <Box
                     sx={{
                       display: "flex",
@@ -613,19 +579,19 @@ export default function RoomSettingsPage({ room, username }: Props) {
                       onClick={() => setDeleteOpen(true)}
                       sx={{
                         background: "transparent",
-                        border: "1px solid rgba(220,80,80,0.35)",
-                        borderRadius: "8px",
-                        color: "rgba(220,120,120,0.8)",
+                        border: `2px solid ${BRICK}`,
+                        borderRadius: "999px",
+                        color: BRICK,
                         fontFamily: FONT_SANS,
                         fontSize: "13px",
-                        fontWeight: 500,
+                        fontWeight: 700,
                         padding: "8px 18px",
                         textTransform: "none",
                         flexShrink: 0,
                         "&:hover": {
-                          background: "rgba(220,80,80,0.1)",
-                          borderColor: "rgba(220,80,80,0.6)",
-                          color: "rgba(220,120,120,1)",
+                          background: TINT_BRICK,
+                          borderColor: BRICK,
+                          color: BRICK,
                         },
                       }}
                     >
@@ -639,18 +605,7 @@ export default function RoomSettingsPage({ room, username }: Props) {
         </Box>
       </Box>
 
-      <Dialog
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        PaperProps={{
-          sx: {
-            background: "#1a1610",
-            border: "1px solid rgba(220,80,80,0.25)",
-            borderRadius: "14px",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
-          },
-        }}
-      >
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
         <DialogTitle
           sx={{ fontFamily: FONT_SERIF, fontSize: "20px", fontWeight: 700, color: "text.primary" }}
         >
@@ -666,34 +621,22 @@ export default function RoomSettingsPage({ room, username }: Props) {
           <Button
             onClick={() => setDeleteOpen(false)}
             sx={{
-              background: "transparent",
-              border: `1px solid ${BORDER_AMBER}`,
-              borderRadius: "8px",
               color: TEXT_DIM,
-              fontFamily: FONT_SANS,
               fontSize: "13px",
-              fontWeight: 500,
               padding: "8px 18px",
-              textTransform: "none",
-              "&:hover": { background: "rgba(180,140,60,0.08)", color: "text.primary" },
+              "&:hover": { color: "text.primary" },
             }}
           >
             Cancel
           </Button>
           <Button
-            onClick={handleDelete}
+            color="error"
             disabled={deleting}
+            variant="contained"
+            onClick={handleDelete}
             sx={{
-              background: "rgba(220,80,80,0.15)",
-              border: "1px solid rgba(220,80,80,0.35)",
-              borderRadius: "8px",
-              color: "rgba(220,120,120,0.9)",
-              fontFamily: FONT_SANS,
               fontSize: "13px",
-              fontWeight: 500,
               padding: "8px 18px",
-              textTransform: "none",
-              "&:hover": { background: "rgba(220,80,80,0.25)" },
               "&.Mui-disabled": { opacity: 0.5 },
             }}
           >

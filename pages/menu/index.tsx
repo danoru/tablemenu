@@ -3,14 +3,23 @@ import ExportMenuButton from "@/components/pdf/ExportMenuButton";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import {
-  AMBER_DIM,
-  BORDER_AMBER,
+  BORDER_INK,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
-  GOLD,
-  GOLD_FADED,
+  INK,
+  OLIVE,
+  PLUM,
+  SHADOW_HARD,
+  SHADOW_HARD_LG,
+  TEAL,
   TEXT_DIM,
   TEXT_FAINT,
+  TINT_BRICK,
+  TINT_MUSTARD,
+  TINT_OLIVE,
+  TINT_PLUM,
+  TINT_TEAL,
 } from "@/styles/theme";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CasinoIcon from "@mui/icons-material/Casino";
@@ -39,9 +48,9 @@ const COURSES = [
     icon: "🥨",
     label: "Appetizers",
     subtitle: "While everyone arrives",
-    color: "rgba(34,85,48,0.25)",
-    border: "rgba(60,160,80,0.2)",
-    accent: "secondary.light",
+    color: TINT_OLIVE,
+    border: OLIVE,
+    accent: OLIVE,
     filter: (g: LibraryGame) => g.maxPlaytime <= 20,
     picks: 2,
   },
@@ -50,9 +59,9 @@ const COURSES = [
     icon: "🍽️",
     label: "Entrées",
     subtitle: "The main event",
-    color: "rgba(180,110,30,0.18)",
-    border: "rgba(180,140,60,0.25)",
-    accent: GOLD,
+    color: TINT_BRICK,
+    border: BRICK,
+    accent: BRICK,
     filter: (g: LibraryGame) => g.minPlaytime >= 30 && g.maxPlaytime <= 89,
     picks: 2,
   },
@@ -61,9 +70,9 @@ const COURSES = [
     icon: "🏰",
     label: "Epic Course",
     subtitle: "Go all in",
-    color: "rgba(60,40,80,0.25)",
-    border: "rgba(100,70,160,0.25)",
-    accent: "#c4a0f0",
+    color: TINT_PLUM,
+    border: PLUM,
+    accent: PLUM,
     filter: (g: LibraryGame) => g.minPlaytime >= 90,
     picks: 1,
   },
@@ -72,9 +81,9 @@ const COURSES = [
     icon: "🎂",
     label: "Desserts",
     subtitle: "Wind down the night",
-    color: "rgba(90,30,30,0.2)",
-    border: "rgba(160,70,70,0.2)",
-    accent: "#f0a0a0",
+    color: TINT_TEAL,
+    border: TEAL,
+    accent: TEAL,
     filter: (g: LibraryGame) => g.maxPlaytime <= 29,
     picks: 2,
   },
@@ -216,25 +225,9 @@ export default function MenuPage({ library, username }: Props) {
         <title>The Menu — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "50vh",
-            background:
-              "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(180,110,30,0.12) 0%, transparent 65%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "800px",
             margin: "0 auto",
             padding: { xs: "28px 16px", md: "44px 32px" },
@@ -257,7 +250,7 @@ export default function MenuPage({ library, username }: Props) {
               </Typography>
             </Box>
             <Typography
-              sx={{ fontFamily: FONT_SANS, fontSize: "15px", fontWeight: 300, color: TEXT_DIM }}
+              sx={{ fontFamily: FONT_SANS, fontSize: "15px", fontWeight: 400, color: TEXT_DIM }}
             >
               A curated evening of games — from warm-up to send-off.
             </Typography>
@@ -266,9 +259,9 @@ export default function MenuPage({ library, username }: Props) {
           <Box
             sx={{
               backgroundColor: "background.paper",
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: "14px",
+              border: BORDER_INK,
+              borderRadius: "13px",
+              boxShadow: SHADOW_HARD,
               padding: "20px 24px",
               mb: "28px",
             }}
@@ -278,9 +271,9 @@ export default function MenuPage({ library, username }: Props) {
                 sx={{
                   fontFamily: FONT_SANS,
                   fontSize: "11px",
-                  fontWeight: 500,
-                  color: TEXT_FAINT,
-                  letterSpacing: "1px",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                  letterSpacing: "0.1em",
                   textTransform: "uppercase",
                 }}
               >
@@ -300,16 +293,17 @@ export default function MenuPage({ library, username }: Props) {
                 onClick={handleSwitchToSolo}
                 startIcon={<PersonIcon sx={{ fontSize: "15px !important" }} />}
                 sx={{
-                  background: mode === "solo" ? "rgba(200,150,42,0.2)" : "rgba(255,255,255,0.04)",
-                  border: `1px solid ${mode === "solo" ? "primary.main" : "divider"}`,
-                  borderRadius: "8px",
-                  color: mode === "solo" ? GOLD : TEXT_DIM,
+                  background: mode === "solo" ? TINT_MUSTARD : "background.paper",
+                  border: `2px solid ${mode === "solo" ? INK : "rgba(51,39,26,0.3)"}`,
+                  borderRadius: "999px",
+                  boxShadow: mode === "solo" ? SHADOW_HARD : "none",
+                  color: mode === "solo" ? INK : "text.secondary",
                   fontFamily: FONT_SANS,
                   fontSize: "13px",
-                  fontWeight: 500,
+                  fontWeight: mode === "solo" ? 700 : 500,
                   padding: "7px 16px",
                   textTransform: "none",
-                  "&:hover": { background: AMBER_DIM, borderColor: "primary.main" },
+                  "&:hover": { background: TINT_MUSTARD, borderColor: INK },
                 }}
               >
                 My library
@@ -327,18 +321,19 @@ export default function MenuPage({ library, username }: Props) {
                 startIcon={<MeetingRoomIcon sx={{ fontSize: "15px !important" }} />}
                 onClick={() => mode !== "room" && setMode("room")}
                 sx={{
-                  background: mode === "room" ? "rgba(34,85,48,0.25)" : "rgba(255,255,255,0.04)",
-                  border: `1px solid ${mode === "room" ? "rgba(60,160,80,0.4)" : "divider"}`,
-                  borderRadius: "8px",
-                  color: mode === "room" ? "primary.light" : TEXT_DIM,
+                  background: mode === "room" ? TINT_MUSTARD : "background.paper",
+                  border: `2px solid ${mode === "room" ? INK : "rgba(51,39,26,0.3)"}`,
+                  borderRadius: "999px",
+                  boxShadow: mode === "room" ? SHADOW_HARD : "none",
+                  color: mode === "room" ? INK : "text.secondary",
                   fontFamily: FONT_SANS,
                   fontSize: "13px",
-                  fontWeight: 500,
+                  fontWeight: mode === "room" ? 700 : 500,
                   padding: "7px 16px",
                   textTransform: "none",
                   "&:hover": {
-                    background: "rgba(34,85,48,0.2)",
-                    borderColor: "rgba(60,160,80,0.3)",
+                    background: TINT_MUSTARD,
+                    borderColor: INK,
                   },
                 }}
               >
@@ -378,37 +373,19 @@ export default function MenuPage({ library, username }: Props) {
                       letterSpacing: "1px",
                       fontSize: "13px",
                     },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: roomError ? "rgba(220,80,80,0.5)" : BORDER_AMBER,
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "primary.main",
-                      borderWidth: "1px",
-                    },
                   }}
                 />
                 <Button
+                  variant="contained"
                   onClick={handleRoomConnect}
                   disabled={roomLoading || !roomCode.trim()}
                   sx={{
-                    backgroundColor: "primary.main",
-                    borderRadius: "8px",
-                    color: "background.default",
-                    fontFamily: FONT_SANS,
                     fontSize: "13px",
-                    fontWeight: 500,
                     padding: "9px 18px",
-                    textTransform: "none",
-                    "&:hover": { backgroundColor: "primary.light" },
-                    "&.Mui-disabled": {
-                      background: "rgba(200,150,42,0.35)",
-                      color: "rgba(15,12,8,0.5)",
-                    },
                   }}
                 >
                   {roomLoading ? (
-                    <CircularProgress size={16} sx={{ color: "rgba(15,12,8,0.5)" }} />
+                    <CircularProgress size={16} sx={{ color: "text.disabled" }} />
                   ) : (
                     "Connect"
                   )}
@@ -419,7 +396,7 @@ export default function MenuPage({ library, username }: Props) {
                       width: "100%",
                       fontFamily: FONT_SANS,
                       fontSize: "12px",
-                      color: "rgba(220,100,100,0.9)",
+                      color: "error.main",
                       mt: "4px",
                     }}
                   >
@@ -436,14 +413,14 @@ export default function MenuPage({ library, username }: Props) {
                     width: "8px",
                     height: "8px",
                     borderRadius: "50%",
-                    backgroundColor: "secondary.light",
+                    backgroundColor: OLIVE,
                     flexShrink: 0,
                     "@keyframes pulse": { "0%, 100%": { opacity: 1 }, "50%": { opacity: 0.3 } },
                     animation: "pulse 2s infinite",
                   }}
                 />
                 <Typography
-                  sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: "secondary.light" }}
+                  sx={{ fontFamily: FONT_SANS, fontSize: "13px", fontWeight: 700, color: OLIVE }}
                 >
                   Connected to {roomName}
                 </Typography>
@@ -463,24 +440,18 @@ export default function MenuPage({ library, username }: Props) {
             disabled={generating || (mode === "room" && !roomPool)}
             startIcon={
               generating ? (
-                <CircularProgress size={18} sx={{ color: "background.default" }} />
+                <CircularProgress size={18} sx={{ color: "text.disabled" }} />
               ) : (
                 <AutoAwesomeIcon />
               )
             }
+            variant="contained"
             sx={{
-              backgroundColor: "primary.main",
-              borderRadius: "10px",
-              color: "background.default",
               fontFamily: FONT_SERIF,
               fontSize: "17px",
-              fontWeight: 700,
               fontStyle: "italic",
               padding: "14px",
-              textTransform: "none",
               mb: "36px",
-              "&:hover": { backgroundColor: "primary.light" },
-              "&.Mui-disabled": { background: "rgba(200,150,42,0.35)", color: "rgba(15,12,8,0.5)" },
             }}
           >
             {generating
@@ -492,42 +463,73 @@ export default function MenuPage({ library, username }: Props) {
 
           {hasMenu && !generating && (
             <Box>
-              <Box sx={{ textAlign: "center", mb: "32px" }}>
-                <Typography
-                  sx={{
-                    fontFamily: FONT_SERIF,
-                    fontSize: "13px",
-                    fontWeight: 400,
-                    color: GOLD_FADED,
-                    letterSpacing: "3px",
-                    textTransform: "uppercase",
-                    mb: "8px",
-                  }}
-                >
-                  Tonight's Programme
-                </Typography>
-                <Box
-                  sx={{
-                    width: "60px",
-                    height: "1px",
-                    background: `linear-gradient(to right, transparent, ${GOLD_FADED}, transparent)`,
-                    margin: "0 auto",
-                  }}
-                />
-              </Box>
+              <Box
+                sx={{
+                  backgroundColor: "background.paper",
+                  border: BORDER_INK,
+                  borderRadius: "13px",
+                  boxShadow: SHADOW_HARD_LG,
+                  padding: { xs: "32px 22px", md: "44px 52px" },
+                }}
+              >
+                <Box sx={{ textAlign: "center", mb: "10px" }}>
+                  <Typography
+                    sx={{
+                      fontFamily: FONT_SANS,
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      color: BRICK,
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      mb: "10px",
+                    }}
+                  >
+                    Tablekeeper · An evening of games
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: FONT_SERIF,
+                      fontStyle: "italic",
+                      fontSize: { xs: "28px", md: "34px" },
+                      fontWeight: 900,
+                      color: "text.primary",
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    Tonight&apos;s Programme
+                  </Typography>
+                </Box>
 
-              <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {COURSES.map((course) => {
+                <Box sx={{ borderTop: `2px solid ${INK}`, mb: "3px" }} />
+                <Box sx={{ borderTop: "1px solid rgba(51,39,26,0.3)", mb: "30px" }} />
+
+                {COURSES.map((course, courseIdx) => {
                   const picks = menu[course.id] ?? [];
                   return (
-                    <CourseCard
-                      key={course.id}
-                      course={course}
-                      games={picks}
-                      empty={picks.length === 0}
-                      rerollingIdx={rerolling?.courseId === course.id ? rerolling.idx : null}
-                      onRerollGame={(idx) => handleRerollGame(course.id, idx)}
-                    />
+                    <Box key={course.id}>
+                      {courseIdx > 0 && (
+                        <Typography
+                          aria-hidden
+                          sx={{
+                            textAlign: "center",
+                            color: BRICK,
+                            fontSize: "15px",
+                            lineHeight: 1,
+                            my: "26px",
+                            userSelect: "none",
+                          }}
+                        >
+                          ✳
+                        </Typography>
+                      )}
+                      <CourseCard
+                        course={course}
+                        games={picks}
+                        empty={picks.length === 0}
+                        rerollingIdx={rerolling?.courseId === course.id ? rerolling.idx : null}
+                        onRerollGame={(idx) => handleRerollGame(course.id, idx)}
+                      />
+                    </Box>
                   );
                 })}
               </Box>
@@ -542,23 +544,12 @@ export default function MenuPage({ library, username }: Props) {
                 }}
               >
                 <Button
+                  variant="outlined"
                   onClick={generateMenu}
                   startIcon={<CasinoIcon />}
                   sx={{
-                    background: "transparent",
-                    border: `1px solid ${BORDER_AMBER}`,
-                    borderRadius: "8px",
-                    color: TEXT_DIM,
-                    fontFamily: FONT_SANS,
                     fontSize: "14px",
-                    fontWeight: 500,
                     padding: "10px 20px",
-                    textTransform: "none",
-                    "&:hover": {
-                      background: "rgba(180,140,60,0.08)",
-                      color: "text.primary",
-                      borderColor: "primary.main",
-                    },
                   }}
                 >
                   Start over

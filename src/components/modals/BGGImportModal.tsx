@@ -1,12 +1,4 @@
-import {
-  BG_ELEVATED,
-  BORDER_AMBER,
-  FONT_SANS,
-  FONT_SERIF,
-  GOLD,
-  TEXT_DIM,
-  TEXT_FAINT,
-} from "@/styles/theme";
+import { BRICK, FONT_SANS, FONT_SERIF, OLIVE, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
 import type { BGGCollectionGame } from "@api/bgg/collection";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
@@ -147,21 +139,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
   }
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      TransitionComponent={SlideUp}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        sx: {
-          background: BG_ELEVATED,
-          border: `1px solid ${BORDER_AMBER}`,
-          borderRadius: "14px",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
-        },
-      }}
-    >
+    <Dialog open={open} onClose={handleClose} TransitionComponent={SlideUp} fullWidth maxWidth="sm">
       <DialogContent sx={{ padding: "28px" }}>
         <Box
           sx={{
@@ -208,7 +186,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
             >
               Enter your BoardGameGeek username to preview your owned games collection. Make sure
               your collection is set to{" "}
-              <Box component="span" sx={{ color: GOLD }}>
+              <Box component="span" sx={{ color: BRICK }}>
                 public
               </Box>{" "}
               on BGG.
@@ -234,13 +212,6 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                 fontSize: "15px",
                 color: "text.primary",
                 mb: "16px",
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
-                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "primary.main",
-                  borderWidth: "1px",
-                },
-                "& input::placeholder": { color: TEXT_FAINT },
               }}
             />
 
@@ -249,7 +220,8 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                 sx={{
                   fontFamily: FONT_SANS,
                   fontSize: "13px",
-                  color: "rgba(220,100,100,0.9)",
+                  color: "error.main",
+                  fontWeight: 500,
                   mb: "16px",
                 }}
               >
@@ -262,27 +234,10 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
               onClick={handleFetch}
               disabled={fetching || !bggUsername.trim()}
               startIcon={
-                fetching ? (
-                  <CircularProgress size={16} sx={{ color: "background.default" }} />
-                ) : (
-                  <SearchIcon />
-                )
+                fetching ? <CircularProgress size={16} sx={{ color: "inherit" }} /> : <SearchIcon />
               }
-              sx={{
-                backgroundColor: "primary.main",
-                borderRadius: "8px",
-                color: "background.default",
-                fontFamily: FONT_SANS,
-                fontSize: "15px",
-                fontWeight: 500,
-                padding: "12px",
-                textTransform: "none",
-                "&:hover": { backgroundColor: "primary.light" },
-                "&.Mui-disabled": {
-                  background: "rgba(200,150,42,0.35)",
-                  color: "rgba(15,12,8,0.5)",
-                },
-              }}
+              variant="contained"
+              sx={{ fontSize: "15px", padding: "10px" }}
             >
               {fetching ? "Fetching collection…" : "Preview collection"}
             </Button>
@@ -324,7 +279,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                 </Typography>
                 <Typography sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT }}>
                   BGG collection for{" "}
-                  <Box component="span" sx={{ color: GOLD }}>
+                  <Box component="span" sx={{ color: BRICK }}>
                     {bggUsername}
                   </Box>
                 </Typography>
@@ -417,7 +372,14 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                       )}
                     </Box>
                     {game.bggRating && (
-                      <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: GOLD }}>
+                      <Typography
+                        sx={{
+                          fontFamily: FONT_SANS,
+                          fontSize: "11px",
+                          fontWeight: 500,
+                          color: "#a87a20",
+                        }}
+                      >
                         ★ {game.bggRating.toFixed(1)}
                       </Typography>
                     )}
@@ -429,19 +391,10 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
 
             <Button
               fullWidth
+              variant="contained"
               onClick={handleImport}
               startIcon={<DownloadIcon />}
-              sx={{
-                backgroundColor: "primary.main",
-                borderRadius: "8px",
-                color: "background.default",
-                fontFamily: FONT_SANS,
-                fontSize: "15px",
-                fontWeight: 500,
-                padding: "12px",
-                textTransform: "none",
-                "&:hover": { backgroundColor: "primary.light" },
-              }}
+              sx={{ fontSize: "15px", padding: "10px" }}
             >
               Import all {games.length} games
             </Button>
@@ -510,7 +463,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
               </Box>
               <Box sx={{ textAlign: "center" }}>
                 <Typography
-                  sx={{ fontFamily: FONT_SERIF, fontSize: "28px", fontWeight: 700, color: GOLD }}
+                  sx={{ fontFamily: FONT_SERIF, fontSize: "28px", fontWeight: 700, color: OLIVE }}
                 >
                   {importResult.skipped}
                 </Typography>
@@ -525,7 +478,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                       fontFamily: FONT_SERIF,
                       fontSize: "28px",
                       fontWeight: 700,
-                      color: "rgba(220,120,120,0.9)",
+                      color: "error.main",
                     }}
                   >
                     {importResult.failed}
@@ -539,18 +492,9 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
 
             <Button
               fullWidth
+              variant="contained"
               onClick={handleClose}
-              sx={{
-                backgroundColor: "primary.main",
-                borderRadius: "8px",
-                color: "background.default",
-                fontFamily: FONT_SANS,
-                fontSize: "15px",
-                fontWeight: 500,
-                padding: "12px",
-                textTransform: "none",
-                "&:hover": { backgroundColor: "primary.light" },
-              }}
+              sx={{ fontSize: "15px", padding: "10px" }}
             >
               Done
             </Button>

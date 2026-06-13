@@ -1,4 +1,4 @@
-import { TEXT_FAINT } from "@/styles/theme";
+import { MUSTARD } from "@/styles/theme";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { Box } from "@mui/material";
@@ -26,10 +26,11 @@ export default function StarRating({
             onClick={() => !readonly && onChange?.(star)}
             sx={{
               cursor: readonly ? "default" : "pointer",
-              color: filled ? "primary.main" : TEXT_FAINT,
+              color: filled ? MUSTARD : "rgba(51,39,26,0.3)",
               display: "flex",
               transition: "color 0.15s",
               "& svg": { fontSize: "22px" },
+              "& svg path": filled ? { stroke: "rgba(51,39,26,0.6)", strokeWidth: 0.5 } : {},
             }}
           >
             {filled ? <StarIcon /> : <StarBorderIcon />}

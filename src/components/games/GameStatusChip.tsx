@@ -18,13 +18,12 @@ export default function GameStatusChip({
         top: "6px",
         right: "6px",
         background: BG_BLUE,
-        border: `1px solid ${BORDER_BLUE}`,
-        borderRadius: "6px",
-        padding: "2px 6px",
+        border: `1.5px solid ${BORDER_BLUE}`,
+        borderRadius: "999px",
+        padding: "2px 7px",
         display: "flex",
         alignItems: "center",
         gap: "3px",
-        backdropFilter: "blur(4px)",
       }}
     >
       <BookmarkIcon sx={{ fontSize: "9px", color: BLUE }} />

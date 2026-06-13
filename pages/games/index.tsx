@@ -1,13 +1,14 @@
 import GameGrid from "@/components/games/GameGrid";
 import FilterChip from "@/components/ui/FilterChip";
 import {
-  BORDER_AMBER,
-  BG_ELEVATED,
-  TEXT_DIM,
-  TEXT_FAINT,
-  AMBER_DIM,
+  BORDER_INK,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
+  SURFACE,
+  TEXT_DIM,
+  TEXT_FAINT,
+  TINT_MUSTARD,
 } from "@/styles/theme";
 import { LibraryGame } from "@pages/api/games/library";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -35,9 +36,9 @@ function FilterLabel({ children }: { children: React.ReactNode }) {
       sx={{
         fontFamily: FONT_SANS,
         fontSize: "11px",
-        fontWeight: 600,
-        color: "primary.main",
-        letterSpacing: "1.2px",
+        fontWeight: 700,
+        color: "text.secondary",
+        letterSpacing: "0.1em",
         textTransform: "uppercase",
         mb: "10px",
       }}
@@ -158,22 +159,6 @@ export default function GamesIndexPage() {
       <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "40vh",
-            background:
-              "radial-gradient(ellipse 70% 50% at 50% -5%, rgba(34,85,48,0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "1200px",
             margin: "0 auto",
             padding: { xs: "24px 16px", md: "40px 32px" },
@@ -210,20 +195,14 @@ export default function GamesIndexPage() {
             </Box>
 
             <Button
+              variant="outlined"
               onClick={() => setFiltersOpen((o) => !o)}
               startIcon={<TuneIcon />}
               sx={{
-                background: hasActiveFilters ? AMBER_DIM : "transparent",
-                border: "1px solid",
-                borderColor: `${hasActiveFilters ? BORDER_AMBER : "divider"}`,
-                borderRadius: "8px",
-                color: hasActiveFilters ? "primary.main" : TEXT_DIM,
-                fontFamily: FONT_SANS,
+                backgroundColor: hasActiveFilters ? TINT_MUSTARD : SURFACE,
                 fontSize: "14px",
-                fontWeight: 500,
                 padding: "8px 16px",
-                textTransform: "none",
-                "&:hover": { borderColor: BORDER_AMBER, color: "text.primary" },
+                "&:hover": { backgroundColor: hasActiveFilters ? TINT_MUSTARD : SURFACE },
               }}
             >
               Filters{hasActiveFilters ? " •" : ""}
@@ -243,26 +222,16 @@ export default function GamesIndexPage() {
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "14px",
-              color: "text.primary",
               mb: "16px",
-              background: "rgba(255,255,255,0.03)",
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: "primary.main",
-                borderWidth: "1px",
-              },
-              "& input::placeholder": { color: TEXT_FAINT },
             }}
           />
 
           <Collapse in={filtersOpen}>
             <Box
               sx={{
-                background: BG_ELEVATED,
-                border: "1px solid",
-                borderColor: "divider",
-                borderRadius: "12px",
+                backgroundColor: "background.paper",
+                border: BORDER_INK,
+                borderRadius: "13px",
                 padding: "24px",
                 mb: "20px",
                 display: "grid",
@@ -375,9 +344,10 @@ export default function GamesIndexPage() {
                   sx={{
                     fontFamily: FONT_SANS,
                     fontSize: "13px",
-                    color: TEXT_FAINT,
+                    fontWeight: 700,
+                    color: BRICK,
                     cursor: "pointer",
-                    "&:hover": { color: TEXT_DIM },
+                    "&:hover": { textDecoration: "underline" },
                   }}
                 >
                   Clear filters ×
@@ -400,9 +370,9 @@ export default function GamesIndexPage() {
                 sx={{
                   fontFamily: FONT_SANS,
                   fontSize: "11px",
-                  fontWeight: 600,
-                  color: "primary.main",
-                  letterSpacing: "1.2px",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                  letterSpacing: "0.1em",
                   textTransform: "uppercase",
                   flexShrink: 0,
                 }}
@@ -445,7 +415,9 @@ export default function GamesIndexPage() {
 
           {!loading && games.length === 0 && (
             <Box sx={{ textAlign: "center", py: "80px" }}>
-              <Typography sx={{ fontFamily: FONT_SERIF, fontSize: "22px", color: TEXT_DIM }}>
+              <Typography
+                sx={{ fontFamily: FONT_SERIF, fontSize: "22px", fontWeight: 700, color: TEXT_DIM }}
+              >
                 No games found
               </Typography>
               <Typography
@@ -459,23 +431,12 @@ export default function GamesIndexPage() {
           {hasMore && (
             <Box sx={{ display: "flex", justifyContent: "center", mt: "40px" }}>
               <Button
+                variant="outlined"
                 onClick={handleLoadMore}
                 disabled={loading}
                 sx={{
-                  background: "transparent",
-                  border: `1px solid ${BORDER_AMBER}`,
-                  borderRadius: "8px",
-                  color: TEXT_DIM,
-                  fontFamily: FONT_SANS,
                   fontSize: "14px",
-                  fontWeight: 500,
                   padding: "10px 32px",
-                  textTransform: "none",
-                  "&:hover": {
-                    background: AMBER_DIM,
-                    color: "primary.main",
-                    borderColor: "primary.main",
-                  },
                 }}
               >
                 {loading ? "Loading…" : `Load more · ${total - games.length} remaining`}

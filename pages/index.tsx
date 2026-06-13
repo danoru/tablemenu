@@ -1,5 +1,15 @@
 import Header from "@/components/layout/Header";
-import { GOLD } from "@/styles/theme";
+import {
+  BORDER_INK,
+  BRICK,
+  FONT_SANS,
+  FONT_SERIF,
+  INK,
+  OLIVE,
+  SHADOW_HARD,
+  TINT_MUSTARD,
+  TINT_OLIVE,
+} from "@/styles/theme";
 import { Box, Button, OutlinedInput, Typography } from "@mui/material";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
@@ -10,72 +20,17 @@ import { authOptions } from "./api/auth/[...nextauth]";
 
 const styles = {
   root: {
-    backgroundColor: "background.primary",
+    backgroundColor: "background.default",
     minHeight: "100vh",
-    position: "relative" as const,
     overflowX: "hidden" as const,
     display: "flex",
     flexDirection: "column" as const,
   },
 
-  ambientTop: {
-    position: "absolute" as const,
-    top: 0,
-    left: 0,
-    right: 0,
-    height: "50%",
-    background:
-      "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(34,85,48,0.22) 0%, transparent 70%)",
-    pointerEvents: "none" as const,
-    zIndex: 0,
-  },
-
-  ambientBottom: {
-    position: "absolute" as const,
-    bottom: 0,
-    right: 0,
-    width: "60%",
-    height: "50%",
-    background:
-      "radial-gradient(ellipse 60% 50% at 80% 100%, rgba(180,110,30,0.07) 0%, transparent 70%)",
-    pointerEvents: "none" as const,
-    zIndex: 0,
-  },
-
   content: {
-    position: "relative" as const,
-    zIndex: 1,
     display: "flex",
     flexDirection: "column" as const,
     flexGrow: 1,
-  },
-
-  nav: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "20px 32px",
-    borderBottom: "1px solid rgba(180,140,60,0.15)",
-  },
-
-  logo: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: "22px",
-    fontWeight: 900,
-    color: GOLD,
-    letterSpacing: "-0.3px",
-    userSelect: "none" as const,
-  },
-
-  logoFaded: {
-    color: "rgba(232,201,122,0.4)",
-    fontWeight: 700,
-  },
-
-  navRight: {
-    display: "flex",
-    gap: "8px",
-    alignItems: "center",
   },
 
   hero: {
@@ -90,47 +45,48 @@ const styles = {
     display: "inline-flex",
     alignItems: "center",
     gap: "8px",
-    background: "rgba(34,85,48,0.3)",
-    border: "1px solid rgba(60,160,80,0.25)",
-    color: "secondary.light",
+    backgroundColor: TINT_OLIVE,
+    border: BORDER_INK,
+    boxShadow: SHADOW_HARD,
+    color: INK,
     fontSize: "11px",
-    fontWeight: 500,
-    letterSpacing: "1.2px",
+    fontWeight: 700,
+    letterSpacing: "0.1em",
     textTransform: "uppercase" as const,
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: FONT_SANS,
     padding: "5px 14px",
-    borderRadius: "20px",
+    borderRadius: "999px",
     marginBottom: "28px",
   },
 
   eyebrowDot: {
     width: "6px",
     height: "6px",
-    backgroundColor: "secondary.light",
+    backgroundColor: OLIVE,
     borderRadius: "50%",
     flexShrink: 0,
   },
 
   headline: {
-    fontFamily: "'Playfair Display', serif",
+    fontFamily: FONT_SERIF,
     fontSize: "clamp(38px, 6vw, 62px)",
     fontWeight: 900,
     lineHeight: 1.05,
-    color: "#f0e6cc",
+    color: "text.primary",
     margin: "0 0 20px",
     letterSpacing: "-1px",
   },
 
   headlineEm: {
     fontStyle: "italic",
-    color: GOLD,
+    color: BRICK,
   },
 
   subhead: {
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: FONT_SANS,
     fontSize: "17px",
-    fontWeight: 300,
-    color: "rgba(232,223,200,0.6)",
+    fontWeight: 400,
+    color: "text.secondary",
     lineHeight: 1.75,
     maxWidth: "520px",
     margin: "0 auto 44px",
@@ -154,7 +110,7 @@ const styles = {
   divider: {
     width: "100%",
     height: "1px",
-    background: "linear-gradient(to right, transparent, rgba(180,140,60,0.2), transparent)",
+    background: "rgba(51,39,26,0.18)",
   },
 
   modes: {
@@ -168,26 +124,26 @@ const styles = {
   },
 
   modeCard: (featured: boolean) => ({
-    background: featured ? "rgba(34,85,48,0.12)" : "rgba(255,255,255,0.03)",
-    border: featured ? "1px solid rgba(60,160,80,0.25)" : "1px solid rgba(180,140,60,0.14)",
-    borderRadius: "12px",
+    backgroundColor: featured ? TINT_OLIVE : "background.paper",
+    border: BORDER_INK,
+    borderRadius: "13px",
+    boxShadow: SHADOW_HARD,
     padding: "28px",
-    transition: "border-color 0.2s",
     cursor: "default",
   }),
 
   modeTag: (amber: boolean) => ({
     display: "inline-block",
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: FONT_SANS,
     fontSize: "11px",
-    fontWeight: 500,
-    letterSpacing: "1px",
+    fontWeight: 700,
+    letterSpacing: "0.1em",
     textTransform: "uppercase" as const,
-    color: amber ? GOLD : "secondary.light",
-    background: amber ? "rgba(180,110,30,0.25)" : "rgba(34,85,48,0.4)",
-    border: amber ? "1px solid rgba(180,140,60,0.25)" : "1px solid rgba(60,160,80,0.2)",
+    color: INK,
+    backgroundColor: amber ? TINT_MUSTARD : TINT_OLIVE,
+    border: `1.5px solid ${INK}`,
     padding: "3px 10px",
-    borderRadius: "20px",
+    borderRadius: "999px",
     marginBottom: "16px",
   }),
 
@@ -199,18 +155,18 @@ const styles = {
   },
 
   modeTitle: {
-    fontFamily: "'Playfair Display', serif",
+    fontFamily: FONT_SERIF,
     fontSize: "22px",
     fontWeight: 700,
-    color: "#f0e6cc",
+    color: "text.primary",
     margin: "0 0 10px",
   },
 
   modeDesc: {
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: FONT_SANS,
     fontSize: "14px",
-    fontWeight: 300,
-    color: "rgba(232,223,200,0.55)",
+    fontWeight: 400,
+    color: "text.secondary",
     lineHeight: 1.65,
     margin: 0,
   },
@@ -227,15 +183,17 @@ const styles = {
 
   featCard: {
     padding: "20px",
-    borderRadius: "10px",
-    background: "rgba(255,255,255,0.025)",
-    border: "1px solid rgba(180,140,60,0.1)",
+    borderRadius: "13px",
+    backgroundColor: "background.paper",
+    border: BORDER_INK,
+    boxShadow: SHADOW_HARD,
   },
 
   featIcon: {
     width: "32px",
     height: "32px",
-    background: "rgba(180,110,30,0.2)",
+    backgroundColor: TINT_MUSTARD,
+    border: `1.5px solid ${INK}`,
     borderRadius: "8px",
     display: "flex",
     alignItems: "center",
@@ -245,17 +203,17 @@ const styles = {
   },
 
   featTitle: {
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: "14px",
-    fontWeight: 500,
-    color: "#e8dfc8",
+    fontFamily: FONT_SERIF,
+    fontSize: "16px",
+    fontWeight: 700,
+    color: "text.primary",
     margin: "0 0 6px",
   },
 
   featDesc: {
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: FONT_SANS,
     fontSize: "13px",
-    color: "rgba(232,223,200,0.45)",
+    color: "text.secondary",
     lineHeight: 1.55,
     margin: 0,
   },
@@ -268,9 +226,10 @@ const styles = {
   },
 
   roomBox: {
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(180,140,60,0.18)",
-    borderRadius: "12px",
+    backgroundColor: "background.paper",
+    border: BORDER_INK,
+    borderRadius: "13px",
+    boxShadow: SHADOW_HARD,
     padding: "28px 32px",
     display: "flex",
     alignItems: "center",
@@ -284,17 +243,17 @@ const styles = {
   },
 
   roomTitle: {
-    fontFamily: "'Playfair Display', serif",
+    fontFamily: FONT_SERIF,
     fontSize: "18px",
     fontWeight: 700,
-    color: "#f0e6cc",
+    color: "text.primary",
     margin: "0 0 4px",
   },
 
   roomSub: {
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: FONT_SANS,
     fontSize: "13px",
-    color: "rgba(232,223,200,0.4)",
+    color: "text.secondary",
     margin: 0,
   },
 
@@ -359,9 +318,6 @@ export default function HomePage() {
       />
 
       <Box sx={styles.root}>
-        <Box sx={styles.ambientTop} />
-        <Box sx={styles.ambientBottom} />
-
         <Box sx={styles.content}>
           <Box sx={styles.hero}>
             <Box sx={styles.eyebrow}>
@@ -391,22 +347,11 @@ export default function HomePage() {
 
             <Box sx={styles.ctaRow}>
               <Button
+                variant="contained"
                 onClick={() => router.push("/register")}
                 sx={{
-                  background: "#c8962a",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "background.default",
-                  fontFamily: "'DM Sans', sans-serif",
                   fontSize: "15px",
-                  fontWeight: 500,
                   padding: "13px 28px",
-                  textTransform: "none",
-                  "&:hover": {
-                    backgroundColor: "primary.light",
-                    transform: "translateY(-1px)",
-                  },
-                  transition: "all 0.2s",
                 }}
               >
                 Build my library
@@ -474,50 +419,30 @@ export default function HomePage() {
                   inputProps={{ maxLength: 6 }}
                   error={!!error}
                   sx={{
-                    background: "rgba(255,255,255,0.06)",
-                    borderRadius: "7px",
-                    color: "#e8dfc8",
-                    fontFamily: "'DM Sans', sans-serif",
+                    fontFamily: FONT_SANS,
                     fontSize: "15px",
-                    fontWeight: 500,
+                    fontWeight: 700,
                     letterSpacing: "3px",
                     textAlign: "center",
                     width: "160px",
                     "& input": { textAlign: "center", padding: "10px 14px" },
                     "& input::placeholder": {
-                      color: "rgba(232,223,200,0.25)",
                       letterSpacing: "1px",
                       fontSize: "13px",
                     },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: error ? "rgba(220,80,80,0.5)" : "rgba(180,140,60,0.25)",
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: error ? "rgba(220,80,80,0.7)" : "rgba(180,140,60,0.45)",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "rgba(180,140,60,0.6)",
+                    "&.Mui-error .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "error.main",
                     },
                   }}
                 />
                 <Button
                   type="submit"
+                  variant="contained"
                   disabled={loading || !roomCode.trim()}
                   sx={{
-                    background: "#c8962a",
-                    borderRadius: "7px",
-                    color: "background.default",
-                    fontFamily: "'DM Sans', sans-serif",
                     fontSize: "14px",
-                    fontWeight: 500,
                     padding: "10px 20px",
-                    textTransform: "none",
                     whiteSpace: "nowrap",
-                    "&:hover": { backgroundColor: "primary.light" },
-                    "&.Mui-disabled": {
-                      background: "rgba(200,150,42,0.35)",
-                      color: "rgba(15,12,8,0.5)",
-                    },
                   }}
                 >
                   {loading ? "Finding…" : "Join table"}
@@ -528,9 +453,9 @@ export default function HomePage() {
                 <Typography
                   sx={{
                     width: "100%",
-                    fontFamily: "'DM Sans', sans-serif",
+                    fontFamily: FONT_SANS,
                     fontSize: "13px",
-                    color: "rgba(220,100,100,0.9)",
+                    color: "error.main",
                     marginTop: "8px",
                   }}
                 >

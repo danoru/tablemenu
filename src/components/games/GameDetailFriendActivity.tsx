@@ -1,4 +1,4 @@
-import { FONT_SANS, TEXT_FAINT } from "@/styles/theme";
+import { FONT_SANS, INK, TEXT_FAINT } from "@/styles/theme";
 import { Box, Typography } from "@mui/material";
 import FriendMiniAvatar from "../players/FriendMiniAvatar";
 
@@ -33,7 +33,7 @@ export default function FriendActivityRow({
         alignItems: "center",
         gap: "12px",
         padding: "10px 0",
-        borderBottom: "1px solid divider",
+        borderBottom: "1px solid rgba(51,39,26,0.18)",
         "&:last-child": { borderBottom: "none" },
       }}
     >
@@ -63,8 +63,8 @@ export default function FriendActivityRow({
               width: "28px",
               height: "28px",
               borderRadius: "50%",
-              background: "rgba(255,255,255,0.06)",
-              border: `1.5px solid rgba(180,140,60,0.25)`,
+              backgroundColor: "background.default",
+              border: `1.5px solid ${INK}`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

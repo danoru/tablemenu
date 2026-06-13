@@ -83,24 +83,12 @@ export default function ExportMenuButton({ menu, courses }: Props) {
   return (
     <>
       <Button
+        variant="outlined"
         onClick={handleOpen}
         startIcon={<PictureAsPdfIcon />}
         sx={{
-          background: "transparent",
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: "8px",
-          color: TEXT_DIM,
-          fontFamily: FONT_SANS,
           fontSize: "14px",
-          fontWeight: 500,
           padding: "10px 20px",
-          textTransform: "none",
-          "&:hover": {
-            background: "rgba(180,140,60,0.08)",
-            color: "text.primary",
-            borderColor: "primary.main",
-          },
         }}
       >
         Export as PDF
@@ -113,10 +101,6 @@ export default function ExportMenuButton({ menu, courses }: Props) {
         fullWidth
         PaperProps={{
           sx: {
-            backgroundColor: "background.paper",
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: "14px",
             overflow: "hidden",
           },
         }}
@@ -127,7 +111,8 @@ export default function ExportMenuButton({ menu, courses }: Props) {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 24px",
-            borderBottom: "1px solid divider",
+            borderBottom: "1px solid",
+            borderColor: "divider",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
@@ -166,25 +151,15 @@ export default function ExportMenuButton({ menu, courses }: Props) {
                     disabled={loading}
                     startIcon={
                       loading ? (
-                        <CircularProgress size={14} sx={{ color: "primary.main" }} />
+                        <CircularProgress size={14} sx={{ color: "text.disabled" }} />
                       ) : (
                         <PictureAsPdfIcon sx={{ fontSize: "15px !important" }} />
                       )
                     }
+                    variant="contained"
                     sx={{
-                      backgroundColor: "primary.main",
-                      borderRadius: "8px",
-                      color: "background.default",
-                      fontFamily: FONT_SANS,
                       fontSize: "13px",
-                      fontWeight: 500,
                       padding: "7px 16px",
-                      textTransform: "none",
-                      "&:hover": { backgroundColor: "primary.light" },
-                      "&.Mui-disabled": {
-                        background: "rgba(200,150,42,0.4)",
-                        color: "rgba(15,12,8,0.5)",
-                      },
                     }}
                   >
                     {loading ? "Building PDF…" : "Download PDF"}

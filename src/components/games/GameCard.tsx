@@ -1,4 +1,4 @@
-import { BORDER_AMBER, FONT_SANS, TEXT_FAINT } from "@/styles/theme";
+import { FONT_SANS, INK, MUSTARD, SHADOW_HARD, SHADOW_HARD_HOVER } from "@/styles/theme";
 import StarIcon from "@mui/icons-material/Star";
 import { Box, Typography } from "@mui/material";
 import { LibraryGame } from "@pages/api/games/library";
@@ -8,49 +8,56 @@ import GameArt from "../games/GameArt";
 
 export default function GameCard({ game }: { game: LibraryGame }) {
   return (
-    <Link href={`/games/${game.gameId}`} style={{ textDecoration: "none" }}>
+    <Link
+      href={`/games/${game.gameId}`}
+      style={{ textDecoration: "none", display: "block", height: "100%" }}
+    >
       <Box
         sx={{
           backgroundColor: "background.paper",
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: "10px",
+          border: `2px solid ${INK}`,
+          borderRadius: "13px",
+          boxShadow: SHADOW_HARD,
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
+          height: "100%",
           cursor: "pointer",
-          transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
+          transition: "transform 0.12s ease, box-shadow 0.12s ease",
           "&:hover": {
-            borderColor: BORDER_AMBER,
-            transform: "translateY(-2px)",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            transform: "translate(-2px, -2px)",
+            boxShadow: SHADOW_HARD_HOVER,
           },
         }}
       >
-        <GameArt
-          game={
-            {
-              ...game,
-              gameId: game.gameId,
-              userGameId: 0,
-              addedAt: "",
-              weight: 1,
-              notes: null,
-              description: null,
-              mechanics: [],
-              designers: [],
-              publishers: [],
-              userStars: null,
-            } as LibraryGame
-          }
-          size={120}
-        />
-        <Box sx={{ padding: "10px 12px 12px", flex: 1 }}>
+        <Box sx={{ borderBottom: `2px solid ${INK}`, "& > *": { display: "block" } }}>
+          <GameArt
+            flush
+            fullWidth
+            game={
+              {
+                ...game,
+                gameId: game.gameId,
+                userGameId: 0,
+                addedAt: "",
+                weight: 1,
+                notes: null,
+                description: null,
+                mechanics: [],
+                designers: [],
+                publishers: [],
+                userStars: null,
+              } as LibraryGame
+            }
+            size={120}
+          />
+        </Box>
+        <Box sx={{ padding: "10px 12px 12px", flex: 1, display: "flex", flexDirection: "column" }}>
           <Typography
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "13px",
-              fontWeight: 500,
+              fontWeight: 700,
               color: "text.primary",
               lineHeight: 1.35,
               mb: "6px",
@@ -58,12 +65,21 @@ export default function GameCard({ game }: { game: LibraryGame }) {
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
+              // reserve two lines so single-line titles don't shrink the card
+              minHeight: "calc(2 * 1.35 * 13px)",
             }}
           >
             {game.name}
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: TEXT_FAINT }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mt: "auto",
+            }}
+          >
+            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: "text.secondary" }}>
               {game.minPlayers === game.maxPlayers
                 ? `${game.minPlayers}p`
                 : `${game.minPlayers}–${game.maxPlayers}p`}
@@ -74,8 +90,15 @@ export default function GameCard({ game }: { game: LibraryGame }) {
             </Typography>
             {game.bggRating != null && (
               <Box sx={{ display: "flex", alignItems: "center", gap: "2px" }}>
-                <StarIcon sx={{ fontSize: "10px", color: "primary.main" }} />
-                <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: TEXT_FAINT }}>
+                <StarIcon sx={{ fontSize: "11px", color: MUSTARD }} />
+                <Typography
+                  sx={{
+                    fontFamily: FONT_SANS,
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    color: "text.secondary",
+                  }}
+                >
                   {game.bggRating.toFixed(1)}
                 </Typography>
               </Box>

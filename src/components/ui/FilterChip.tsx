@@ -1,4 +1,4 @@
-import { AMBER_DIM, BORDER_AMBER, FONT_SANS, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
+import { FONT_SANS, INK, MUSTARD, SHADOW_HARD } from "@/styles/theme";
 import { Box } from "@mui/material";
 
 export default function FilterChip({
@@ -16,19 +16,23 @@ export default function FilterChip({
       sx={{
         display: "inline-flex",
         alignItems: "center",
-        padding: "5px 14px",
-        border: "1px solid",
-        borderColor: `${active ? BORDER_AMBER : "divider"}`,
-        borderRadius: "20px",
-        background: active ? AMBER_DIM : "transparent",
-        color: active ? "primary.main" : TEXT_FAINT,
+        padding: "4px 14px",
+        border: `2px solid ${active ? INK : "rgba(51,39,26,0.3)"}`,
+        borderRadius: "999px",
+        background: active ? MUSTARD : "background.paper",
+        boxShadow: active ? SHADOW_HARD : "none",
+        color: active ? INK : "text.secondary",
         fontFamily: FONT_SANS,
         fontSize: "13px",
-        fontWeight: active ? 600 : 400,
+        fontWeight: active ? 700 : 500,
         cursor: "pointer",
-        transition: "all 0.15s",
+        transition: "all 0.12s ease",
         userSelect: "none",
-        "&:hover": { borderColor: BORDER_AMBER, color: TEXT_DIM },
+        "&:hover": {
+          borderColor: INK,
+          color: INK,
+          transform: active ? "none" : "translate(-1px, -1px)",
+        },
       }}
     >
       {label}

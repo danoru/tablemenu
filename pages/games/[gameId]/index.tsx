@@ -5,18 +5,21 @@ import StarRating from "@/components/ui/StarRating";
 import StatPill from "@/components/ui/StatPill";
 import { authOptions } from "@/lib/authOptions";
 import {
-  AMBER_DIM,
-  BG_BLUE,
-  BG_GREEN,
-  BLUE,
-  BORDER_AMBER,
-  BORDER_BLUE,
-  BORDER_GREEN,
+  BORDER_INK,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
-  RED,
+  INK,
+  MUSTARD,
+  OLIVE,
+  SHADOW_HARD,
+  TEAL,
   TEXT_DIM,
   TEXT_FAINT,
+  TINT_BRICK,
+  TINT_MUSTARD,
+  TINT_OLIVE,
+  TINT_TEAL,
 } from "@/styles/theme";
 import AddIcon from "@mui/icons-material/Add";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
@@ -95,11 +98,11 @@ function complexityLabel(c: number) {
 }
 
 function complexityColor(c: number) {
-  if (c < 1.5) return "secondary.light";
-  if (c < 2.5) return "#8dd47a";
-  if (c < 3.5) return "#c8962a";
-  if (c < 4.2) return "#e0823a";
-  return "#e05c5c";
+  if (c < 1.5) return OLIVE;
+  if (c < 2.5) return OLIVE;
+  if (c < 3.5) return "#a87a20";
+  if (c < 4.2) return "#a87a20";
+  return BRICK;
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
@@ -108,9 +111,9 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
       sx={{
         fontFamily: FONT_SANS,
         fontSize: "11px",
-        fontWeight: 600,
-        color: "primary.main",
-        letterSpacing: "1.5px",
+        fontWeight: 700,
+        color: "text.secondary",
+        letterSpacing: "0.1em",
         textTransform: "uppercase",
         mb: "16px",
       }}
@@ -125,9 +128,8 @@ function Card({ children, sx = {} }: { children: React.ReactNode; sx?: object })
     <Box
       sx={{
         backgroundColor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: "12px",
+        border: BORDER_INK,
+        borderRadius: "13px",
         padding: "24px",
         ...sx,
       }}
@@ -252,22 +254,6 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
       <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "60vh",
-            background:
-              "radial-gradient(ellipse 60% 50% at 50% -5%, rgba(34,85,48,0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "1100px",
             margin: "0 auto",
             padding: { xs: "24px 16px", md: "40px 32px" },
@@ -304,11 +290,10 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
               sx={{
                 flexShrink: 0,
                 width: { xs: "160px", md: "200px" },
-                borderRadius: "12px",
+                borderRadius: "13px",
                 overflow: "hidden",
-                boxShadow: "0 8px 40px rgba(0,0,0,0.6)",
-                border: "1px solid",
-                borderColor: "divider",
+                boxShadow: SHADOW_HARD,
+                border: BORDER_INK,
               }}
             >
               <GameArt game={game} size={200} />
@@ -319,12 +304,12 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 <Typography
                   sx={{
                     fontFamily: FONT_SANS,
-                    fontSize: "12px",
-                    color: "primary.main",
-                    letterSpacing: "1.5px",
+                    fontSize: "11px",
+                    color: "text.secondary",
+                    letterSpacing: "0.1em",
                     textTransform: "uppercase",
                     mb: "8px",
-                    fontWeight: 600,
+                    fontWeight: 700,
                   }}
                 >
                   {game.yearPublished}
@@ -380,10 +365,9 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       display: "flex",
                       alignItems: "center",
                       gap: "6px",
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid",
-                      borderColor: "divider",
-                      borderRadius: "20px",
+                      backgroundColor: "background.paper",
+                      border: BORDER_INK,
+                      borderRadius: "999px",
                       padding: "6px 14px",
                     }}
                   >
@@ -392,7 +376,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                         fontFamily: FONT_SANS,
                         fontSize: "13px",
                         color: complexityColor(game.complexity),
-                        fontWeight: 600,
+                        fontWeight: 700,
                       }}
                     >
                       {game.complexity.toFixed(1)}
@@ -408,14 +392,13 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       display: "flex",
                       alignItems: "center",
                       gap: "6px",
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid",
-                      borderColor: "divider",
-                      borderRadius: "20px",
+                      backgroundColor: "background.paper",
+                      border: BORDER_INK,
+                      borderRadius: "999px",
                       padding: "6px 14px",
                     }}
                   >
-                    <StarIcon sx={{ color: "primary.main", fontSize: "15px" }} />
+                    <StarIcon sx={{ color: MUSTARD, fontSize: "15px" }} />
                     <Typography sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_DIM }}>
                       {game.bggRating.toFixed(1)} BGG
                     </Typography>
@@ -433,20 +416,11 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
               >
                 {!inLibrary ? (
                   <Button
-                    onClick={handleAddToLibrary}
                     disabled={libraryLoading}
                     startIcon={libraryLoading ? <CircularProgress size={14} /> : <AddIcon />}
-                    sx={{
-                      backgroundColor: "primary.main",
-                      borderRadius: "8px",
-                      color: "background.default",
-                      fontFamily: FONT_SANS,
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      padding: "9px 20px",
-                      textTransform: "none",
-                      "&:hover": { backgroundColor: "primary.light" },
-                    }}
+                    sx={{ fontSize: "14px", padding: "9px 20px" }}
+                    variant="contained"
+                    onClick={handleAddToLibrary}
                   >
                     Add to Library
                   </Button>
@@ -456,19 +430,19 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       display: "flex",
                       alignItems: "center",
                       gap: "6px",
-                      background: BG_GREEN,
-                      border: `1px solid ${BORDER_GREEN}`,
-                      borderRadius: "8px",
+                      backgroundColor: TINT_OLIVE,
+                      border: `2px solid ${OLIVE}`,
+                      borderRadius: "999px",
                       padding: "9px 16px",
                     }}
                   >
-                    <CheckIcon sx={{ color: "secondary.light", fontSize: "16px" }} />
+                    <CheckIcon sx={{ color: OLIVE, fontSize: "16px" }} />
                     <Typography
                       sx={{
                         fontFamily: FONT_SANS,
                         fontSize: "14px",
-                        color: "secondary.light",
-                        fontWeight: 500,
+                        color: OLIVE,
+                        fontWeight: 700,
                       }}
                     >
                       In Library
@@ -481,15 +455,16 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     <IconButton
                       onClick={handleToggleFavorite}
                       sx={{
-                        border: `1px solid ${isFavorite ? "rgba(224,92,92,0.4)" : "divider"}`,
+                        backgroundColor: isFavorite ? TINT_BRICK : "transparent",
+                        border: `2px solid ${isFavorite ? BRICK : "rgba(51,39,26,0.3)"}`,
                         borderRadius: "8px",
-                        color: isFavorite ? RED : TEXT_FAINT,
+                        color: isFavorite ? BRICK : TEXT_FAINT,
                         padding: "9px",
                         transition: "all 0.2s",
                         "&:hover": {
-                          color: RED,
-                          borderColor: "rgba(224,92,92,0.4)",
-                          background: "rgba(224,92,92,0.08)",
+                          color: BRICK,
+                          borderColor: BRICK,
+                          backgroundColor: TINT_BRICK,
                         },
                       }}
                     >
@@ -505,12 +480,13 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     <IconButton
                       onClick={handleToggleWantToPlay}
                       sx={{
-                        border: `1px solid ${isWantToPlay ? BORDER_BLUE : "divider"}`,
+                        backgroundColor: isWantToPlay ? TINT_TEAL : "transparent",
+                        border: `2px solid ${isWantToPlay ? TEAL : "rgba(51,39,26,0.3)"}`,
                         borderRadius: "8px",
-                        color: isWantToPlay ? BLUE : TEXT_FAINT,
+                        color: isWantToPlay ? TEAL : TEXT_FAINT,
                         padding: "9px",
                         transition: "all 0.2s",
-                        "&:hover": { color: BLUE, borderColor: BORDER_BLUE, background: BG_BLUE },
+                        "&:hover": { color: TEAL, borderColor: TEAL, backgroundColor: TINT_TEAL },
                       }}
                     >
                       {isWantToPlay ? <BookmarkIcon /> : <BookmarkBorderIcon />}
@@ -526,12 +502,11 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        border: "1px solid",
-                        borderColor: "divider",
+                        border: "2px solid rgba(51,39,26,0.3)",
                         borderRadius: "8px",
                         color: TEXT_FAINT,
                         padding: "9px",
-                        "&:hover": { color: TEXT_DIM, borderColor: BORDER_AMBER },
+                        "&:hover": { color: TEXT_DIM, borderColor: INK },
                       }}
                     >
                       <OpenInNewIcon sx={{ fontSize: "18px" }} />
@@ -586,10 +561,11 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                             sx={{
                               fontFamily: FONT_SANS,
                               fontSize: "12px",
-                              background: AMBER_DIM,
-                              color: "primary.main",
-                              border: `1px solid rgba(200,150,42,0.25)`,
-                              borderRadius: "6px",
+                              fontWeight: 500,
+                              backgroundColor: TINT_BRICK,
+                              color: "#9c3823",
+                              border: `1.5px solid ${BRICK}`,
+                              borderRadius: "8px",
                               height: "26px",
                             }}
                           />
@@ -612,11 +588,11 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                             sx={{
                               fontFamily: FONT_SANS,
                               fontSize: "12px",
-                              background: "rgba(255,255,255,0.04)",
-                              color: TEXT_DIM,
-                              border: "1px solid",
-                              borderColor: "divider",
-                              borderRadius: "6px",
+                              fontWeight: 500,
+                              backgroundColor: TINT_TEAL,
+                              color: "text.primary",
+                              border: `1.5px solid ${TEAL}`,
+                              borderRadius: "8px",
                               height: "26px",
                             }}
                           />
@@ -655,7 +631,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     sx={{
                       textAlign: "center",
                       py: "32px",
-                      border: "1px dashed divider",
+                      border: "1px dashed rgba(51,39,26,0.3)",
                       borderRadius: "8px",
                     }}
                   >
@@ -687,14 +663,14 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                   <GameDetailFriendActivity
                     label={{ singular: "owns this", plural: "own this" }}
                     friends={friendActivity.owns}
-                    accentColor={"secondary.light"}
+                    accentColor={OLIVE}
                     onNavigate={(username) => router.push(`/players/${username}`)}
                   />
 
                   <GameDetailFriendActivity
                     label={{ singular: "wants to play this", plural: "want to play this" }}
                     friends={friendActivity.wantToPlay}
-                    accentColor={BLUE}
+                    accentColor={TEAL}
                     onNavigate={(username) => router.push(`/players/${username}`)}
                   />
 
@@ -704,7 +680,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       plural: "have this as a favorite",
                     }}
                     friends={friendActivity.favorited}
-                    accentColor={RED}
+                    accentColor={BRICK}
                     onNavigate={(username) => router.push(`/players/${username}`)}
                   />
                 </Card>
@@ -725,7 +701,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                       sx={{
                         fontFamily: FONT_SANS,
                         fontSize: "11px",
-                        color: notesSaved ? "primary.light" : TEXT_FAINT,
+                        color: notesSaved ? OLIVE : TEXT_FAINT,
                         transition: "color 0.3s",
                       }}
                     >
@@ -739,11 +715,10 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     minRows={4}
                     style={{
                       width: "100%",
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid",
-                      borderColor: "divider",
+                      background: "transparent",
+                      border: "2px solid rgba(51,39,26,0.4)",
                       borderRadius: "8px",
-                      color: "text.primary",
+                      color: INK,
                       fontFamily: FONT_SANS,
                       fontSize: "13px",
                       lineHeight: 1.65,
@@ -764,10 +739,16 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     {stars > 0 && (
                       <Typography
                         sx={{
+                          display: "inline-block",
                           fontFamily: FONT_SANS,
-                          fontSize: "12px",
-                          color: TEXT_FAINT,
-                          mt: "6px",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          color: "text.primary",
+                          backgroundColor: TINT_MUSTARD,
+                          border: `1.5px solid ${INK}`,
+                          borderRadius: "999px",
+                          padding: "2px 10px",
+                          mt: "8px",
                         }}
                       >
                         {
@@ -790,11 +771,10 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     minRows={3}
                     style={{
                       width: "100%",
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid",
-                      borderColor: "divider",
+                      background: "transparent",
+                      border: "2px solid rgba(51,39,26,0.4)",
                       borderRadius: "8px",
-                      color: "text.primary",
+                      color: INK,
                       fontFamily: FONT_SANS,
                       fontSize: "13px",
                       lineHeight: 1.65,
@@ -806,23 +786,11 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                     }}
                   />
                   <Button
-                    onClick={handleSaveRating}
-                    disabled={ratingLoading || stars === 0}
                     fullWidth
-                    sx={{
-                      background: stars > 0 ? "primary.main" : "rgba(255,255,255,0.04)",
-                      borderRadius: "8px",
-                      color: stars > 0 ? "primary.contrastText" : TEXT_FAINT,
-                      fontFamily: FONT_SANS,
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      padding: "10px",
-                      textTransform: "none",
-                      transition: "all 0.2s",
-                      "&:hover": {
-                        background: stars > 0 ? "primary.light" : "rgba(255,255,255,0.07)",
-                      },
-                    }}
+                    disabled={ratingLoading || stars === 0}
+                    sx={{ fontSize: "14px", padding: "10px" }}
+                    variant="contained"
+                    onClick={handleSaveRating}
                   >
                     {ratingLoading ? (
                       <CircularProgress size={16} />

@@ -6,16 +6,18 @@ import { authOptions } from "@/lib/authOptions";
 import { avatarColor } from "@/lib/helpers";
 import { buildTasteProfile, type TasteProfile } from "@/services/tasteProfile";
 import {
-  AMBER_DIM,
-  BLUE,
-  BORDER_AMBER,
-  BORDER_BLUE,
+  BORDER_INK,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
-  GOLD,
-  GOLD_FADED,
+  INK,
+  SHADOW_HARD,
+  SHADOW_HARD_HOVER,
+  SURFACE,
+  TEAL,
   TEXT_DIM,
   TEXT_FAINT,
+  TINT_MUSTARD,
 } from "@/styles/theme";
 import EditIcon from "@mui/icons-material/Edit";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
@@ -52,7 +54,7 @@ function PlayerPill({
         "&:hover": onClick
           ? {
               transform: "translateY(-1px)",
-              "& .pill-value": { color: GOLD },
+              "& .pill-value": { color: BRICK },
               "& .pill-label": { color: TEXT_DIM },
             }
           : undefined,
@@ -163,25 +165,9 @@ export default function UserProfilePage({
         type="profile"
       />
 
-      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "40vh",
-            background:
-              "radial-gradient(ellipse 70% 40% at 50% -5%, rgba(34,85,48,0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "860px",
             margin: "0 auto",
             padding: { xs: "28px 16px", md: "44px 32px" },
@@ -190,9 +176,9 @@ export default function UserProfilePage({
           <Box
             sx={{
               backgroundColor: "background.paper",
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: "16px",
+              border: BORDER_INK,
+              borderRadius: "13px",
+              boxShadow: SHADOW_HARD,
               padding: { xs: "28px 24px", md: "36px 40px" },
               mb: "24px",
             }}
@@ -211,7 +197,7 @@ export default function UserProfilePage({
                   height: { xs: "64px", md: "80px" },
                   borderRadius: "50%",
                   background: avatarColor(profileUser.username),
-                  border: `2px solid ${BORDER_AMBER}`,
+                  border: `2px solid ${INK}`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -223,7 +209,7 @@ export default function UserProfilePage({
                     fontFamily: FONT_SERIF,
                     fontSize: { xs: "26px", md: "32px" },
                     fontWeight: 700,
-                    color: "rgba(232,223,200,0.6)",
+                    color: "rgba(255,251,240,0.9)",
                     userSelect: "none",
                   }}
                 >
@@ -259,14 +245,14 @@ export default function UserProfilePage({
                       sx={{
                         fontFamily: FONT_SANS,
                         fontSize: "10px",
-                        fontWeight: 500,
+                        fontWeight: 700,
                         letterSpacing: "1px",
                         textTransform: "uppercase",
-                        color: "primary.main",
-                        background: AMBER_DIM,
-                        border: "1px solid rgba(200,150,42,0.25)",
+                        color: INK,
+                        background: TINT_MUSTARD,
+                        border: `1.5px solid ${INK}`,
                         padding: "3px 8px",
-                        borderRadius: "10px",
+                        borderRadius: "999px",
                       }}
                     >
                       {profileUser.badge}
@@ -292,7 +278,7 @@ export default function UserProfilePage({
                     sx={{
                       fontFamily: FONT_SANS,
                       fontSize: "14px",
-                      fontWeight: 300,
+                      fontWeight: 400,
                       color: TEXT_DIM,
                       lineHeight: 1.65,
                       mb: "12px",
@@ -324,13 +310,14 @@ export default function UserProfilePage({
                       }}
                       onClick={() => window.open(profileUser.website!, "_blank")}
                     >
-                      <LinkIcon sx={{ fontSize: "14px", color: GOLD_FADED }} />
+                      <LinkIcon sx={{ fontSize: "14px", color: BRICK }} />
                       <Typography
                         sx={{
                           fontFamily: FONT_SANS,
                           fontSize: "13px",
-                          color: GOLD_FADED,
-                          "&:hover": { color: GOLD },
+                          fontWeight: 500,
+                          color: BRICK,
+                          "&:hover": { textDecoration: "underline" },
                           transition: "color 0.15s",
                         }}
                       >
@@ -354,19 +341,20 @@ export default function UserProfilePage({
                     startIcon={<EditIcon sx={{ fontSize: "14px !important" }} />}
                     onClick={() => router.push(`/players/${profileUser.username}/settings`)}
                     sx={{
-                      background: "transparent",
-                      border: `1px solid ${BORDER_AMBER}`,
-                      borderRadius: "8px",
-                      color: TEXT_DIM,
+                      backgroundColor: "background.paper",
+                      border: `1.5px solid ${INK}`,
+                      borderRadius: "999px",
+                      boxShadow: `2px 2px 0 ${INK}`,
+                      color: "text.primary",
                       fontFamily: FONT_SANS,
                       fontSize: "13px",
-                      fontWeight: 500,
+                      fontWeight: 700,
                       padding: "8px 16px",
                       textTransform: "none",
                       "&:hover": {
-                        background: "rgba(180,140,60,0.08)",
-                        color: "text.primary",
-                        borderColor: "primary.main",
+                        backgroundColor: "background.paper",
+                        boxShadow: `3px 3px 0 ${INK}`,
+                        transform: "translate(-1px, -1px)",
                       },
                     }}
                   >
@@ -386,28 +374,29 @@ export default function UserProfilePage({
                       )
                     }
                     sx={{
-                      borderRadius: "8px",
+                      borderRadius: "999px",
                       fontFamily: FONT_SANS,
                       fontSize: "13px",
-                      fontWeight: 500,
+                      fontWeight: 700,
                       padding: "8px 16px",
                       textTransform: "none",
                       transition: "all 0.15s",
                       ...(isFollowing
                         ? {
                             background: "transparent",
-                            border: `1px solid ${BORDER_AMBER}`,
+                            border: "1.5px solid rgba(51,39,26,0.4)",
                             color: TEXT_DIM,
                             "&:hover": {
-                              borderColor: "rgba(220,80,80,0.4)",
-                              color: "rgba(220,120,120,0.9)",
-                              background: "rgba(220,80,80,0.06)",
+                              borderColor: BRICK,
+                              color: BRICK,
+                              background: "rgba(192,69,44,0.06)",
                             },
                           }
                         : {
                             backgroundColor: "primary.main",
-                            border: "none",
-                            color: "background.default",
+                            border: `1.5px solid ${INK}`,
+                            boxShadow: `2px 2px 0 ${INK}`,
+                            color: SURFACE,
                             "&:hover": { backgroundColor: "primary.light" },
                           }),
                       "&.Mui-disabled": { opacity: 0.5 },
@@ -492,9 +481,10 @@ export default function UserProfilePage({
                 sx={{
                   fontFamily: FONT_SANS,
                   fontSize: "13px",
-                  color: GOLD_FADED,
+                  fontWeight: 500,
+                  color: BRICK,
                   cursor: "pointer",
-                  "&:hover": { color: GOLD },
+                  "&:hover": { textDecoration: "underline" },
                   transition: "color 0.15s",
                 }}
               >
@@ -517,16 +507,19 @@ export default function UserProfilePage({
                   sx={{
                     position: "relative",
                     backgroundColor: "background.paper",
-                    border: "1px solid",
-                    borderColor: "divider",
+                    border: BORDER_INK,
                     borderRadius: "10px",
+                    boxShadow: SHADOW_HARD,
                     overflow: "hidden",
                     cursor: "pointer",
-                    transition: "border-color 0.15s, transform 0.15s",
-                    "&:hover": { borderColor: BORDER_AMBER, transform: "translateY(-2px)" },
+                    transition: "box-shadow 0.15s, transform 0.15s",
+                    "&:hover": {
+                      boxShadow: SHADOW_HARD_HOVER,
+                      transform: "translate(-2px, -2px)",
+                    },
                   }}
                 >
-                  <GameArt game={game} size={120} />
+                  <GameArt flush game={game} size={120} />
                   <Box sx={{ padding: "8px 10px" }}>
                     <Typography
                       sx={{
@@ -562,9 +555,9 @@ export default function UserProfilePage({
                 padding: "11px",
                 textTransform: "none",
                 "&:hover": {
-                  background: "rgba(180,140,60,0.06)",
-                  borderColor: BORDER_AMBER,
-                  color: TEXT_DIM,
+                  background: "rgba(51,39,26,0.04)",
+                  borderColor: INK,
+                  color: "text.primary",
                 },
               }}
             >
@@ -610,18 +603,19 @@ export default function UserProfilePage({
                     sx={{
                       position: "relative",
                       backgroundColor: "background.paper",
-                      border: `1px solid ${BORDER_BLUE}`,
+                      border: `2px solid ${TEAL}`,
                       borderRadius: "10px",
+                      boxShadow: `3px 3px 0 ${TEAL}`,
                       overflow: "hidden",
                       cursor: "pointer",
-                      transition: "border-color 0.15s, transform 0.15s",
+                      transition: "box-shadow 0.15s, transform 0.15s",
                       "&:hover": {
-                        borderColor: BLUE,
-                        transform: "translateY(-2px)",
+                        boxShadow: `5px 5px 0 ${TEAL}`,
+                        transform: "translate(-2px, -2px)",
                       },
                     }}
                   >
-                    <GameArt game={game} size={120} />
+                    <GameArt flush game={game} size={120} />
 
                     <Box sx={{ padding: "8px 10px" }}>
                       <Typography

@@ -2,14 +2,16 @@ import { authOptions } from "@/lib/authOptions";
 import { avatarColor } from "@/lib/helpers";
 import { getAllUsers } from "@data/users";
 import {
-  AMBER_DIM,
-  BORDER_AMBER,
+  BORDER_INK,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
-  GOLD,
-  GOLD_FADED,
+  INK,
+  SHADOW_HARD,
+  SURFACE,
   TEXT_DIM,
   TEXT_FAINT,
+  TINT_MUSTARD,
 } from "@/styles/theme";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
@@ -100,25 +102,9 @@ export default function UsersPage({
         <title>Players — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "40vh",
-            background:
-              "radial-gradient(ellipse 70% 40% at 50% -5%, rgba(34,85,48,0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "800px",
             margin: "0 auto",
             padding: { xs: "28px 16px", md: "44px 32px" },
@@ -142,7 +128,7 @@ export default function UsersPage({
               sx={{
                 fontFamily: FONT_SANS,
                 fontSize: "15px",
-                fontWeight: 300,
+                fontWeight: 400,
                 color: TEXT_DIM,
               }}
             >
@@ -165,14 +151,6 @@ export default function UsersPage({
               fontSize: "14px",
               color: "text.primary",
               mb: "24px",
-              background: "rgba(255,255,255,0.03)",
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: "primary.main",
-                borderWidth: "1px",
-              },
-              "& input::placeholder": { color: TEXT_FAINT },
             }}
           />
 
@@ -192,9 +170,9 @@ export default function UsersPage({
           <Box
             sx={{
               backgroundColor: "background.paper",
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: "14px",
+              border: BORDER_INK,
+              borderRadius: "13px",
+              boxShadow: SHADOW_HARD,
               overflow: "hidden",
             }}
           >
@@ -218,9 +196,10 @@ export default function UsersPage({
                       alignItems: "center",
                       gap: "16px",
                       padding: "14px 20px",
-                      borderBottom: i < filtered.length - 1 ? "1px solid divider" : "none",
+                      borderBottom:
+                        i < filtered.length - 1 ? "1px solid rgba(51,39,26,0.18)" : "none",
                       transition: "background 0.15s",
-                      "&:hover": { background: "rgba(255,255,255,0.025)" },
+                      "&:hover": { background: "rgba(51,39,26,0.05)" },
                     }}
                   >
                     <Box
@@ -230,15 +209,14 @@ export default function UsersPage({
                         height: "40px",
                         borderRadius: "50%",
                         background: avatarColor(user.username),
-                        border: "1px solid",
-                        borderColor: "divider",
+                        border: `2px solid ${INK}`,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         flexShrink: 0,
                         cursor: "pointer",
-                        transition: "border-color 0.15s",
-                        "&:hover": { borderColor: GOLD_FADED },
+                        transition: "transform 0.15s",
+                        "&:hover": { transform: "scale(1.05)" },
                       }}
                     >
                       <Typography
@@ -246,7 +224,7 @@ export default function UsersPage({
                           fontFamily: FONT_SERIF,
                           fontSize: "16px",
                           fontWeight: 700,
-                          color: "rgba(232,223,200,0.6)",
+                          color: "rgba(255,251,240,0.9)",
                           userSelect: "none",
                         }}
                       >
@@ -277,14 +255,14 @@ export default function UsersPage({
                               ml: "8px",
                               fontFamily: FONT_SANS,
                               fontSize: "10px",
-                              fontWeight: 500,
+                              fontWeight: 700,
                               letterSpacing: "0.8px",
                               textTransform: "uppercase",
-                              color: "primary.main",
-                              background: AMBER_DIM,
-                              border: "1px solid rgba(200,150,42,0.25)",
+                              color: INK,
+                              background: TINT_MUSTARD,
+                              border: `1.5px solid ${INK}`,
                               padding: "2px 7px",
-                              borderRadius: "10px",
+                              borderRadius: "999px",
                               verticalAlign: "middle",
                             }}
                           >
@@ -324,9 +302,9 @@ export default function UsersPage({
                           color: TEXT_FAINT,
                           transition: "all 0.15s",
                           "&:hover": {
-                            borderColor: GOLD_FADED,
-                            color: GOLD,
-                            background: "rgba(232,201,122,0.06)",
+                            borderColor: INK,
+                            color: BRICK,
+                            background: "rgba(51,39,26,0.05)",
                           },
                         }}
                       >
@@ -350,27 +328,28 @@ export default function UsersPage({
                         sx={{
                           fontFamily: FONT_SANS,
                           fontSize: "12px",
-                          fontWeight: 500,
+                          fontWeight: 700,
                           textTransform: "none",
-                          borderRadius: "7px",
+                          borderRadius: "999px",
                           padding: "6px 13px",
                           minWidth: "90px",
                           transition: "all 0.15s",
                           ...(isFollowing
                             ? {
                                 background: "transparent",
-                                border: `1px solid ${BORDER_AMBER}`,
+                                border: "1.5px solid rgba(51,39,26,0.4)",
                                 color: TEXT_DIM,
                                 "&:hover": {
-                                  borderColor: "rgba(220,80,80,0.4)",
-                                  color: "rgba(220,120,120,0.9)",
-                                  background: "rgba(220,80,80,0.06)",
+                                  borderColor: BRICK,
+                                  color: BRICK,
+                                  background: "rgba(192,69,44,0.06)",
                                 },
                               }
                             : {
                                 backgroundColor: "primary.main",
-                                border: "none",
-                                color: "background.default",
+                                border: `1.5px solid ${INK}`,
+                                boxShadow: `2px 2px 0 ${INK}`,
+                                color: SURFACE,
                                 "&:hover": { backgroundColor: "primary.light" },
                               }),
                           "&.Mui-disabled": {

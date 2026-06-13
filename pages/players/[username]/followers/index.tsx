@@ -1,6 +1,6 @@
 import UserListRow, { UserListEntry } from "@/components/players/UserListRow";
 import { authOptions } from "@/lib/authOptions";
-import { BORDER_AMBER, FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
+import { FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
 import { Box, Typography } from "@mui/material";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
@@ -28,25 +28,9 @@ export default function FollowersPage({
         <title>{profileUsername}'s Followers — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "40vh",
-            background:
-              "radial-gradient(ellipse 70% 40% at 50% -5%, rgba(34,85,48,0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "720px",
             margin: "0 auto",
             padding: { xs: "28px 16px", md: "44px 32px" },
@@ -94,8 +78,8 @@ export default function FollowersPage({
           {followers.length === 0 ? (
             <Box
               sx={{
-                border: `1px dashed ${BORDER_AMBER}`,
-                borderRadius: "12px",
+                border: "2px dashed rgba(51,39,26,0.3)",
+                borderRadius: "13px",
                 padding: "40px 20px",
                 textAlign: "center",
               }}

@@ -1,5 +1,17 @@
 import { gameColor, initials } from "@/lib/helpers";
-import { FONT_SANS, FONT_SERIF, TEXT_FAINT } from "@/styles/theme";
+import {
+  BORDER_INK,
+  BRICK,
+  FONT_SANS,
+  FONT_SERIF,
+  INK,
+  OLIVE,
+  SHADOW_HARD,
+  TEXT_FAINT,
+  TINT_BRICK,
+  TINT_MUSTARD,
+  TINT_OLIVE,
+} from "@/styles/theme";
 import type { RoomSuggestion } from "@api/rooms/[code]/index";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
@@ -34,9 +46,10 @@ export default function GameDetailSuggestions({
         alignItems: "center",
         gap: "14px",
         padding: "14px 18px",
-        borderRadius: "10px",
-        background: suggestion.bringing ? "rgba(34,85,48,0.1)" : "rgba(255,255,255,0.02)",
-        border: `1px solid ${suggestion.bringing ? "rgba(60,160,80,0.2)" : "divider"}`,
+        borderRadius: "13px",
+        backgroundColor: suggestion.bringing ? TINT_OLIVE : "background.paper",
+        border: BORDER_INK,
+        boxShadow: SHADOW_HARD,
         transition: "all 0.15s",
         mb: "8px",
       }}
@@ -58,7 +71,7 @@ export default function GameDetailSuggestions({
               fontFamily: FONT_SERIF,
               fontSize: "14px",
               fontWeight: 700,
-              color: "rgba(232,223,200,0.5)",
+              color: "rgba(255,251,240,0.9)",
               userSelect: "none",
             }}
           >
@@ -86,7 +99,9 @@ export default function GameDetailSuggestions({
         </Typography>
         <Box sx={{ display: "flex", gap: "8px", mt: "3px", alignItems: "center" }}>
           {suggestion.bringing && (
-            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "11px", color: "secondary.light" }}>
+            <Typography
+              sx={{ fontFamily: FONT_SANS, fontSize: "11px", fontWeight: 700, color: OLIVE }}
+            >
               ✓ In the pool
             </Typography>
           )}
@@ -95,11 +110,12 @@ export default function GameDetailSuggestions({
               sx={{
                 fontFamily: FONT_SANS,
                 fontSize: "11px",
-                color: "rgba(200,150,42,0.7)",
-                background: "rgba(200,150,42,0.08)",
-                border: "1px solid rgba(200,150,42,0.18)",
-                borderRadius: "4px",
-                padding: "0px 5px",
+                color: "#a87a20",
+                fontWeight: 500,
+                background: TINT_MUSTARD,
+                border: "1px solid rgba(168,122,32,0.5)",
+                borderRadius: "999px",
+                padding: "0px 7px",
                 lineHeight: "18px",
               }}
             >
@@ -117,14 +133,16 @@ export default function GameDetailSuggestions({
             display: "flex",
             alignItems: "center",
             gap: "3px",
-            background: "rgba(94,201,122,0.1)",
-            border: "1px solid rgba(94,201,122,0.18)",
-            borderRadius: "6px",
-            padding: "3px 8px",
+            background: TINT_OLIVE,
+            border: `1.5px solid ${OLIVE}`,
+            borderRadius: "999px",
+            padding: "3px 9px",
           }}
         >
-          <ThumbUpIcon sx={{ fontSize: "11px", color: "secondary.light" }} />
-          <Typography sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: "secondary.light" }}>
+          <ThumbUpIcon sx={{ fontSize: "11px", color: OLIVE }} />
+          <Typography
+            sx={{ fontFamily: FONT_SANS, fontSize: "12px", fontWeight: 700, color: OLIVE }}
+          >
             {suggestion.interestedCount}
           </Typography>
         </Box>
@@ -133,15 +151,15 @@ export default function GameDetailSuggestions({
             display: "flex",
             alignItems: "center",
             gap: "3px",
-            background: "rgba(220,80,80,0.08)",
-            border: "1px solid rgba(220,80,80,0.15)",
-            borderRadius: "6px",
-            padding: "3px 8px",
+            background: TINT_BRICK,
+            border: `1.5px solid ${BRICK}`,
+            borderRadius: "999px",
+            padding: "3px 9px",
           }}
         >
-          <ThumbDownIcon sx={{ fontSize: "11px", color: "rgba(220,120,120,0.8)" }} />
+          <ThumbDownIcon sx={{ fontSize: "11px", color: BRICK }} />
           <Typography
-            sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: "rgba(220,120,120,0.8)" }}
+            sx={{ fontFamily: FONT_SANS, fontSize: "12px", fontWeight: 700, color: BRICK }}
           >
             {suggestion.vetoCount}
           </Typography>
@@ -154,12 +172,13 @@ export default function GameDetailSuggestions({
             disabled={isLoading}
             size="small"
             sx={{
-              background: isBringing ? "rgba(34,85,48,0.3)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${isBringing ? "rgba(60,160,80,0.3)" : "divider"}`,
-              borderRadius: "7px",
-              color: isBringing ? "primary.light" : TEXT_FAINT,
+              background: isBringing ? TINT_OLIVE : "transparent",
+              border: `1.5px solid ${isBringing ? OLIVE : "rgba(51,39,26,0.3)"}`,
+              borderRadius: "8px",
+              color: isBringing ? OLIVE : TEXT_FAINT,
               "&:hover": {
-                background: isBringing ? "rgba(34,85,48,0.5)" : "rgba(255,255,255,0.08)",
+                background: isBringing ? TINT_OLIVE : "rgba(51,39,26,0.05)",
+                borderColor: isBringing ? OLIVE : INK,
               },
             }}
           >
@@ -172,12 +191,11 @@ export default function GameDetailSuggestions({
             disabled={isLoading}
             size="small"
             sx={{
-              background:
-                suggestion.myVote === true ? "rgba(94,201,122,0.2)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${suggestion.myVote === true ? "rgba(94,201,122,0.3)" : "divider"}`,
-              borderRadius: "7px",
-              color: suggestion.myVote === true ? "primary.light" : TEXT_FAINT,
-              "&:hover": { background: "rgba(94,201,122,0.15)" },
+              background: suggestion.myVote === true ? TINT_OLIVE : "transparent",
+              border: `1.5px solid ${suggestion.myVote === true ? OLIVE : "rgba(51,39,26,0.3)"}`,
+              borderRadius: "8px",
+              color: suggestion.myVote === true ? OLIVE : TEXT_FAINT,
+              "&:hover": { background: TINT_OLIVE, borderColor: OLIVE, color: OLIVE },
             }}
           >
             <ThumbUpIcon sx={{ fontSize: "16px" }} />
@@ -189,12 +207,11 @@ export default function GameDetailSuggestions({
             disabled={isLoading}
             size="small"
             sx={{
-              background:
-                suggestion.myVote === false ? "rgba(220,80,80,0.15)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${suggestion.myVote === false ? "rgba(220,80,80,0.25)" : "divider"}`,
-              borderRadius: "7px",
-              color: suggestion.myVote === false ? "rgba(220,120,120,0.9)" : TEXT_FAINT,
-              "&:hover": { background: "rgba(220,80,80,0.1)" },
+              background: suggestion.myVote === false ? TINT_BRICK : "transparent",
+              border: `1.5px solid ${suggestion.myVote === false ? BRICK : "rgba(51,39,26,0.3)"}`,
+              borderRadius: "8px",
+              color: suggestion.myVote === false ? BRICK : TEXT_FAINT,
+              "&:hover": { background: TINT_BRICK, borderColor: BRICK, color: BRICK },
             }}
           >
             <ThumbDownIcon sx={{ fontSize: "16px" }} />

@@ -5,14 +5,18 @@ import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import { avatarColor, gameColor, initials } from "@/lib/helpers";
 import {
-  AMBER_DIM,
-  BORDER_AMBER,
+  BORDER_INK,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
-  GOLD,
-  GOLD_FADED,
+  INK,
+  OLIVE,
+  SHADOW_HARD,
+  SHADOW_HARD_LG,
   TEXT_DIM,
   TEXT_FAINT,
+  TINT_MUSTARD,
+  TINT_OLIVE,
 } from "@/styles/theme";
 import Header from "@/components/layout/Header";
 import type { RoomData } from "@api/rooms/[code]/index";
@@ -72,9 +76,10 @@ function RoomPreview({ room }: { room: PreviewRoom }) {
           sx={{
             maxWidth: "480px",
             width: "100%",
-            background: "rgba(255,255,255,0.03)",
-            border: `1px solid ${BORDER_AMBER}`,
-            borderRadius: "14px",
+            backgroundColor: "background.paper",
+            border: BORDER_INK,
+            borderRadius: "13px",
+            boxShadow: SHADOW_HARD,
             padding: { xs: "32px 24px", md: "44px 36px" },
             textAlign: "center",
           }}
@@ -83,10 +88,10 @@ function RoomPreview({ room }: { room: PreviewRoom }) {
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "11px",
-              fontWeight: 500,
-              letterSpacing: "1.5px",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
               textTransform: "uppercase",
-              color: TEXT_FAINT,
+              color: "text.secondary",
               mb: "10px",
             }}
           >
@@ -120,43 +125,17 @@ function RoomPreview({ room }: { room: PreviewRoom }) {
           </Typography>
 
           <Button
+            variant="contained"
             onClick={() => router.push(`/login?next=${next}`)}
-            sx={{
-              backgroundColor: "primary.main",
-              borderRadius: "8px",
-              color: "background.default",
-              fontFamily: FONT_SANS,
-              fontSize: "14px",
-              fontWeight: 500,
-              padding: "10px 22px",
-              textTransform: "none",
-              width: "100%",
-              mb: "10px",
-              "&:hover": { backgroundColor: "primary.light" },
-            }}
+            sx={{ fontSize: "14px", padding: "10px 22px", width: "100%", mb: "10px" }}
           >
             Sign in to join
           </Button>
 
           <Button
+            variant="outlined"
             onClick={() => router.push(`/register?next=${next}`)}
-            sx={{
-              background: "transparent",
-              border: `1px solid ${BORDER_AMBER}`,
-              borderRadius: "8px",
-              color: TEXT_DIM,
-              fontFamily: FONT_SANS,
-              fontSize: "14px",
-              fontWeight: 500,
-              padding: "10px 22px",
-              textTransform: "none",
-              width: "100%",
-              "&:hover": {
-                background: "rgba(180,140,60,0.08)",
-                color: "text.primary",
-                borderColor: "primary.main",
-              },
-            }}
+            sx={{ fontSize: "14px", padding: "10px 22px", width: "100%" }}
           >
             Create an account
           </Button>
@@ -351,25 +330,9 @@ function AuthenticatedRoomPage({
         description={`Game night hosted by ${room.hostUsername} · code ${room.code}. ${room.suggestions.length} ${room.suggestions.length === 1 ? "game" : "games"} on the table, ${room.members.length} ${room.members.length === 1 ? "player" : "players"} invited.`}
       />
 
-      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "40vh",
-            background:
-              "radial-gradient(ellipse 80% 50% at 50% -5%, rgba(34,85,48,0.16) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "1000px",
             margin: "0 auto",
             padding: { xs: "24px 16px", md: "40px 32px" },
@@ -428,12 +391,17 @@ function AuthenticatedRoomPage({
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  background: "rgba(180,110,30,0.15)",
-                  border: "1px solid rgba(180,140,60,0.3)",
-                  borderRadius: "8px",
+                  background: TINT_MUSTARD,
+                  border: BORDER_INK,
+                  borderRadius: "10px",
+                  boxShadow: SHADOW_HARD,
                   padding: "8px 14px",
                   cursor: "pointer",
-                  "&:hover": { background: "rgba(180,110,30,0.25)" },
+                  transition: "transform 0.12s ease, box-shadow 0.12s ease",
+                  "&:hover": {
+                    boxShadow: SHADOW_HARD_LG,
+                    transform: "translate(-1px, -1px)",
+                  },
                 }}
               >
                 <Typography
@@ -441,55 +409,32 @@ function AuthenticatedRoomPage({
                     fontFamily: FONT_SANS,
                     fontSize: "16px",
                     fontWeight: 700,
-                    color: GOLD,
+                    color: INK,
                     letterSpacing: "3px",
                   }}
                 >
                   {room.code}
                 </Typography>
                 {copied ? (
-                  <CheckIcon sx={{ fontSize: "14px", color: "secondary.light" }} />
+                  <CheckIcon sx={{ fontSize: "14px", color: OLIVE }} />
                 ) : (
-                  <ContentCopyIcon sx={{ fontSize: "14px", color: GOLD_FADED }} />
+                  <ContentCopyIcon sx={{ fontSize: "14px", color: "rgba(51,39,26,0.6)" }} />
                 )}
               </Box>
               <Button
-                onClick={() => setQuickGenOpen(true)}
                 startIcon={<CasinoIcon />}
-                sx={{
-                  backgroundColor: "primary.main",
-                  borderRadius: "8px",
-                  color: "background.default",
-                  fontFamily: FONT_SANS,
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  padding: "9px 18px",
-                  textTransform: "none",
-                  "&:hover": { backgroundColor: "primary.light" },
-                }}
+                variant="contained"
+                onClick={() => setQuickGenOpen(true)}
+                sx={{ fontSize: "14px", padding: "9px 18px" }}
               >
                 Spin
               </Button>
               {isHost && (
                 <Button
-                  onClick={() => router.push(`/rooms/${code}/settings`)}
                   startIcon={<SettingsIcon sx={{ fontSize: "16px !important" }} />}
-                  sx={{
-                    background: "transparent",
-                    border: `1px solid ${BORDER_AMBER}`,
-                    borderRadius: "8px",
-                    color: TEXT_DIM,
-                    fontFamily: FONT_SANS,
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    padding: "9px 14px",
-                    textTransform: "none",
-                    "&:hover": {
-                      background: "rgba(180,140,60,0.08)",
-                      color: "text.primary",
-                      borderColor: "primary.main",
-                    },
-                  }}
+                  variant="outlined"
+                  onClick={() => router.push(`/rooms/${code}/settings`)}
+                  sx={{ fontSize: "14px", padding: "9px 14px" }}
                 >
                   Settings
                 </Button>
@@ -500,9 +445,10 @@ function AuthenticatedRoomPage({
           {isHost && (
             <Box
               sx={{
-                background: activeSessionId ? "rgba(34,85,48,0.18)" : "rgba(180,110,30,0.1)",
-                border: `1px solid ${activeSessionId ? "rgba(60,160,80,0.3)" : "rgba(180,140,60,0.2)"}`,
-                borderRadius: "12px",
+                backgroundColor: activeSessionId ? TINT_OLIVE : "background.paper",
+                border: BORDER_INK,
+                borderRadius: "13px",
+                boxShadow: SHADOW_HARD,
                 padding: "18px 24px",
                 display: "flex",
                 alignItems: "center",
@@ -520,7 +466,7 @@ function AuthenticatedRoomPage({
                         width: "8px",
                         height: "8px",
                         borderRadius: "50%",
-                        backgroundColor: "secondary.light",
+                        backgroundColor: OLIVE,
                         "@keyframes pulse": { "0%,100%": { opacity: 1 }, "50%": { opacity: 0.3 } },
                         animation: "pulse 2s infinite",
                       }}
@@ -570,43 +516,20 @@ function AuthenticatedRoomPage({
                 {activeSessionId ? (
                   <>
                     <Button
-                      onClick={() => setLogOpen(true)}
+                      color="secondary"
                       startIcon={<EmojiEventsIcon />}
-                      sx={{
-                        background: "rgba(34,85,48,0.3)",
-                        border: "1px solid rgba(60,160,80,0.35)",
-                        borderRadius: "8px",
-                        color: "secondary.light",
-                        fontFamily: FONT_SANS,
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        padding: "8px 16px",
-                        textTransform: "none",
-                        "&:hover": { background: "rgba(34,85,48,0.5)" },
-                      }}
+                      variant="contained"
+                      onClick={() => setLogOpen(true)}
+                      sx={{ fontSize: "13px", padding: "8px 16px" }}
                     >
                       Log games
                     </Button>
                     <Button
-                      onClick={handleCloseSession}
                       disabled={sessionLoading}
                       startIcon={<CheckCircleIcon />}
-                      sx={{
-                        background: "transparent",
-                        border: `1px solid ${BORDER_AMBER}`,
-                        borderRadius: "8px",
-                        color: TEXT_DIM,
-                        fontFamily: FONT_SANS,
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        padding: "8px 16px",
-                        textTransform: "none",
-                        "&:hover": {
-                          background: "rgba(180,140,60,0.08)",
-                          color: "text.primary",
-                          borderColor: "primary.main",
-                        },
-                      }}
+                      variant="outlined"
+                      onClick={handleCloseSession}
+                      sx={{ fontSize: "13px", padding: "8px 16px" }}
                     >
                       {sessionLoading ? (
                         <CircularProgress size={14} sx={{ color: "inherit" }} />
@@ -617,30 +540,17 @@ function AuthenticatedRoomPage({
                   </>
                 ) : (
                   <Button
-                    onClick={handleOpenSession}
                     disabled={sessionLoading}
+                    variant="contained"
                     startIcon={
                       sessionLoading ? (
-                        <CircularProgress size={14} sx={{ color: "background.default" }} />
+                        <CircularProgress size={14} sx={{ color: "inherit" }} />
                       ) : (
                         <NightlifeIcon />
                       )
                     }
-                    sx={{
-                      backgroundColor: "primary.main",
-                      borderRadius: "8px",
-                      color: "background.default",
-                      fontFamily: FONT_SANS,
-                      fontSize: "13px",
-                      fontWeight: 500,
-                      padding: "8px 18px",
-                      textTransform: "none",
-                      "&:hover": { backgroundColor: "primary.light" },
-                      "&.Mui-disabled": {
-                        background: "rgba(200,150,42,0.35)",
-                        color: "rgba(15,12,8,0.5)",
-                      },
-                    }}
+                    onClick={handleOpenSession}
+                    sx={{ fontSize: "13px", padding: "8px 18px" }}
                   >
                     Open tonight
                   </Button>
@@ -723,12 +633,12 @@ function AuthenticatedRoomPage({
                           gap: "12px",
                           padding: "10px 14px",
                           borderRadius: "8px",
-                          background: "rgba(255,255,255,0.02)",
+                          background: "transparent",
                           border: "1px solid",
                           borderColor: "divider",
                           "&:hover": {
-                            background: "rgba(180,140,60,0.05)",
-                            borderColor: BORDER_AMBER,
+                            background: "rgba(51,39,26,0.05)",
+                            borderColor: INK,
                           },
                         }}
                       >
@@ -749,7 +659,7 @@ function AuthenticatedRoomPage({
                               fontFamily: FONT_SERIF,
                               fontSize: "11px",
                               fontWeight: 700,
-                              color: "rgba(232,223,200,0.5)",
+                              color: "rgba(255,251,240,0.9)",
                               userSelect: "none",
                             }}
                           >
@@ -768,20 +678,20 @@ function AuthenticatedRoomPage({
                           {game.name}
                         </Typography>
                         <Button
-                          onClick={() => handleAddFromLibrary(game.gameId)}
                           disabled={loadingGameId === game.gameId}
                           size="small"
+                          onClick={() => handleAddFromLibrary(game.gameId)}
                           sx={{
-                            background: "rgba(180,110,30,0.15)",
-                            border: "1px solid rgba(180,140,60,0.25)",
-                            borderRadius: "6px",
-                            color: GOLD_FADED,
+                            background: "transparent",
+                            border: `1.5px solid ${INK}`,
+                            borderRadius: "999px",
+                            color: INK,
                             fontFamily: FONT_SANS,
                             fontSize: "12px",
-                            fontWeight: 500,
+                            fontWeight: 700,
                             padding: "4px 12px",
                             textTransform: "none",
-                            "&:hover": { background: "rgba(180,110,30,0.3)", color: GOLD },
+                            "&:hover": { background: TINT_MUSTARD },
                           }}
                         >
                           {loadingGameId === game.gameId ? <CircularProgress size={12} /> : "Bring"}
@@ -808,9 +718,9 @@ function AuthenticatedRoomPage({
               <Box
                 sx={{
                   backgroundColor: "background.paper",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: "12px",
+                  border: BORDER_INK,
+                  borderRadius: "13px",
+                  boxShadow: SHADOW_HARD,
                   overflow: "hidden",
                   mb: "16px",
                 }}
@@ -833,8 +743,7 @@ function AuthenticatedRoomPage({
                             height: "34px",
                             borderRadius: "50%",
                             background: avatarColor(member.username),
-                            border: "1px solid",
-                            borderColor: "divider",
+                            border: BORDER_INK,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -846,7 +755,7 @@ function AuthenticatedRoomPage({
                               fontFamily: FONT_SERIF,
                               fontSize: "13px",
                               fontWeight: 700,
-                              color: "rgba(232,223,200,0.6)",
+                              color: "rgba(255,251,240,0.9)",
                               userSelect: "none",
                             }}
                           >
@@ -870,12 +779,12 @@ function AuthenticatedRoomPage({
                                 ml: "8px",
                                 fontFamily: FONT_SANS,
                                 fontSize: "10px",
-                                fontWeight: 500,
+                                fontWeight: 700,
                                 letterSpacing: "0.8px",
                                 textTransform: "uppercase",
-                                color: "primary.main",
-                                background: AMBER_DIM,
-                                border: "1px solid rgba(200,150,42,0.2)",
+                                color: INK,
+                                background: TINT_MUSTARD,
+                                border: `1.5px solid ${INK}`,
                                 padding: "2px 7px",
                                 borderRadius: "10px",
                                 verticalAlign: "middle",
@@ -893,8 +802,8 @@ function AuthenticatedRoomPage({
 
               <Box
                 sx={{
-                  background: "rgba(180,110,30,0.08)",
-                  border: "1px solid rgba(180,140,60,0.18)",
+                  backgroundColor: "background.paper",
+                  border: "2px solid rgba(51,39,26,0.15)",
                   borderRadius: "10px",
                   padding: "16px",
                 }}
@@ -924,7 +833,7 @@ function AuthenticatedRoomPage({
                     sx={{
                       fontFamily: FONT_SANS,
                       fontWeight: 700,
-                      color: GOLD,
+                      color: BRICK,
                       letterSpacing: "2px",
                     }}
                   >
@@ -934,21 +843,10 @@ function AuthenticatedRoomPage({
                 </Typography>
                 <Button
                   fullWidth
-                  onClick={handleCopyCode}
                   startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
-                  sx={{
-                    mt: "10px",
-                    background: "transparent",
-                    border: `1px solid ${BORDER_AMBER}`,
-                    borderRadius: "7px",
-                    color: TEXT_DIM,
-                    fontFamily: FONT_SANS,
-                    fontSize: "12px",
-                    fontWeight: 500,
-                    padding: "7px",
-                    textTransform: "none",
-                    "&:hover": { background: "rgba(180,140,60,0.08)", color: "text.primary" },
-                  }}
+                  variant="outlined"
+                  onClick={handleCopyCode}
+                  sx={{ mt: "10px", fontSize: "12px", padding: "7px" }}
                 >
                   {copied ? "Copied!" : "Copy room code"}
                 </Button>

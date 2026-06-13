@@ -1,6 +1,15 @@
 import { authOptions } from "@/lib/authOptions";
 import { avatarColor } from "@/lib/helpers";
-import { BORDER_AMBER, FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
+import {
+  BORDER_INK,
+  FONT_SANS,
+  FONT_SERIF,
+  INK,
+  SHADOW_HARD,
+  SURFACE,
+  TEXT_DIM,
+  TEXT_FAINT,
+} from "@/styles/theme";
 import {
   Box,
   Button,
@@ -31,18 +40,11 @@ const inputSx = {
     fontFamily: FONT_SANS,
     fontSize: "15px",
     color: "text.primary",
-    background: "rgba(255,255,255,0.03)",
-    "& .MuiOutlinedInput-notchedOutline": { borderColor: BORDER_AMBER },
-    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "primary.main",
-      borderWidth: "1px",
-    },
   },
   "& .MuiFormHelperText-root": {
     fontFamily: FONT_SANS,
     fontSize: "12px",
-    color: "rgba(220,100,100,0.9)",
+    color: "error.main",
     ml: 0,
   },
 };
@@ -108,25 +110,9 @@ export default function EditProfilePage({ username, initial }: Props) {
         <title>Edit Profile — Tablekeeper</title>
       </Head>
 
-      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", position: "relative" }}>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         <Box
           sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "40vh",
-            background:
-              "radial-gradient(ellipse 70% 40% at 50% -5%, rgba(34,85,48,0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: 1,
             maxWidth: "640px",
             margin: "0 auto",
             padding: { xs: "28px 16px", md: "44px 32px" },
@@ -177,7 +163,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                 height: "64px",
                 borderRadius: "50%",
                 background: avatarColor(username),
-                border: `2px solid ${BORDER_AMBER}`,
+                border: `2px solid ${INK}`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -189,7 +175,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                   fontFamily: FONT_SERIF,
                   fontSize: "26px",
                   fontWeight: 700,
-                  color: "rgba(232,223,200,0.6)",
+                  color: "rgba(255,251,240,0.9)",
                   userSelect: "none",
                 }}
               >
@@ -213,9 +199,9 @@ export default function EditProfilePage({ username, initial }: Props) {
           <Box
             sx={{
               backgroundColor: "background.paper",
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: "14px",
+              border: BORDER_INK,
+              borderRadius: "13px",
+              boxShadow: SHADOW_HARD,
               padding: { xs: "24px", md: "32px 36px" },
             }}
           >
@@ -298,7 +284,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                       "& .MuiFormHelperText-root": {
                         fontFamily: FONT_SANS,
                         fontSize: "12px",
-                        color: values.bio.length > 260 ? "rgba(220,100,100,0.9)" : TEXT_FAINT,
+                        color: values.bio.length > 260 ? "error.main" : TEXT_FAINT,
                         ml: 0,
                         textAlign: "right",
                       },
@@ -356,22 +342,26 @@ export default function EditProfilePage({ username, initial }: Props) {
                       disabled={isSubmitting}
                       sx={{
                         backgroundColor: "primary.main",
-                        borderRadius: "8px",
-                        color: "background.default",
+                        border: BORDER_INK,
+                        borderRadius: "999px",
+                        boxShadow: SHADOW_HARD,
+                        color: SURFACE,
                         fontFamily: FONT_SANS,
                         fontSize: "15px",
-                        fontWeight: 500,
+                        fontWeight: 700,
                         padding: "12px",
                         textTransform: "none",
                         "&:hover": { backgroundColor: "primary.light" },
                         "&.Mui-disabled": {
-                          background: "rgba(200,150,42,0.35)",
-                          color: "rgba(15,12,8,0.5)",
+                          background: "rgba(51,39,26,0.15)",
+                          border: "2px solid rgba(51,39,26,0.38)",
+                          boxShadow: "none",
+                          color: "rgba(51,39,26,0.5)",
                         },
                       }}
                     >
                       {isSubmitting ? (
-                        <CircularProgress size={20} sx={{ color: "rgba(15,12,8,0.5)" }} />
+                        <CircularProgress size={20} sx={{ color: "rgba(51,39,26,0.5)" }} />
                       ) : (
                         "Save changes"
                       )}
@@ -379,19 +369,20 @@ export default function EditProfilePage({ username, initial }: Props) {
                     <Button
                       onClick={() => router.push(`/users/${username}`)}
                       sx={{
-                        background: "transparent",
-                        border: `1px solid ${BORDER_AMBER}`,
-                        borderRadius: "8px",
-                        color: TEXT_DIM,
+                        backgroundColor: "background.paper",
+                        border: BORDER_INK,
+                        borderRadius: "999px",
+                        boxShadow: SHADOW_HARD,
+                        color: "text.primary",
                         fontFamily: FONT_SANS,
                         fontSize: "15px",
-                        fontWeight: 500,
+                        fontWeight: 700,
                         padding: "12px 20px",
                         textTransform: "none",
                         "&:hover": {
-                          background: "rgba(180,140,60,0.08)",
-                          color: "text.primary",
-                          borderColor: "primary.main",
+                          backgroundColor: "background.paper",
+                          boxShadow: `4px 4px 0 ${INK}`,
+                          transform: "translate(-1px, -1px)",
                         },
                       }}
                     >

@@ -13,11 +13,12 @@ export default function GameGrid({ games }: { games: LibraryGame[] }) {
           sm: "repeat(auto-fill, minmax(150px, 1fr))",
           md: "repeat(auto-fill, minmax(160px, 1fr))",
         },
+        gridAutoRows: "1fr",
         gap: "14px",
       }}
     >
       {games.map((game) => (
-        <GameCard game={game} />
+        <GameCard key={game.gameId} game={game} />
       ))}
     </Box>
   );

@@ -20,249 +20,229 @@ export interface MenuPdfDocumentProps {
 }
 
 Font.register({
-  family: "Cormorant Garamond",
+  family: "Fraunces",
   fonts: [
-    { src: "/fonts/cormorant-garamond-regular.ttf", fontWeight: 400 },
-    { src: "/fonts/cormorant-garamond-italic.ttf", fontWeight: 400, fontStyle: "italic" },
-    { src: "/fonts/cormorant-garamond-medium.ttf", fontWeight: 500 },
-    { src: "/fonts/cormorant-garamond-medium-italic.ttf", fontWeight: 500, fontStyle: "italic" },
+    { src: "/fonts/fraunces-700.ttf", fontWeight: 700 },
+    { src: "/fonts/fraunces-700-italic.ttf", fontWeight: 700, fontStyle: "italic" },
+    { src: "/fonts/fraunces-900.ttf", fontWeight: 900 },
+    { src: "/fonts/fraunces-900-italic.ttf", fontWeight: 900, fontStyle: "italic" },
   ],
 });
 
 Font.register({
-  family: "Inter",
+  family: "Space Grotesk",
   fonts: [
-    { src: "/fonts/inter-regular.ttf", fontWeight: 400 },
-    { src: "/fonts/inter-medium.ttf", fontWeight: 500 },
+    { src: "/fonts/space-grotesk-400.ttf", fontWeight: 400 },
+    { src: "/fonts/space-grotesk-500.ttf", fontWeight: 500 },
+    { src: "/fonts/space-grotesk-700.ttf", fontWeight: 700 },
   ],
 });
 
 Font.registerHyphenationCallback((word) => [word]);
 
+// Café Press print palette — mirrors src/styles/theme.ts
 const C = {
-  paper: "#fdfcf8", // warm white (mostly invisible on print)
-  ink: "#1a1410", // body
-  inkSoft: "#1a1410",
-  accent: "#6b1f2a", // burgundy — prints to a clean dark gray
-  muted: "#6b6256", // captions, course descriptions
-  hair: "#1a1410", // hairline rules (full ink)
+  paper: "#fffbf0",
+  ink: "#33271a",
+  muted: "rgba(51,39,26,0.65)",
+  faint: "rgba(51,39,26,0.45)",
+  leader: "rgba(51,39,26,0.4)",
+  brick: "#c0452c",
 };
+
+// Tint fills per course id — same coding as the web menu sheet
+const COURSE_TINTS: Record<string, string> = {
+  appetizer: "#e2e8d4", // olive
+  entree: "#f4d9d2", // brick
+  epic: "#ecdce6", // plum
+  dessert: "#d9e6e2", // teal
+};
+
 const s = StyleSheet.create({
   page: {
     backgroundColor: C.paper,
-    paddingTop: 56,
-    paddingBottom: 56,
-    paddingHorizontal: 72,
-    fontFamily: "Cormorant Garamond",
+    paddingTop: 36,
+    paddingBottom: 36,
+    paddingHorizontal: 36,
+    fontFamily: "Space Grotesk",
     color: C.ink,
   },
 
-  topRule: { height: 1, backgroundColor: C.hair, marginBottom: 3 },
-  topRuleHair: { height: 0.5, backgroundColor: C.hair, opacity: 0.4, marginBottom: 22 },
+  // bold sticker frame around the whole sheet
+  frame: {
+    flex: 1,
+    borderWidth: 2.5,
+    borderColor: C.ink,
+    borderRadius: 12,
+    paddingTop: 40,
+    paddingBottom: 56,
+    paddingHorizontal: 48,
+  },
 
-  brandRow: {
+  brand: {
+    fontFamily: "Space Grotesk",
+    fontSize: 8,
+    fontWeight: 700,
+    color: C.brick,
+    letterSpacing: 3,
+    textTransform: "uppercase",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  title: {
+    fontFamily: "Fraunces",
+    fontStyle: "italic",
+    fontWeight: 900,
+    fontSize: 34,
+    color: C.ink,
+    textAlign: "center",
+    lineHeight: 1.05,
+    marginBottom: 8,
+  },
+  titleDate: {
+    fontFamily: "Space Grotesk",
+    fontWeight: 500,
+    fontSize: 9,
+    color: C.muted,
     textAlign: "center",
     marginBottom: 18,
   },
-  brand: {
-    fontFamily: "Inter",
-    fontSize: 7.5,
-    fontWeight: 500,
-    color: C.accent,
-    letterSpacing: 3,
-    textTransform: "uppercase",
-    textAlign: "center",
-  },
-  title: {
-    fontFamily: "Cormorant Garamond",
-    fontStyle: "italic",
-    fontWeight: 400,
-    fontSize: 56,
-    color: C.ink,
-    textAlign: "center",
-    lineHeight: 1,
-    marginBottom: 12,
-  },
-  titleDeck: {
-    fontFamily: "Cormorant Garamond",
-    fontStyle: "italic",
-    fontSize: 12,
-    color: C.muted,
-    textAlign: "center",
-    lineHeight: 1.4,
-  },
-  titleDate: {
-    fontFamily: "Cormorant Garamond",
-    fontStyle: "italic",
-    fontSize: 11,
-    color: C.muted,
-    textAlign: "center",
-    marginTop: 4,
-  },
 
-  ornamentRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 18,
-    marginBottom: 4,
-  },
-  ornamentRule: { flex: 1, height: 0.5, backgroundColor: C.hair, opacity: 0.45 },
-  ornamentMark: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: C.accent,
-    marginHorizontal: 12,
-  },
-
-  programmeRow: {
-    textAlign: "center",
-    marginTop: 14,
-    marginBottom: 22,
-  },
-  programmeLabel: {
-    fontFamily: "Inter",
-    fontWeight: 500,
-    fontSize: 8,
-    color: C.ink,
-    letterSpacing: 3,
-    textTransform: "uppercase",
-    textAlign: "center",
-  },
+  doubleRuleBold: { height: 2, backgroundColor: C.ink, marginBottom: 2.5 },
+  doubleRuleHair: { height: 0.75, backgroundColor: C.ink, opacity: 0.35, marginBottom: 26 },
 
   course: {
-    marginBottom: 22,
+    marginBottom: 0,
   },
-  courseHeaderRow: {
+  courseChipRow: {
     flexDirection: "row",
-    alignItems: "baseline",
     justifyContent: "center",
-    marginBottom: 4,
+    marginBottom: 7,
   },
-  numeral: {
-    fontFamily: "Cormorant Garamond",
-    fontStyle: "italic",
-    fontSize: 12,
-    color: C.accent,
-    marginRight: 10,
+  courseChip: {
+    borderWidth: 1.5,
+    borderColor: C.ink,
+    borderRadius: 999,
+    paddingVertical: 4,
+    paddingHorizontal: 16,
   },
-  courseLabel: {
-    fontFamily: "Cormorant Garamond",
-    fontStyle: "italic",
-    fontWeight: 500,
-    fontSize: 26,
+  courseChipText: {
+    fontFamily: "Space Grotesk",
+    fontWeight: 700,
+    fontSize: 9,
     color: C.ink,
-    textAlign: "center",
-  },
-  courseSubtitle: {
-    fontFamily: "Inter",
-    fontWeight: 400,
-    fontSize: 7.5,
-    color: C.muted,
-    letterSpacing: 2,
-    textTransform: "uppercase",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  courseNote: {
-    fontFamily: "Cormorant Garamond",
-    fontStyle: "italic",
-    fontSize: 11,
-    color: C.muted,
-    textAlign: "center",
-    lineHeight: 1.5,
-    marginHorizontal: 60,
-    marginBottom: 12,
-  },
-  courseInnerOrnament: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  courseInnerRule: {
-    width: 40,
-    height: 0.5,
-    backgroundColor: C.hair,
-    opacity: 0.45,
-  },
-  courseInnerMark: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: C.accent,
-    marginHorizontal: 10,
-  },
-
-  game: {
-    marginBottom: 12,
-    paddingHorizontal: 30,
-  },
-  gameName: {
-    fontFamily: "Cormorant Garamond",
-    fontStyle: "italic",
-    fontWeight: 500,
-    fontSize: 16,
-    color: C.ink,
-    textAlign: "center",
-  },
-  gameTasting: {
-    fontFamily: "Cormorant Garamond",
-    fontStyle: "italic",
-    fontSize: 11,
-    color: C.ink,
-    opacity: 0.78,
-    lineHeight: 1.5,
-    textAlign: "center",
-    marginTop: 3,
-    marginHorizontal: 24,
-  },
-  gameMeta: {
-    fontFamily: "Inter",
-    fontWeight: 500,
-    fontSize: 7,
-    color: C.accent,
     letterSpacing: 2.5,
     textTransform: "uppercase",
+  },
+  courseSubtitle: {
+    fontFamily: "Fraunces",
+    fontStyle: "italic",
+    fontWeight: 700,
+    fontSize: 10,
+    color: C.faint,
     textAlign: "center",
-    marginTop: 5,
+    marginBottom: 14,
+  },
+
+  gameRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    marginBottom: 10,
+    paddingHorizontal: 16,
+  },
+  gameName: {
+    fontFamily: "Fraunces",
+    fontWeight: 700,
+    fontSize: 13,
+    color: C.ink,
+    lineHeight: 1.25,
+    maxWidth: 320,
+  },
+  gameLeader: {
+    flex: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: C.leader,
+    borderBottomStyle: "dotted",
+    marginHorizontal: 6,
+    marginBottom: 2.5,
+    minWidth: 16,
+  },
+  gameMeta: {
+    fontFamily: "Space Grotesk",
+    fontWeight: 500,
+    fontSize: 8,
+    color: C.muted,
+    marginBottom: 1,
+  },
+  gameTasting: {
+    fontFamily: "Fraunces",
+    fontStyle: "italic",
+    fontWeight: 700,
+    fontSize: 9.5,
+    color: C.muted,
+    lineHeight: 1.4,
+    textAlign: "left",
+    paddingHorizontal: 16,
+    marginTop: -6,
+    marginBottom: 10,
   },
 
   emptyText: {
-    fontFamily: "Cormorant Garamond",
+    fontFamily: "Fraunces",
     fontStyle: "italic",
-    fontSize: 11,
-    color: C.muted,
+    fontWeight: 700,
+    fontSize: 10.5,
+    color: C.faint,
     textAlign: "center",
-    paddingVertical: 6,
+    paddingVertical: 4,
+  },
+
+  dividerRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
+    marginVertical: 18,
+  },
+  dividerDot: {
+    width: 3.5,
+    height: 3.5,
+    borderRadius: 1.75,
+    backgroundColor: C.brick,
+  },
+  dividerDotSmall: {
+    width: 2,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: C.brick,
+    opacity: 0.55,
   },
 
   footer: {
     position: "absolute",
-    bottom: 36,
-    left: 72,
-    right: 72,
+    bottom: 54,
+    left: 84,
+    right: 84,
     paddingTop: 10,
-    borderTopWidth: 0.5,
-    borderTopColor: C.hair,
+    borderTopWidth: 0.75,
+    borderTopColor: C.ink,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   footerText: {
-    fontFamily: "Inter",
-    fontWeight: 500,
+    fontFamily: "Space Grotesk",
+    fontWeight: 700,
     fontSize: 7,
     color: C.muted,
     letterSpacing: 2.5,
     textTransform: "uppercase",
   },
   footerMark: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: C.muted,
+    width: 3.5,
+    height: 3.5,
+    borderRadius: 1.75,
+    backgroundColor: C.brick,
   },
 });
 
@@ -276,26 +256,19 @@ function formatPlaytime(min: number | null, max: number | null): string {
 
 function formatPlayers(min: number | null, max: number | null): string {
   if (!min && !max) return "";
-  if (min && max && min !== max) return `${min}–${max} players`;
-  if (max) return `${max} players`;
-  if (min) return `${min}+ players`;
+  if (min && max && min !== max) return `${min}–${max}p`;
+  if (max) return `${max}p`;
+  if (min) return `${min}+p`;
   return "";
-}
-
-function formatWeight(w: number | null | undefined): string {
-  if (w == null) return "";
-  return `weight ${w.toFixed(1)} / 5`;
 }
 
 function formatGameMeta(game: LibraryGame): string {
   const parts: string[] = [];
   const players = formatPlayers(game.minPlayers ?? null, game.maxPlayers ?? null);
   const playtime = formatPlaytime(game.minPlaytime ?? null, game.maxPlaytime ?? null);
-  const weight = formatWeight((game as any).weight ?? null);
   if (players) parts.push(players);
   if (playtime) parts.push(playtime);
-  if (weight) parts.push(weight);
-  return parts.join("   ·   ");
+  return parts.join(" · ");
 }
 
 function formatLongDate(date: Date): string {
@@ -308,10 +281,8 @@ function formatLongDate(date: Date): string {
 }
 
 function stripEmojis(text: string): string {
-  return text.replace(/[\p{Extended_Pictographic}\uFE0F]/gu, "").trim();
+  return text.replace(/[\p{Extended_Pictographic}️]/gu, "").trim();
 }
-
-const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
 function GameRow({
   game,
@@ -324,10 +295,13 @@ function GameRow({
   const noteKey = (game.gameId as unknown as string) ?? game.name;
   const tasting = tastingNotes?.[noteKey];
   return (
-    <View style={s.game} wrap={false}>
-      <Text style={s.gameName}>{game.name}</Text>
+    <View wrap={false}>
+      <View style={s.gameRow}>
+        <Text style={s.gameName}>{game.name}</Text>
+        <View style={s.gameLeader} />
+        {meta ? <Text style={s.gameMeta}>{meta}</Text> : null}
+      </View>
       {tasting ? <Text style={s.gameTasting}>{tasting}</Text> : null}
-      {meta ? <Text style={s.gameMeta}>{meta}</Text> : null}
     </View>
   );
 }
@@ -335,36 +309,30 @@ function GameRow({
 function CourseSection({
   course,
   games,
-  index,
   tastingNotes,
 }: {
   course: CourseConfig;
   games: LibraryGame[];
-  index: number;
   tastingNotes?: Record<string, string>;
 }) {
-  const numeral = ROMAN[index] ?? `${index + 1}`;
   const label = stripEmojis(course.label);
+  const tint = COURSE_TINTS[course.id] ?? C.paper;
   return (
     <View style={s.course} wrap={false}>
-      <View style={s.courseHeaderRow}>
-        <Text style={s.numeral}>{numeral}.</Text>
-        <Text style={s.courseLabel}>{label}</Text>
+      <View style={s.courseChipRow}>
+        <View style={[s.courseChip, { backgroundColor: tint }]}>
+          <Text style={s.courseChipText}>{label}</Text>
+        </View>
       </View>
       {course.subtitle ? (
         <Text style={s.courseSubtitle}>{stripEmojis(course.subtitle)}</Text>
       ) : null}
-      <View style={s.courseInnerOrnament}>
-        <View style={s.courseInnerRule} />
-        <View style={s.courseInnerMark} />
-        <View style={s.courseInnerRule} />
-      </View>
       {games.length > 0 ? (
         games.map((game) => (
           <GameRow key={game.gameId ?? game.name} game={game} tastingNotes={tastingNotes} />
         ))
       ) : (
-        <Text style={s.emptyText}>— Course left to the chef's discretion —</Text>
+        <Text style={s.emptyText}>— Left to the chef&apos;s discretion —</Text>
       )}
     </View>
   );
@@ -380,42 +348,36 @@ export default function MenuPdfDocument({
   return (
     <Document title="The Menu — Tablekeeper" author="Tablekeeper" subject="Game Night Menu">
       <Page size="LETTER" style={s.page}>
-        {/* Title plate */}
-        <View style={s.topRule} />
-        <View style={s.topRuleHair} />
-
-        <View style={s.brandRow}>
+        <View style={s.frame}>
           <Text style={s.brand}>Tablekeeper · An Evening of Games</Text>
+          <Text style={s.title}>Tonight&apos;s Programme</Text>
+          <Text style={s.titleDate}>{formatLongDate(today)}</Text>
+
+          <View style={s.doubleRuleBold} />
+          <View style={s.doubleRuleHair} />
+
+          {courses.map((course, idx) => (
+            <View key={course.id}>
+              {idx > 0 ? (
+                <View style={s.dividerRow}>
+                  <View style={s.dividerDotSmall} />
+                  <View style={s.dividerDot} />
+                  <View style={s.dividerDotSmall} />
+                </View>
+              ) : null}
+              <CourseSection
+                course={course}
+                games={menu[course.id] ?? []}
+                tastingNotes={tastingNotes}
+              />
+            </View>
+          ))}
         </View>
-
-        <Text style={s.title}>The Menu</Text>
-        <Text style={s.titleDeck}>A curated tasting, in four courses</Text>
-        <Text style={s.titleDate}>{formatLongDate(today)}</Text>
-
-        <View style={s.ornamentRow}>
-          <View style={s.ornamentRule} />
-          <View style={s.ornamentMark} />
-          <View style={s.ornamentRule} />
-        </View>
-
-        <View style={s.programmeRow}>
-          <Text style={s.programmeLabel}>Tonight's Programme</Text>
-        </View>
-
-        {courses.map((course, idx) => (
-          <CourseSection
-            key={course.id}
-            course={course}
-            games={menu[course.id] ?? []}
-            index={idx}
-            tastingNotes={tastingNotes}
-          />
-        ))}
 
         <View style={s.footer} fixed>
           <Text style={s.footerText}>Bon Jeu</Text>
           <View style={s.footerMark} />
-          <Text style={s.footerText}>Generated by Tablekeeper.</Text>
+          <Text style={s.footerText}>Generated by Tablekeeper</Text>
         </View>
       </Page>
     </Document>

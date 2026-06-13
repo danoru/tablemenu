@@ -1,16 +1,20 @@
 import { gameColor, initials } from "@/lib/helpers";
 import type { Compatibility } from "@/services/compatibility";
 import {
-  AMBER_DIM,
-  BG_ELEVATED,
-  BORDER_AMBER,
-  BORDER_GREEN,
+  BORDER_INK,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
-  GOLD,
-  GOLD_FADED,
+  INK,
+  MUSTARD,
+  OLIVE,
+  SHADOW_HARD,
+  SHADOW_HARD_HOVER,
+  SHADOW_HARD_LG,
   TEXT_DIM,
   TEXT_FAINT,
+  TINT_BRICK,
+  TINT_OLIVE,
 } from "@/styles/theme";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
@@ -41,9 +45,9 @@ const SlideUp = React.forwardRef(function SlideUp(
 });
 
 function scoreColor(score: number): { ring: string; text: string } {
-  if (score >= 70) return { ring: "rgba(94,201,122,0.55)", text: "#a8e0b6" };
-  if (score >= 50) return { ring: BORDER_AMBER, text: GOLD };
-  return { ring: "rgba(232,201,122,0.25)", text: GOLD_FADED };
+  if (score >= 70) return { ring: OLIVE, text: OLIVE };
+  if (score >= 50) return { ring: MUSTARD, text: "#a87a20" };
+  return { ring: "rgba(51,39,26,0.3)", text: TEXT_FAINT };
 }
 
 function CompatibilityBody({ data }: { data: Compatibility }) {
@@ -65,7 +69,7 @@ function CompatibilityBody({ data }: { data: Compatibility }) {
             alignItems: "center",
             justifyContent: "center",
             mb: "12px",
-            background: "rgba(0,0,0,0.2)",
+            background: "transparent",
           }}
         >
           <Typography
@@ -117,7 +121,7 @@ function CompatibilityBody({ data }: { data: Compatibility }) {
                 color: TEXT_DIM,
                 lineHeight: 1.8,
                 textAlign: "center",
-                "&::before": { content: '"·"', color: GOLD_FADED, mr: "6px" },
+                "&::before": { content: '"·"', color: BRICK, mr: "6px" },
               }}
             >
               {n}
@@ -131,9 +135,8 @@ function CompatibilityBody({ data }: { data: Compatibility }) {
           sx={{
             padding: "10px 14px",
             borderRadius: "10px",
-            background: "rgba(34,85,48,0.12)",
-            border: "1px solid",
-            borderColor: BORDER_GREEN,
+            background: TINT_OLIVE,
+            border: `1.5px solid ${OLIVE}`,
             mb: data.recommendations.length > 0 ? "20px" : 0,
           }}
         >
@@ -190,7 +193,7 @@ function CompatibilityBody({ data }: { data: Compatibility }) {
                   overflow: "hidden",
                   cursor: "pointer",
                   transition: "border-color 0.15s, transform 0.15s",
-                  "&:hover": { borderColor: BORDER_AMBER, transform: "translateY(-2px)" },
+                  "&:hover": { borderColor: INK, transform: "translateY(-2px)" },
                 }}
                 onClick={() => router.push(`/games/${rec.gameId}`)}
               >
@@ -222,7 +225,7 @@ function CompatibilityBody({ data }: { data: Compatibility }) {
                         fontFamily: FONT_SERIF,
                         fontSize: "20px",
                         fontWeight: 700,
-                        color: "rgba(232,223,200,0.5)",
+                        color: "rgba(255,251,240,0.9)",
                         userSelect: "none",
                       }}
                     >
@@ -299,8 +302,8 @@ export default function CompatibilityCard({ username }: Props) {
   }, [username]);
 
   const ready = data?.ready ?? false;
-  const teaserBorder = ready ? BORDER_AMBER : "divider";
-  const scoreText = data && ready ? scoreColor(data.score).text : GOLD_FADED;
+  const teaserBorder = ready ? INK : "divider";
+  const scoreText = data && ready ? scoreColor(data.score).text : TEXT_FAINT;
   const headline = loading
     ? "Calculating…"
     : error
@@ -317,17 +320,18 @@ export default function CompatibilityCard({ username }: Props) {
           width: "100%",
           textAlign: "left",
           backgroundColor: "background.paper",
-          border: "1px solid",
+          border: "2px solid",
           borderColor: teaserBorder,
-          borderRadius: "12px",
+          borderRadius: "13px",
+          boxShadow: ready ? SHADOW_HARD : "none",
           padding: "14px 18px",
           display: "flex",
           alignItems: "center",
           gap: "14px",
-          transition: "border-color 0.15s, transform 0.15s",
+          transition: "box-shadow 0.15s, transform 0.15s",
           "&:hover": {
-            borderColor: ready ? GOLD_FADED : BORDER_AMBER,
-            transform: ready ? "translateY(-1px)" : "none",
+            boxShadow: ready ? SHADOW_HARD_HOVER : "none",
+            transform: ready ? "translate(-2px, -2px)" : "none",
           },
           "&.Mui-disabled": { opacity: 0.7, cursor: "default" },
         }}
@@ -338,26 +342,25 @@ export default function CompatibilityCard({ username }: Props) {
             width: "36px",
             height: "36px",
             borderRadius: "50%",
-            background: AMBER_DIM,
-            border: "1px solid",
-            borderColor: BORDER_AMBER,
+            background: TINT_BRICK,
+            border: `1.5px solid ${INK}`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
           }}
         >
-          <HandshakeIcon sx={{ fontSize: "18px", color: GOLD }} />
+          <HandshakeIcon sx={{ fontSize: "18px", color: BRICK }} />
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "10px",
-              fontWeight: 500,
+              fontWeight: 700,
               letterSpacing: "1.8px",
               textTransform: "uppercase",
-              color: GOLD_FADED,
+              color: "text.secondary",
               mb: "2px",
             }}
           >
@@ -391,7 +394,7 @@ export default function CompatibilityCard({ username }: Props) {
           )}
         </Box>
         {loading ? (
-          <CircularProgress size={18} sx={{ color: GOLD_FADED }} />
+          <CircularProgress size={18} sx={{ color: BRICK }} />
         ) : ready && data ? (
           <Typography
             sx={{
@@ -405,7 +408,7 @@ export default function CompatibilityCard({ username }: Props) {
             {data.score}%
           </Typography>
         ) : (
-          <ArrowForwardIcon sx={{ fontSize: "16px", color: GOLD_FADED, flexShrink: 0 }} />
+          <ArrowForwardIcon sx={{ fontSize: "16px", color: BRICK, flexShrink: 0 }} />
         )}
       </ButtonBase>
 
@@ -416,34 +419,21 @@ export default function CompatibilityCard({ username }: Props) {
         open={open && ready}
         PaperProps={{
           sx: {
-            background: BG_ELEVATED,
-            border: `1px solid ${BORDER_AMBER}`,
-            borderRadius: "14px",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+            background: "background.paper",
+            border: BORDER_INK,
+            borderRadius: "13px",
+            boxShadow: SHADOW_HARD_LG,
             overflow: "hidden",
           },
         }}
         onClose={() => setOpen(false)}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "180px",
-            background:
-              "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(34,85,48,0.18) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
         <IconButton
           sx={{
             position: "absolute",
             top: "12px",
             right: "12px",
             color: TEXT_FAINT,
-            zIndex: 1,
             "&:hover": { color: TEXT_DIM },
           }}
           onClick={() => setOpen(false)}
@@ -455,10 +445,10 @@ export default function CompatibilityCard({ username }: Props) {
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "10px",
-              fontWeight: 500,
+              fontWeight: 700,
               letterSpacing: "2.5px",
               textTransform: "uppercase",
-              color: GOLD_FADED,
+              color: "text.secondary",
               mb: "20px",
               textAlign: "center",
             }}

@@ -1,14 +1,16 @@
 import type { TasteProfile } from "@/services/tasteProfile";
 import {
-  AMBER_DIM,
-  BG_ELEVATED,
-  BORDER_AMBER,
+  BORDER_INK,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
-  GOLD,
-  GOLD_FADED,
+  INK,
+  SHADOW_HARD,
+  SHADOW_HARD_HOVER,
+  SHADOW_HARD_LG,
   TEXT_DIM,
   TEXT_FAINT,
+  TINT_MUSTARD,
 } from "@/styles/theme";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
@@ -121,10 +123,10 @@ function TagRow({
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "12px",
+              fontWeight: 500,
               color,
               padding: "4px 10px",
-              border: "1px solid",
-              borderColor: "divider",
+              border: "1.5px solid rgba(51,39,26,0.25)",
               borderRadius: "999px",
               background: "transparent",
             }}
@@ -159,10 +161,10 @@ function TasteProfileBody({ profile, username }: { profile: TasteProfile; userna
           sx={{
             fontFamily: FONT_SANS,
             fontSize: "10px",
-            fontWeight: 500,
+            fontWeight: 700,
             letterSpacing: "2.5px",
             textTransform: "uppercase",
-            color: GOLD_FADED,
+            color: "text.secondary",
             mb: "6px",
           }}
         >
@@ -173,7 +175,7 @@ function TasteProfileBody({ profile, username }: { profile: TasteProfile; userna
             fontFamily: FONT_SERIF,
             fontSize: { xs: "26px", md: "32px" },
             fontWeight: 900,
-            color: GOLD,
+            color: BRICK,
             letterSpacing: "-0.5px",
             lineHeight: 1.1,
             mb: "6px",
@@ -213,7 +215,7 @@ function TasteProfileBody({ profile, username }: { profile: TasteProfile; userna
       </Box>
 
       <Box sx={{ position: "relative" }}>
-        <TagRow color={GOLD} items={profile.loves} label="Loves" />
+        <TagRow color={BRICK} items={profile.loves} label="Loves" />
         <TagRow items={profile.allergies} label="Allergic to" />
 
         {profile.highlights.length > 0 && (
@@ -222,9 +224,8 @@ function TasteProfileBody({ profile, username }: { profile: TasteProfile; userna
               mt: "12px",
               padding: "12px 14px",
               borderRadius: "10px",
-              background: AMBER_DIM,
-              border: "1px solid",
-              borderColor: BORDER_AMBER,
+              background: TINT_MUSTARD,
+              border: `1.5px solid ${INK}`,
             }}
           >
             {profile.highlights.map((h) => (
@@ -233,11 +234,10 @@ function TasteProfileBody({ profile, username }: { profile: TasteProfile; userna
                 sx={{
                   fontFamily: FONT_SANS,
                   fontSize: "13px",
-                  color: TEXT_DIM,
+                  color: INK,
                   lineHeight: 1.7,
                   "&:not(:last-of-type)": {
-                    borderBottom: "1px solid",
-                    borderColor: "divider",
+                    borderBottom: "1px solid rgba(51,39,26,0.18)",
                     pb: "6px",
                     mb: "6px",
                   },
@@ -288,17 +288,19 @@ export default function TasteProfileCard({ profile, username, isSelf }: Props) {
           width: "100%",
           textAlign: "left",
           backgroundColor: "background.paper",
-          border: "1px solid",
-          borderColor: ready ? BORDER_AMBER : "divider",
-          borderRadius: "12px",
+          border: "2px solid",
+          borderColor: ready ? INK : "divider",
+          borderRadius: "13px",
+          boxShadow: ready ? SHADOW_HARD : "none",
           padding: "14px 18px",
           display: "flex",
           alignItems: "center",
           gap: "14px",
-          transition: "border-color 0.15s, transform 0.15s",
+          transition: "border-color 0.15s, box-shadow 0.15s, transform 0.15s",
           "&:hover": {
-            borderColor: ready ? GOLD_FADED : BORDER_AMBER,
-            transform: "translateY(-1px)",
+            borderColor: INK,
+            boxShadow: ready ? SHADOW_HARD_HOVER : "none",
+            transform: ready ? "translate(-2px, -2px)" : "translateY(-1px)",
           },
         }}
         onClick={() => setOpen(true)}
@@ -308,26 +310,25 @@ export default function TasteProfileCard({ profile, username, isSelf }: Props) {
             width: "36px",
             height: "36px",
             borderRadius: "50%",
-            background: AMBER_DIM,
-            border: "1px solid",
-            borderColor: BORDER_AMBER,
+            background: TINT_MUSTARD,
+            border: `1.5px solid ${INK}`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
           }}
         >
-          <RestaurantMenuIcon sx={{ fontSize: "18px", color: GOLD }} />
+          <RestaurantMenuIcon sx={{ fontSize: "18px", color: "#a87a20" }} />
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "10px",
-              fontWeight: 500,
+              fontWeight: 700,
               letterSpacing: "1.8px",
               textTransform: "uppercase",
-              color: GOLD_FADED,
+              color: "text.secondary",
               mb: "2px",
             }}
           >
@@ -362,7 +363,7 @@ export default function TasteProfileCard({ profile, username, isSelf }: Props) {
             {subline}
           </Typography>
         </Box>
-        <ArrowForwardIcon sx={{ fontSize: "16px", color: GOLD_FADED, flexShrink: 0 }} />
+        <ArrowForwardIcon sx={{ fontSize: "16px", color: BRICK, flexShrink: 0 }} />
       </ButtonBase>
 
       <Dialog
@@ -372,34 +373,21 @@ export default function TasteProfileCard({ profile, username, isSelf }: Props) {
         open={open}
         PaperProps={{
           sx: {
-            background: BG_ELEVATED,
-            border: `1px solid ${BORDER_AMBER}`,
-            borderRadius: "14px",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+            background: "background.paper",
+            border: BORDER_INK,
+            borderRadius: "13px",
+            boxShadow: SHADOW_HARD_LG,
             overflow: "hidden",
           },
         }}
         onClose={() => setOpen(false)}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "180px",
-            background:
-              "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(200,150,42,0.12) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
         <IconButton
           sx={{
             position: "absolute",
             top: "12px",
             right: "12px",
             color: TEXT_FAINT,
-            zIndex: 1,
             "&:hover": { color: TEXT_DIM },
           }}
           onClick={() => setOpen(false)}
@@ -415,10 +403,10 @@ export default function TasteProfileCard({ profile, username, isSelf }: Props) {
                 sx={{
                   fontFamily: FONT_SANS,
                   fontSize: "10px",
-                  fontWeight: 500,
+                  fontWeight: 700,
                   letterSpacing: "2.5px",
                   textTransform: "uppercase",
-                  color: GOLD_FADED,
+                  color: "text.secondary",
                   mb: "8px",
                 }}
               >

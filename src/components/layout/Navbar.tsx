@@ -1,8 +1,17 @@
-import { FONT_SANS, FONT_SERIF, GOLD, GOLD_FADED, GOLD_LIGHT, TEXT_DIM } from "@/styles/theme";
+import {
+  BRICK,
+  FONT_SANS,
+  FONT_SERIF,
+  INK,
+  PLUM,
+  SHADOW_HARD,
+  SHADOW_HARD_HOVER,
+  SURFACE,
+  TEXT_DIM,
+} from "@/styles/theme";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, Button, Container, Divider, IconButton, Menu, MenuItem } from "@mui/material";
 import { useSession, signOut } from "next-auth/react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import * as React from "react";
@@ -12,33 +21,39 @@ interface NavPage {
   title: string;
   link?: string;
   action?: () => void;
-  variant?: "default" | "primary" | "muted";
+  variant?: "tab" | "primary" | "muted";
 }
 
 function getPages(session: any, onSignOut: () => void): NavPage[] {
   if (session) {
     return [
-      {
-        id: 1,
-        title: session.user?.username,
-        link: `/players/${session.user?.username}`,
-        variant: "muted",
-      },
-      { id: 2, title: "Games", link: "/games" },
-      { id: 2, title: "Menu", link: "/menu" },
-      { id: 3, title: "Players", link: "/players" },
+      { id: 1, title: "Games", link: "/games", variant: "tab" },
+      { id: 2, title: "Menu", link: "/menu", variant: "tab" },
+      { id: 3, title: "Players", link: "/players", variant: "tab" },
       { id: 4, title: "Sign out", action: onSignOut, variant: "muted" },
     ];
   }
 
   return [
-    { id: 1, title: "Menu", link: "/menu" },
-    { id: 2, title: "Games", link: "/games" },
-    { id: 3, title: "Players", link: "/players" },
-    { id: 4, title: "Sign in", link: "/login", variant: "default" },
+    { id: 1, title: "Menu", link: "/menu", variant: "tab" },
+    { id: 2, title: "Games", link: "/games", variant: "tab" },
+    { id: 3, title: "Players", link: "/players", variant: "tab" },
+    { id: 4, title: "Sign in", link: "/login", variant: "muted" },
     { id: 5, title: "Create account", link: "/register", variant: "primary" },
   ];
 }
+
+const stickerSx = {
+  backgroundColor: SURFACE,
+  border: `2px solid ${INK}`,
+  boxShadow: SHADOW_HARD,
+  transition: "transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease",
+};
+
+const stickerHoverSx = {
+  boxShadow: SHADOW_HARD_HOVER,
+  transform: "translate(-2px, -2px)",
+};
 
 export default function Navbar() {
   const router = useRouter();
@@ -50,6 +65,12 @@ export default function Navbar() {
   }
 
   const pages = getPages(session, handleSignOut);
+  const username: string | undefined = (session?.user as any)?.username;
+
+  function isActive(link?: string) {
+    if (!link) return false;
+    return router.pathname === link || router.pathname.startsWith(`${link}/`);
+  }
 
   function handleOpenNavMenu(event: React.MouseEvent<HTMLElement>) {
     setAnchorElNav(event.currentTarget);
@@ -71,60 +92,39 @@ export default function Navbar() {
   if (status === "loading") return null;
 
   return (
-    <Box
-      component="nav"
-      sx={{
-        backgroundColor: "background.default",
-        borderBottom: "1px solid",
-        borderColor: "divider",
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-        width: "100%",
-      }}
-    >
+    <Box component="nav" sx={{ width: "100%" }}>
       <Container maxWidth="xl">
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            height: { xs: "60px", md: "64px" },
+            height: { xs: "72px", md: "84px" },
             gap: 2,
           }}
         >
-          <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+          <Link href="/" style={{ textDecoration: "none" }}>
             <Box
               sx={{
-                position: "relative",
-                width: 36,
-                height: 36,
-                mr: 1,
-                flexShrink: 0,
-              }}
-            >
-              <Image
-                alt="Tablekeeper"
-                src="/images/logo.svg"
-                fill
-                style={{ objectFit: "contain" }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-            </Box>
-            <Box
-              sx={{
+                ...stickerSx,
+                borderRadius: "10px",
+                padding: "6px 14px",
                 fontFamily: FONT_SERIF,
+                fontStyle: "italic",
                 fontSize: "20px",
                 fontWeight: 900,
-                color: GOLD,
-                letterSpacing: "-0.3px",
-                lineHeight: 1,
+                color: INK,
+                letterSpacing: "-0.01em",
+                lineHeight: 1.3,
+                transform: "rotate(-1.5deg)",
+                "&:hover": {
+                  ...stickerHoverSx,
+                  transform: "rotate(-1.5deg) translate(-2px, -2px)",
+                },
               }}
             >
               Table
-              <Box component="span" sx={{ color: GOLD_FADED, fontWeight: 700 }}>
+              <Box component="span" sx={{ color: BRICK }}>
                 keeper
               </Box>
             </Box>
@@ -134,7 +134,7 @@ export default function Navbar() {
             sx={{
               display: { xs: "none", md: "flex" },
               alignItems: "center",
-              gap: "4px",
+              gap: "10px",
             }}
           >
             {pages.map((page) => {
@@ -142,19 +142,12 @@ export default function Navbar() {
                 return (
                   <Button
                     key={page.id}
+                    variant="contained"
                     onClick={() => handlePageClick(page)}
                     sx={{
-                      backgroundColor: "primary.main",
-                      borderRadius: "6px",
-                      color: "background.default",
-                      fontFamily: FONT_SANS,
-                      fontSize: "13px",
-                      fontWeight: 500,
-                      letterSpacing: "0.3px",
+                      fontSize: "14px",
                       ml: "4px",
-                      padding: "7px 18px",
-                      textTransform: "none",
-                      "&:hover": { backgroundColor: "primary.light" },
+                      padding: "7px 22px",
                     }}
                   >
                     {page.title}
@@ -169,16 +162,16 @@ export default function Navbar() {
                     onClick={() => handlePageClick(page)}
                     sx={{
                       background: "transparent",
-                      borderRadius: "6px",
+                      borderRadius: "999px",
                       color: TEXT_DIM,
                       fontFamily: FONT_SANS,
-                      fontSize: "13px",
-                      fontWeight: 400,
+                      fontSize: "14px",
+                      fontWeight: 500,
                       padding: "7px 14px",
                       textTransform: "none",
                       "&:hover": {
-                        background: "rgba(255,255,255,0.04)",
-                        color: GOLD_LIGHT,
+                        background: "rgba(51,39,26,0.06)",
+                        color: INK,
                       },
                     }}
                   >
@@ -187,34 +180,58 @@ export default function Navbar() {
                 );
               }
 
+              const active = isActive(page.link);
               return (
-                <Button
+                <Box
                   key={page.id}
+                  component="button"
                   onClick={() => handlePageClick(page)}
                   sx={{
-                    background: "transparent",
-                    border: page.variant === "default" ? "1px solid rgba(180,140,60,0.3)" : "none",
-                    borderRadius: "6px",
-                    color: page.variant === "default" ? GOLD_LIGHT : TEXT_DIM,
+                    ...stickerSx,
+                    backgroundColor: active ? BRICK : SURFACE,
+                    borderRadius: "999px",
+                    color: active ? SURFACE : INK,
+                    cursor: "pointer",
                     fontFamily: FONT_SANS,
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    padding: "7px 16px",
-                    textTransform: "none",
-                    "&:hover": {
-                      background:
-                        page.variant === "default"
-                          ? "rgba(180,140,60,0.1)"
-                          : "rgba(255,255,255,0.04)",
-                      borderColor: "rgba(180,140,60,0.5)",
-                      color: GOLD_LIGHT,
-                    },
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    padding: "8px 22px",
+                    "&:hover": stickerHoverSx,
                   }}
                 >
                   {page.title}
-                </Button>
+                </Box>
               );
             })}
+
+            {session && username && (
+              <Link href={`/players/${username}`} style={{ textDecoration: "none" }}>
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    ml: "6px",
+                    borderRadius: "50%",
+                    border: `2px solid ${INK}`,
+                    backgroundColor: PLUM,
+                    color: SURFACE,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: FONT_SERIF,
+                    fontSize: "17px",
+                    fontWeight: 900,
+                    transition: "transform 0.12s ease, box-shadow 0.12s ease",
+                    "&:hover": {
+                      boxShadow: SHADOW_HARD,
+                      transform: "translate(-1px, -1px)",
+                    },
+                  }}
+                >
+                  {username.charAt(0).toUpperCase()}
+                </Box>
+              </Link>
+            )}
           </Box>
 
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
@@ -224,8 +241,10 @@ export default function Navbar() {
               aria-label="Open navigation menu"
               onClick={handleOpenNavMenu}
               sx={{
-                color: GOLD_LIGHT,
-                "&:hover": { background: "rgba(255,255,255,0.06)" },
+                ...stickerSx,
+                borderRadius: "10px",
+                color: INK,
+                "&:hover": { ...stickerHoverSx, backgroundColor: SURFACE },
               }}
             >
               <MenuIcon />
@@ -241,40 +260,34 @@ export default function Navbar() {
               onClose={handleCloseNavMenu}
               sx={{
                 "& .MuiPaper-root": {
-                  backgroundColor: "#1a1610",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: "10px",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
                   minWidth: "200px",
-                  mt: "8px",
+                  mt: "10px",
                 },
               }}
             >
+              {session && username && (
+                <MenuItem
+                  onClick={() => {
+                    handleCloseNavMenu();
+                    router.push(`/players/${username}`);
+                  }}
+                  sx={{ fontWeight: 700, color: INK, padding: "10px 20px" }}
+                >
+                  {username}
+                </MenuItem>
+              )}
               {pages.map((page, index) => {
-                const isLast = index === pages.length - 1;
                 const isPrimary = page.variant === "primary";
 
                 return (
                   <Box key={page.id}>
-                    {!session && index === 2 && (
-                      <Divider sx={{ borderColor: "divider", my: "4px" }} />
-                    )}
+                    {!session && index === 3 && <Divider sx={{ my: "4px" }} />}
                     <MenuItem
                       onClick={() => handlePageClick(page)}
                       sx={{
-                        fontFamily: FONT_SANS,
-                        fontSize: "14px",
-                        fontWeight: isPrimary ? 500 : 400,
-                        color: isPrimary
-                          ? "primary.main"
-                          : page.variant === "muted"
-                            ? TEXT_DIM
-                            : GOLD_LIGHT,
+                        fontWeight: isPrimary ? 700 : 500,
+                        color: isPrimary ? BRICK : undefined,
                         padding: "10px 20px",
-                        "&:hover": {
-                          background: "rgba(180,140,60,0.08)",
-                        },
                       }}
                     >
                       {page.title}

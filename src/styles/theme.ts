@@ -1,80 +1,104 @@
 import { createTheme } from "@mui/material/styles";
-import { DM_Sans } from "next/font/google";
+import { Fraunces, Space_Grotesk } from "next/font/google";
 
-export const dmSans = DM_Sans({
+export const fraunces = Fraunces({
   display: "swap",
+  style: ["normal", "italic"],
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
+  weight: ["400", "700", "900"],
 });
 
-// ─── Palette Tokens ───────────────────────────────────────────────────────────
+export const spaceGrotesk = Space_Grotesk({
+  display: "swap",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+});
 
-const AMBER_MAIN = "#c8962a"; // primary CTA buttons // primary.main
-const AMBER_LIGHT = "#dba535"; // hover state // primary.light
-const AMBER_DARK = "#a37820"; // pressed / active // primary.dark
+// ─── Café Press Palette ───────────────────────────────────────────────────────
+// Light "cozy brutalist" system: oatmeal paper, warm ink for text AND borders
+// (never pure black), hard offset shadows, earthy screen-print accents.
 
-const CONTRAST_TEXT = "#0f0c08"; // *.contrastText
+export const OAT = "#f4ebda"; // page background
+export const SURFACE = "#fffbf0"; // cards, menus, elevated surfaces
+export const INK = "#33271a"; // text, borders, shadows
 
-const GREEN_MAIN = "#3a7d50"; // secondary accent (Quick Gen tag, success) // secondary.main
-const GREEN_LIGHT = "#5ec97a"; // bright green for badges / dots // secondary.light
-const GREEN_DARK = "#28593a"; // secondary.dark
+export const BRICK = "#c0452c"; // primary accent / CTAs
+const BRICK_LIGHT = "#d4573c"; // hover state
+const BRICK_DARK = "#9c3823"; // pressed / active
 
-const BG_DEFAULT = "#0f0c08"; // page background — deep brown-black // background.default
-const BG_PAPER = "#1a1610"; // cards, menus, elevated surfaces // background.paper
+export const MUSTARD = "#d9a036"; // ratings, highlights, Medium weight
+export const OLIVE = "#6b7f3f"; // success, Light weight
+export const TEAL = "#3f7f77"; // info, links-of-second-rank
+export const PLUM = "#8e5a78"; // avatars, occasional flair
 
-const TEXT_PRIMARY = "#f0e6cc"; // headings, primary labels // text.primary
-const TEXT_SECONDARY = "rgba(232,223,200,0.60)"; // body copy, descriptions // text.secondary
-const TEXT_DISABLED = "rgba(232,223,200,0.30)"; // placeholder, disabled
+// Chip / fill tints (solid pastels — pair with 2px ink borders)
+export const TINT_BRICK = "#f4d9d2";
+export const TINT_MUSTARD = "#f3e4c2";
+export const TINT_OLIVE = "#e2e8d4";
+export const TINT_TEAL = "#d9e6e2";
+export const TINT_PLUM = "#ecdce6";
 
-const BORDER_SUBTLE = "rgba(180,140,60,0.15)"; // nav borders, dividers // divider // BORDER_SUBTLE
-const BORDER_DEFAULT = "rgba(180,140,60,0.25)"; // input outlines
-const BORDER_FOCUS = "rgba(180,140,60,0.60)"; // focused inputs
+// Ink alphas
+const TEXT_PRIMARY = INK;
+const TEXT_SECONDARY = "rgba(51,39,26,0.72)";
+const TEXT_DISABLED = "rgba(51,39,26,0.38)";
 
-// ─── Additional Tokens ────────────────────────────────────────────────────────────────────
+const BORDER_SUBTLE = "rgba(51,39,26,0.18)"; // dividers, hairlines
+const BORDER_DEFAULT = "rgba(51,39,26,0.4)"; // resting input outlines
 
-export const AMBER_DIM = "rgba(200,150,42,0.15)";
-export const BG_BLUE = "rgba(34,60,100,0.25)";
-export const BG_ELEVATED = "#221e14"; // modals, drawers
-export const BG_GREEN = "rgba(34,85,48,0.18)";
-export const BLUE = "#5c9ee0";
-export const BORDER_AMBER = "rgba(180,140,60,0.3)";
-export const BORDER_BLUE = "rgba(60,100,200,0.3)";
-export const BORDER_GREEN = "rgba(60,160,80,0.3)";
-export const GOLD = "#e8c97a"; // gold text on dark backgrounds
-export const GOLD_FADED = "rgba(232,201,122,0.4)";
-export const GOLD_LIGHT = "#c8b880";
-export const TEXT_DIM = "rgba(232,223,200,0.55)";
-export const TEXT_FAINT = "rgba(232,223,200,0.28)";
-export const RED = "#e05c5c";
+// Structure tokens — the signature look
+export const BORDER_INK = `2px solid ${INK}`;
+export const SHADOW_HARD = `3px 3px 0 ${INK}`;
+export const SHADOW_HARD_LG = `4px 4px 0 ${INK}`;
+export const SHADOW_HARD_HOVER = `5px 5px 0 ${INK}`;
+
+// ─── Legacy aliases ───────────────────────────────────────────────────────────
+// Pre-redesign token names mapped onto Café Press values so the app re-skins
+// wholesale. Retire these per-file during the page sweep; do not add new uses.
+
+export const AMBER_DIM = TINT_BRICK; // was active-chip amber wash
+export const BG_BLUE = TINT_TEAL;
+export const BG_ELEVATED = SURFACE; // modals, drawers
+export const BG_GREEN = TINT_OLIVE;
+export const BLUE = TEAL;
+export const BORDER_AMBER = INK; // emphasis/hover borders are now ink
+export const BORDER_BLUE = TEAL;
+export const BORDER_GREEN = OLIVE;
+export const GOLD = BRICK; // was gold accent text on dark
+export const GOLD_FADED = "rgba(192,69,44,0.65)";
+export const GOLD_LIGHT = INK;
+export const TEXT_DIM = TEXT_SECONDARY;
+export const TEXT_FAINT = "rgba(51,39,26,0.5)";
+export const RED = BRICK;
 
 // ─── Typography ───────────────────────────────────────────────────────────────
-export const FONT_SERIF = "'Playfair Display', serif";
-export const FONT_SANS = "'DM Sans', sans-serif";
+export const FONT_SERIF = `${fraunces.style.fontFamily}, serif`;
+export const FONT_SANS = `${spaceGrotesk.style.fontFamily}, sans-serif`;
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
 const theme = createTheme({
   cssVariables: true,
   palette: {
-    mode: "dark",
+    mode: "light",
 
     primary: {
-      main: AMBER_MAIN,
-      light: AMBER_LIGHT,
-      dark: AMBER_DARK,
-      contrastText: CONTRAST_TEXT,
+      main: BRICK,
+      light: BRICK_LIGHT,
+      dark: BRICK_DARK,
+      contrastText: SURFACE,
     },
 
     secondary: {
-      main: GREEN_MAIN,
-      light: GREEN_LIGHT,
-      dark: GREEN_DARK,
-      contrastText: CONTRAST_TEXT,
+      main: OLIVE,
+      light: "#86994f",
+      dark: "#55652f",
+      contrastText: SURFACE,
     },
 
     background: {
-      default: BG_DEFAULT,
-      paper: BG_PAPER,
+      default: OAT,
+      paper: SURFACE,
     },
 
     text: {
@@ -86,45 +110,45 @@ const theme = createTheme({
     divider: BORDER_SUBTLE,
 
     error: {
-      main: "#e05252",
-      contrastText: CONTRAST_TEXT,
+      main: "#b3362b",
+      contrastText: SURFACE,
     },
     success: {
-      main: GREEN_LIGHT,
-      contrastText: CONTRAST_TEXT,
+      main: OLIVE,
+      contrastText: SURFACE,
     },
     info: {
-      main: "#5b9bd5",
-      contrastText: CONTRAST_TEXT,
+      main: TEAL,
+      contrastText: SURFACE,
     },
     warning: {
-      main: GOLD,
-      contrastText: CONTRAST_TEXT,
+      main: MUSTARD,
+      contrastText: INK,
     },
   },
 
   // ─── Typography ─────────────────────────────────────────────────────────────
 
   typography: {
-    fontFamily: dmSans.style.fontFamily,
+    fontFamily: spaceGrotesk.style.fontFamily,
 
-    h1: { fontWeight: 700, fontSize: "3rem" },
-    h2: { fontWeight: 700, fontSize: "2.25rem" },
-    h3: { fontWeight: 600, fontSize: "1.75rem" },
-    h4: { fontWeight: 600, fontSize: "1.5rem" },
-    h5: { fontWeight: 500, fontSize: "1.25rem" },
-    h6: { fontWeight: 500, fontSize: "1rem" },
+    h1: { fontFamily: FONT_SERIF, fontWeight: 900, fontSize: "3rem", letterSpacing: "-0.01em" },
+    h2: { fontFamily: FONT_SERIF, fontWeight: 900, fontSize: "2.25rem", letterSpacing: "-0.01em" },
+    h3: { fontFamily: FONT_SERIF, fontWeight: 700, fontSize: "1.75rem" },
+    h4: { fontFamily: FONT_SERIF, fontWeight: 700, fontSize: "1.5rem" },
+    h5: { fontWeight: 700, fontSize: "1.25rem" },
+    h6: { fontWeight: 700, fontSize: "1rem" },
     subtitle1: { fontSize: "1rem" },
     subtitle2: { fontSize: "0.9rem" },
-    body1: { fontSize: "1rem", lineHeight: 1.7 },
-    body2: { fontSize: "0.875rem", lineHeight: 1.6 },
-    button: { textTransform: "none", fontWeight: 500 },
+    body1: { fontSize: "1rem", lineHeight: 1.6 },
+    body2: { fontSize: "0.875rem", lineHeight: 1.55 },
+    button: { textTransform: "none", fontWeight: 700 },
     caption: { fontSize: "0.75rem", color: TEXT_SECONDARY },
   },
 
   // ─── Shape ──────────────────────────────────────────────────────────────────
 
-  shape: { borderRadius: 8 },
+  shape: { borderRadius: 10 },
 
   // ─── Spacing ────────────────────────────────────────────────────────────────
 
@@ -142,23 +166,23 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: BG_DEFAULT,
+          backgroundColor: OAT,
           color: TEXT_PRIMARY,
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
         },
         "::selection": {
-          background: "rgba(200,150,42,0.35)",
-          color: TEXT_PRIMARY,
+          background: "rgba(217,160,54,0.45)",
+          color: INK,
         },
-        "::-webkit-scrollbar": { width: "6px" },
-        "::-webkit-scrollbar-track": { background: BG_DEFAULT },
+        "::-webkit-scrollbar": { width: "8px" },
+        "::-webkit-scrollbar-track": { background: OAT },
         "::-webkit-scrollbar-thumb": {
-          background: "rgba(180,140,60,0.3)",
-          borderRadius: "3px",
+          background: "rgba(51,39,26,0.3)",
+          borderRadius: "4px",
         },
         "::-webkit-scrollbar-thumb:hover": {
-          background: "rgba(180,140,60,0.5)",
+          background: "rgba(51,39,26,0.5)",
         },
       },
     },
@@ -166,11 +190,50 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "6px",
-          fontFamily: dmSans.style.fontFamily,
-          fontWeight: 500,
-          letterSpacing: "0.3px",
+          borderRadius: "999px",
+          fontFamily: spaceGrotesk.style.fontFamily,
+          fontWeight: 700,
+          letterSpacing: "0.2px",
           textTransform: "none",
+        },
+        // Chunky "sticker" treatment for real buttons; text-variant stays quiet.
+        contained: {
+          border: BORDER_INK,
+          boxShadow: SHADOW_HARD,
+          transition: "transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease",
+          "&:hover": {
+            boxShadow: SHADOW_HARD_LG,
+            transform: "translate(-1px, -1px)",
+          },
+          "&:active": {
+            boxShadow: `1px 1px 0 ${INK}`,
+            transform: "translate(1px, 1px)",
+          },
+          "&.Mui-disabled": {
+            border: `2px solid ${TEXT_DISABLED}`,
+            boxShadow: "none",
+          },
+        },
+        outlined: {
+          backgroundColor: SURFACE,
+          border: BORDER_INK,
+          boxShadow: SHADOW_HARD,
+          color: INK,
+          transition: "transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease",
+          "&:hover": {
+            backgroundColor: SURFACE,
+            border: BORDER_INK,
+            boxShadow: SHADOW_HARD_LG,
+            transform: "translate(-1px, -1px)",
+          },
+          "&:active": {
+            boxShadow: `1px 1px 0 ${INK}`,
+            transform: "translate(1px, 1px)",
+          },
+          "&.Mui-disabled": {
+            border: `2px solid ${TEXT_DISABLED}`,
+            boxShadow: "none",
+          },
         },
       },
     },
@@ -178,21 +241,24 @@ const theme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          fontFamily: dmSans.style.fontFamily,
+          backgroundColor: SURFACE,
+          borderRadius: "10px",
+          fontFamily: spaceGrotesk.style.fontFamily,
           "& .MuiOutlinedInput-notchedOutline": {
             borderColor: BORDER_DEFAULT,
+            borderWidth: "2px",
           },
           "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "rgba(180,140,60,0.45)",
+            borderColor: INK,
           },
           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: BORDER_FOCUS,
-            borderWidth: "1px",
+            borderColor: INK,
+            borderWidth: "2px",
           },
         },
         input: {
           color: TEXT_PRIMARY,
-          "&::placeholder": { color: TEXT_DISABLED },
+          "&::placeholder": { color: TEXT_DISABLED, opacity: 1 },
         },
       },
     },
@@ -201,8 +267,18 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: "none",
-          backgroundColor: BG_PAPER,
-          border: `1px solid ${BORDER_SUBTLE}`,
+          backgroundColor: SURFACE,
+          border: BORDER_INK,
+        },
+      },
+    },
+
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          border: BORDER_INK,
+          borderRadius: "13px",
+          boxShadow: SHADOW_HARD_LG,
         },
       },
     },
@@ -210,9 +286,10 @@ const theme = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: {
-          backgroundColor: BG_ELEVATED,
-          border: `1px solid ${BORDER_SUBTLE}`,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+          backgroundColor: SURFACE,
+          border: BORDER_INK,
+          borderRadius: "10px",
+          boxShadow: SHADOW_HARD,
         },
       },
     },
@@ -220,15 +297,17 @@ const theme = createTheme({
     MuiMenuItem: {
       styleOverrides: {
         root: {
-          fontFamily: dmSans.style.fontFamily,
+          fontFamily: spaceGrotesk.style.fontFamily,
           fontSize: "14px",
+          fontWeight: 500,
           color: TEXT_SECONDARY,
           "&:hover": {
-            backgroundColor: "rgba(180,140,60,0.08)",
+            backgroundColor: "rgba(51,39,26,0.06)",
             color: TEXT_PRIMARY,
           },
           "&.Mui-selected": {
-            backgroundColor: "rgba(180,140,60,0.12)",
+            backgroundColor: TINT_BRICK,
+            "&:hover": { backgroundColor: TINT_BRICK },
           },
         },
       },
@@ -243,9 +322,11 @@ const theme = createTheme({
     MuiAlert: {
       styleOverrides: {
         root: {
-          fontFamily: dmSans.style.fontFamily,
+          border: BORDER_INK,
+          borderRadius: "10px",
+          fontFamily: spaceGrotesk.style.fontFamily,
           fontSize: "14px",
-          borderRadius: "8px",
+          fontWeight: 500,
         },
       },
     },
@@ -259,13 +340,15 @@ const theme = createTheme({
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          backgroundColor: BG_ELEVATED,
-          border: `1px solid ${BORDER_SUBTLE}`,
-          color: TEXT_PRIMARY,
-          fontFamily: dmSans.style.fontFamily,
+          backgroundColor: INK,
+          border: "none",
+          borderRadius: "8px",
+          color: SURFACE,
+          fontFamily: spaceGrotesk.style.fontFamily,
           fontSize: "12px",
+          fontWeight: 500,
         },
-        arrow: { color: BG_ELEVATED },
+        arrow: { color: INK },
       },
     },
   },

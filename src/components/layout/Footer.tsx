@@ -1,8 +1,9 @@
+import { FONT_SANS, FONT_SERIF } from "@/styles/theme";
 import Box from "@mui/material/Box";
 
 const styles = {
   footer: {
-    borderTop: "1px solid rgba(180,140,60,0.1)",
+    borderTop: "2px solid rgba(51,39,26,0.15)",
     padding: "20px 32px",
     display: "flex",
     justifyContent: "space-between",
@@ -11,15 +12,17 @@ const styles = {
   },
 
   footerLogo: {
-    fontFamily: "'Playfair Display', serif",
+    fontFamily: FONT_SERIF,
+    fontStyle: "italic",
+    fontWeight: 700,
     fontSize: "14px",
-    color: "rgba(232,201,122,0.3)",
+    color: "rgba(51,39,26,0.45)",
   },
 
   footerCopy: {
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: FONT_SANS,
     fontSize: "12px",
-    color: "rgba(232,223,200,0.22)",
+    color: "rgba(51,39,26,0.4)",
   },
 };
 

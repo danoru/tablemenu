@@ -23,12 +23,11 @@ export function MiniGameCard({
         alignItems: "center",
         gap: "14px",
         padding: "14px 16px",
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid",
-        borderColor: "divider",
+        backgroundColor: "background.paper",
+        border: `2px solid ${BORDER_AMBER}`,
         borderRadius: "10px",
-        transition: "border-color 0.15s",
-        "&:hover": { borderColor: BORDER_AMBER },
+        transition: "transform 0.12s ease, box-shadow 0.12s ease",
+        "&:hover": { boxShadow: `3px 3px 0 ${BORDER_AMBER}`, transform: "translate(-1px, -1px)" },
         opacity: rerolling ? 0.5 : 1,
       }}
     >
@@ -65,11 +64,11 @@ export function MiniGameCard({
         size="small"
         sx={{
           color: accent,
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: "7px",
-          "&:hover": { background: "rgba(255,255,255,0.08)", borderColor: accent },
+          background: "transparent",
+          border: "2px solid",
+          borderColor: "rgba(51,39,26,0.3)",
+          borderRadius: "8px",
+          "&:hover": { background: "rgba(51,39,26,0.05)", borderColor: accent },
         }}
       >
         {rerolling ? (

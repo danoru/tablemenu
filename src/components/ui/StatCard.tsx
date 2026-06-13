@@ -1,4 +1,4 @@
-import { FONT_SANS, GOLD, TEXT_FAINT } from "@/styles/theme";
+import { BRICK, FONT_SANS, INK, SHADOW_HARD, TINT_MUSTARD } from "@/styles/theme";
 import { Box, Typography } from "@mui/material";
 
 export default function StatCard({
@@ -14,9 +14,9 @@ export default function StatCard({
     <Box
       sx={{
         backgroundColor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: "12px",
+        border: `2px solid ${INK}`,
+        borderRadius: "13px",
+        boxShadow: SHADOW_HARD,
         padding: "20px 24px",
         display: "flex",
         alignItems: "center",
@@ -30,12 +30,12 @@ export default function StatCard({
           width: "40px",
           height: "40px",
           borderRadius: "10px",
-          background: "rgba(180,110,30,0.18)",
-          border: `1px solid rgba(180,140,60,0.2)`,
+          background: TINT_MUSTARD,
+          border: `2px solid ${INK}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: GOLD,
+          color: BRICK,
           flexShrink: 0,
         }}
       >
@@ -45,15 +45,25 @@ export default function StatCard({
         <Typography
           sx={{
             fontFamily: FONT_SANS,
-            fontSize: "22px",
-            fontWeight: 500,
+            fontSize: "24px",
+            fontWeight: 700,
             color: "text.primary",
             lineHeight: 1.1,
           }}
         >
           {value}
         </Typography>
-        <Typography sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT, mt: "2px" }}>
+        <Typography
+          sx={{
+            fontFamily: FONT_SANS,
+            fontSize: "11px",
+            fontWeight: 500,
+            color: "text.secondary",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            mt: "3px",
+          }}
+        >
           {label}
         </Typography>
       </Box>
