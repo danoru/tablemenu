@@ -1,6 +1,8 @@
+import { buildTastingNotes } from "@/lib/menu/format";
+import type { MenuSelection, SectionConfig } from "@/lib/menu/types";
 import { FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
-import React from "react";
-import dynamic from "next/dynamic";
+import CloseIcon from "@mui/icons-material/Close";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import {
   Box,
   Button,
@@ -11,24 +13,12 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import { LibraryGame } from "@pages/api/games/library";
-
-interface CourseConfig {
-  readonly id: string;
-  readonly icon: string;
-  readonly label: string;
-  readonly subtitle: string;
-}
-
-export interface MenuSelection {
-  [courseId: string]: LibraryGame[];
-}
+import React from "react";
+import dynamic from "next/dynamic";
 
 interface Props {
   menu: MenuSelection;
-  courses: readonly CourseConfig[];
+  sections: readonly SectionConfig[];
 }
 
 const PDFViewer = dynamic(() => import("@react-pdf/renderer").then((m) => m.PDFViewer), {
@@ -64,10 +54,13 @@ function PdfLoadingSpinner() {
   );
 }
 
-export default function ExportMenuButton({ menu, courses }: Props) {
+export default function ExportMenuButton({ menu, sections }: Props) {
   const [open, setOpen] = React.useState(false);
-
   const [mounted, setMounted] = React.useState(false);
+
+  // Derived once per open — the tasting notes + date the PDF renders from.
+  const tastingNotes = React.useMemo(() => buildTastingNotes(Object.values(menu).flat()), [menu]);
+  const date = React.useMemo(() => new Date(), [menu]);
 
   function handleOpen() {
     setOpen(true);
@@ -78,7 +71,11 @@ export default function ExportMenuButton({ menu, courses }: Props) {
     setOpen(false);
   }
 
-  const filename = `tablekeeper-menu-${new Date().toISOString().slice(0, 10)}.pdf`;
+  const filename = `tablekeeper-menu-${date.toISOString().slice(0, 10)}.pdf`;
+
+  const doc = (
+    <MenuPdfDocument menu={menu} sections={sections} tastingNotes={tastingNotes} date={date} />
+  );
 
   return (
     <>
@@ -135,7 +132,7 @@ export default function ExportMenuButton({ menu, courses }: Props) {
           <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
             {mounted && (
               <PDFDownloadLink
-                document={<MenuPdfDocument menu={menu} courses={courses} />}
+                document={doc}
                 fileName={filename}
                 style={{ textDecoration: "none" }}
               >
@@ -181,7 +178,7 @@ export default function ExportMenuButton({ menu, courses }: Props) {
         <DialogContent sx={{ padding: 0, height: "70vh", overflow: "hidden" }}>
           {mounted ? (
             <PDFViewer width="100%" height="100%" showToolbar={false} style={{ border: "none" }}>
-              <MenuPdfDocument menu={menu} courses={courses} />
+              {doc}
             </PDFViewer>
           ) : (
             <PdfLoadingSpinner />

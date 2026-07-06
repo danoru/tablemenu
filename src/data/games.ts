@@ -74,6 +74,10 @@ export async function getUserLibrary(userId: number) {
     complexity: ug.game.complexity,
     bggRating: ug.game.bggRating,
     categories: ug.game.categories,
+    mechanics: ug.game.mechanics,
+    designers: ug.game.designers,
+    publishers: ug.game.publishers,
+    yearPublished: ug.game.yearPublished,
     userStars: ratingMap.get(ug.gameId) ?? null,
   }));
 }

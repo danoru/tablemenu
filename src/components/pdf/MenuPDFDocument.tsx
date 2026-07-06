@@ -1,20 +1,11 @@
+import { playersLabel, priceLabel, ratingLabel, spiceLevel } from "@/lib/menu/format";
+import type { MenuSelection, SectionAccent, SectionConfig } from "@/lib/menu/types";
 import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import { LibraryGame } from "@pages/api/games/library";
-
-interface CourseConfig {
-  readonly id: string;
-  readonly icon: string;
-  readonly label: string;
-  readonly subtitle: string;
-}
-
-export interface MenuSelection {
-  [courseId: string]: LibraryGame[];
-}
+import type { LibraryGame } from "@pages/api/games/library";
 
 export interface MenuPdfDocumentProps {
   menu: MenuSelection;
-  courses: readonly CourseConfig[];
+  sections: readonly SectionConfig[];
   tastingNotes?: Record<string, string>;
   date?: Date;
 }
@@ -48,56 +39,122 @@ const C = {
   faint: "rgba(51,39,26,0.45)",
   leader: "rgba(51,39,26,0.4)",
   brick: "#c0452c",
+  mustardDark: "#a87a20",
 };
 
-// Tint fills per course id — same coding as the web menu sheet
-const COURSE_TINTS: Record<string, string> = {
-  appetizer: "#e2e8d4", // olive
-  entree: "#f4d9d2", // brick
-  epic: "#ecdce6", // plum
-  dessert: "#d9e6e2", // teal
+const ACCENTS: Record<SectionAccent, { tint: string; color: string }> = {
+  olive: { tint: "#e2e8d4", color: "#6b7f3f" },
+  brick: { tint: "#f4d9d2", color: "#c0452c" },
+  plum: { tint: "#ecdce6", color: "#8e5a78" },
+  mustard: { tint: "#f3e4c2", color: "#a87a20" },
+  teal: { tint: "#d9e6e2", color: "#3f7f77" },
 };
+
+// ─── Density: one Letter page BY CONSTRUCTION ───────────────────────────────
+// Generation caps at 12 games, so two static tiers keyed on total item count
+// keep even the worst case (every section full, longest names + 2-line notes)
+// within a single page — no measure-and-rerender. The frame is wrap={false},
+// so the geometry below must fit; game names are clamped to one line.
+interface Density {
+  framePadV: number;
+  framePadH: number;
+  brandMb: number;
+  title: number;
+  titleMb: number;
+  dateMb: number;
+  headRuleMb: number;
+  chipFs: number;
+  chipPadV: number;
+  chipMb: number;
+  subtitle: number;
+  subtitleMb: number;
+  gameName: number;
+  meta: number;
+  tasting: number;
+  tastingMaxLines: number;
+  rowGap: number;
+  dividerMy: number;
+}
+
+const COMFORTABLE: Density = {
+  framePadV: 13,
+  framePadH: 44,
+  brandMb: 3,
+  title: 24,
+  titleMb: 2,
+  dateMb: 5,
+  headRuleMb: 5,
+  chipFs: 8.5,
+  chipPadV: 2,
+  chipMb: 2.5,
+  subtitle: 8.5,
+  subtitleMb: 3,
+  gameName: 11.5,
+  meta: 7,
+  tasting: 8,
+  tastingMaxLines: 2,
+  rowGap: 3,
+  dividerMy: 3.5,
+};
+
+const COMPACT: Density = {
+  framePadV: 12,
+  framePadH: 40,
+  brandMb: 3,
+  title: 22,
+  titleMb: 2,
+  dateMb: 5,
+  headRuleMb: 5,
+  chipFs: 7.5,
+  chipPadV: 2,
+  chipMb: 2,
+  subtitle: 8,
+  subtitleMb: 2.5,
+  gameName: 10.5,
+  meta: 6.5,
+  tasting: 7,
+  tastingMaxLines: 1,
+  rowGap: 1.5,
+  dividerMy: 3,
+};
+
+// The break-point is set from the empirical single-page capacity of each tier
+// (see scripts/pdfverify): comfortable holds its 2-line notes up to 8 games;
+// above that we switch to the 1-line compact tier, which fits the 12-game cap.
+function densityFor(count: number): Density {
+  return count <= 8 ? COMFORTABLE : COMPACT;
+}
 
 const s = StyleSheet.create({
   page: {
     backgroundColor: C.paper,
     paddingTop: 36,
-    paddingBottom: 36,
+    paddingBottom: 44, // single source of bottom spacing — reserves the footer band
     paddingHorizontal: 36,
     fontFamily: "Space Grotesk",
     color: C.ink,
   },
-
-  // bold sticker frame around the whole sheet
   frame: {
-    flex: 1,
     borderWidth: 2.5,
     borderColor: C.ink,
     borderRadius: 12,
-    paddingTop: 40,
-    paddingBottom: 56,
-    paddingHorizontal: 48,
   },
-
   brand: {
     fontFamily: "Space Grotesk",
-    fontSize: 8,
     fontWeight: 700,
+    fontSize: 8,
     color: C.brick,
     letterSpacing: 3,
     textTransform: "uppercase",
     textAlign: "center",
-    marginBottom: 12,
   },
   title: {
     fontFamily: "Fraunces",
     fontStyle: "italic",
     fontWeight: 900,
-    fontSize: 34,
     color: C.ink,
     textAlign: "center",
     lineHeight: 1.05,
-    marginBottom: 8,
   },
   titleDate: {
     fontFamily: "Space Grotesk",
@@ -105,61 +162,51 @@ const s = StyleSheet.create({
     fontSize: 9,
     color: C.muted,
     textAlign: "center",
-    marginBottom: 18,
   },
-
   doubleRuleBold: { height: 2, backgroundColor: C.ink, marginBottom: 2.5 },
-  doubleRuleHair: { height: 0.75, backgroundColor: C.ink, opacity: 0.35, marginBottom: 26 },
+  doubleRuleHair: { height: 0.75, backgroundColor: C.ink, opacity: 0.35 },
 
-  course: {
-    marginBottom: 0,
-  },
-  courseChipRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 7,
-  },
-  courseChip: {
+  chipRow: { flexDirection: "row", justifyContent: "center" },
+  chip: {
     borderWidth: 1.5,
     borderColor: C.ink,
     borderRadius: 999,
-    paddingVertical: 4,
     paddingHorizontal: 16,
   },
-  courseChipText: {
+  chipText: {
     fontFamily: "Space Grotesk",
     fontWeight: 700,
-    fontSize: 9,
     color: C.ink,
     letterSpacing: 2.5,
     textTransform: "uppercase",
   },
-  courseSubtitle: {
+  subtitle: {
     fontFamily: "Fraunces",
     fontStyle: "italic",
     fontWeight: 700,
-    fontSize: 10,
     color: C.faint,
     textAlign: "center",
-    marginBottom: 14,
   },
-
-  gameRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    marginBottom: 10,
-    paddingHorizontal: 16,
-  },
+  gameRow: { flexDirection: "row", alignItems: "flex-end" },
   gameName: {
     fontFamily: "Fraunces",
     fontWeight: 700,
-    fontSize: 13,
     color: C.ink,
-    lineHeight: 1.25,
-    maxWidth: 320,
+    lineHeight: 1.15,
+    flexShrink: 1,
+    maxWidth: 360, // keep the dotted leader + price clear when names run long
   },
-  gameLeader: {
-    flex: 1,
+  specialty: {
+    fontFamily: "Space Grotesk",
+    fontWeight: 700,
+    fontSize: 6.5,
+    color: C.mustardDark,
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+  },
+  leader: {
+    flexGrow: 1,
+    flexShrink: 0,
     borderBottomWidth: 1,
     borderBottomColor: C.leader,
     borderBottomStyle: "dotted",
@@ -167,26 +214,18 @@ const s = StyleSheet.create({
     marginBottom: 2.5,
     minWidth: 16,
   },
-  gameMeta: {
-    fontFamily: "Space Grotesk",
-    fontWeight: 500,
-    fontSize: 8,
-    color: C.muted,
-    marginBottom: 1,
-  },
-  gameTasting: {
+  price: { fontFamily: "Space Grotesk", fontWeight: 700, color: C.ink, marginBottom: 1 },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 7, marginTop: 2 },
+  metaText: { fontFamily: "Space Grotesk", fontWeight: 500, color: C.muted },
+  spiceRow: { flexDirection: "row", gap: 1.5, alignItems: "center" },
+  tasting: {
     fontFamily: "Fraunces",
     fontStyle: "italic",
     fontWeight: 700,
-    fontSize: 9.5,
     color: C.muted,
-    lineHeight: 1.4,
-    textAlign: "left",
-    paddingHorizontal: 16,
-    marginTop: -6,
-    marginBottom: 10,
+    lineHeight: 1.3,
+    marginTop: 1.5,
   },
-
   emptyText: {
     fontFamily: "Fraunces",
     fontStyle: "italic",
@@ -196,20 +235,13 @@ const s = StyleSheet.create({
     textAlign: "center",
     paddingVertical: 4,
   },
-
   dividerRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     gap: 5,
-    marginVertical: 18,
   },
-  dividerDot: {
-    width: 3.5,
-    height: 3.5,
-    borderRadius: 1.75,
-    backgroundColor: C.brick,
-  },
+  dividerDot: { width: 3.5, height: 3.5, borderRadius: 1.75, backgroundColor: C.brick },
   dividerDotSmall: {
     width: 2,
     height: 2,
@@ -217,13 +249,12 @@ const s = StyleSheet.create({
     backgroundColor: C.brick,
     opacity: 0.55,
   },
-
   footer: {
     position: "absolute",
-    bottom: 54,
+    bottom: 20,
     left: 84,
     right: 84,
-    paddingTop: 10,
+    paddingTop: 7,
     borderTopWidth: 0.75,
     borderTopColor: C.ink,
     flexDirection: "row",
@@ -238,38 +269,8 @@ const s = StyleSheet.create({
     letterSpacing: 2.5,
     textTransform: "uppercase",
   },
-  footerMark: {
-    width: 3.5,
-    height: 3.5,
-    borderRadius: 1.75,
-    backgroundColor: C.brick,
-  },
+  footerMark: { width: 3.5, height: 3.5, borderRadius: 1.75, backgroundColor: C.brick },
 });
-
-function formatPlaytime(min: number | null, max: number | null): string {
-  if (!min && !max) return "";
-  if (min && max && min !== max) return `${min}–${max} min`;
-  if (max) return `${max} min`;
-  if (min) return `${min}+ min`;
-  return "";
-}
-
-function formatPlayers(min: number | null, max: number | null): string {
-  if (!min && !max) return "";
-  if (min && max && min !== max) return `${min}–${max}p`;
-  if (max) return `${max}p`;
-  if (min) return `${min}+p`;
-  return "";
-}
-
-function formatGameMeta(game: LibraryGame): string {
-  const parts: string[] = [];
-  const players = formatPlayers(game.minPlayers ?? null, game.maxPlayers ?? null);
-  const playtime = formatPlaytime(game.minPlaytime ?? null, game.maxPlaytime ?? null);
-  if (players) parts.push(players);
-  if (playtime) parts.push(playtime);
-  return parts.join(" · ");
-}
 
 function formatLongDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
@@ -280,56 +281,107 @@ function formatLongDate(date: Date): string {
   });
 }
 
-function stripEmojis(text: string): string {
-  return text.replace(/[\p{Extended_Pictographic}️]/gu, "").trim();
+function SpiceDots({ level, color }: { level: number; color: string }) {
+  if (level <= 0) return null;
+  return (
+    <View style={s.spiceRow}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <View
+          key={i}
+          style={{
+            width: 3,
+            height: 3,
+            borderRadius: 1.5,
+            backgroundColor: i < level ? color : "transparent",
+            borderWidth: 0.5,
+            borderColor: i < level ? color : C.faint,
+          }}
+        />
+      ))}
+    </View>
+  );
 }
 
 function GameRow({
   game,
   tastingNotes,
+  accent,
+  d,
 }: {
   game: LibraryGame;
   tastingNotes?: Record<string, string>;
+  accent: string;
+  d: Density;
 }) {
-  const meta = formatGameMeta(game);
-  const noteKey = (game.gameId as unknown as string) ?? game.name;
-  const tasting = tastingNotes?.[noteKey];
+  const price = priceLabel(game);
+  const players = playersLabel(game);
+  const spice = spiceLevel(game);
+  const rating = ratingLabel(game);
+  const tasting = tastingNotes?.[String(game.gameId)];
   return (
-    <View wrap={false}>
+    <View wrap={false} style={{ marginBottom: d.rowGap }}>
       <View style={s.gameRow}>
-        <Text style={s.gameName}>{game.name}</Text>
-        <View style={s.gameLeader} />
-        {meta ? <Text style={s.gameMeta}>{meta}</Text> : null}
+        <Text style={[s.gameName, { fontSize: d.gameName, maxLines: 1, textOverflow: "ellipsis" }]}>
+          {game.name}
+          {game.isFavorite ? <Text style={s.specialty}>{"   ★ House specialty"}</Text> : null}
+        </Text>
+        <View style={s.leader} />
+        {price ? <Text style={[s.price, { fontSize: d.meta + 1 }]}>{price}</Text> : null}
       </View>
-      {tasting ? <Text style={s.gameTasting}>{tasting}</Text> : null}
+      <View style={s.metaRow}>
+        {players ? <Text style={[s.metaText, { fontSize: d.meta }]}>{players}</Text> : null}
+        <SpiceDots color={accent} level={spice} />
+        {rating ? (
+          <Text style={[s.metaText, { fontSize: d.meta, color: C.mustardDark }]}>{rating}</Text>
+        ) : null}
+      </View>
+      {tasting ? (
+        <Text
+          style={[
+            s.tasting,
+            { fontSize: d.tasting, maxLines: d.tastingMaxLines, textOverflow: "ellipsis" },
+          ]}
+        >
+          {tasting}
+        </Text>
+      ) : null}
     </View>
   );
 }
 
-function CourseSection({
-  course,
+function Section({
+  section,
   games,
   tastingNotes,
+  d,
 }: {
-  course: CourseConfig;
+  section: SectionConfig;
   games: LibraryGame[];
   tastingNotes?: Record<string, string>;
+  d: Density;
 }) {
-  const label = stripEmojis(course.label);
-  const tint = COURSE_TINTS[course.id] ?? C.paper;
+  const { tint, color } = ACCENTS[section.accent];
   return (
-    <View style={s.course} wrap={false}>
-      <View style={s.courseChipRow}>
-        <View style={[s.courseChip, { backgroundColor: tint }]}>
-          <Text style={s.courseChipText}>{label}</Text>
+    <View wrap={false}>
+      <View style={[s.chipRow, { marginBottom: d.chipMb }]}>
+        <View style={[s.chip, { backgroundColor: tint, paddingVertical: d.chipPadV }]}>
+          <Text style={[s.chipText, { fontSize: d.chipFs }]}>{section.label}</Text>
         </View>
       </View>
-      {course.subtitle ? (
-        <Text style={s.courseSubtitle}>{stripEmojis(course.subtitle)}</Text>
+      {section.subtitle ? (
+        <Text style={[s.subtitle, { fontSize: d.subtitle, marginBottom: d.subtitleMb }]}>
+          {section.subtitle}
+        </Text>
       ) : null}
       {games.length > 0 ? (
         games.map((game) => (
-          <GameRow key={game.gameId ?? game.name} game={game} tastingNotes={tastingNotes} />
+          <GameRow
+            key={game.gameId ?? game.name}
+            accent={color}
+            d={d}
+            game={game}
+            tastingNotes={tastingNotes}
+          />
         ))
       ) : (
         <Text style={s.emptyText}>— Left to the chef&apos;s discretion —</Text>
@@ -340,34 +392,45 @@ function CourseSection({
 
 export default function MenuPdfDocument({
   menu,
-  courses,
+  sections,
   tastingNotes,
   date,
 }: MenuPdfDocumentProps) {
   const today = date ?? new Date();
+  const totalGames = sections.reduce((n, sec) => n + (menu[sec.id]?.length ?? 0), 0);
+  const d = densityFor(totalGames);
+
   return (
     <Document title="The Menu — Tablekeeper" author="Tablekeeper" subject="Game Night Menu">
       <Page size="LETTER" style={s.page}>
-        <View style={s.frame}>
-          <Text style={s.brand}>Tablekeeper · An Evening of Games</Text>
-          <Text style={s.title}>Tonight&apos;s Programme</Text>
-          <Text style={s.titleDate}>{formatLongDate(today)}</Text>
+        <View
+          style={[s.frame, { paddingVertical: d.framePadV, paddingHorizontal: d.framePadH }]}
+          wrap={false}
+        >
+          <Text style={[s.brand, { marginBottom: d.brandMb }]}>
+            Tablekeeper · An Evening of Games
+          </Text>
+          <Text style={[s.title, { fontSize: d.title, marginBottom: d.titleMb }]}>
+            Tonight&apos;s Programme
+          </Text>
+          <Text style={[s.titleDate, { marginBottom: d.dateMb }]}>{formatLongDate(today)}</Text>
 
           <View style={s.doubleRuleBold} />
-          <View style={s.doubleRuleHair} />
+          <View style={[s.doubleRuleHair, { marginBottom: d.headRuleMb }]} />
 
-          {courses.map((course, idx) => (
-            <View key={course.id}>
+          {sections.map((section, idx) => (
+            <View key={section.id}>
               {idx > 0 ? (
-                <View style={s.dividerRow}>
+                <View style={[s.dividerRow, { marginVertical: d.dividerMy }]}>
                   <View style={s.dividerDotSmall} />
                   <View style={s.dividerDot} />
                   <View style={s.dividerDotSmall} />
                 </View>
               ) : null}
-              <CourseSection
-                course={course}
-                games={menu[course.id] ?? []}
+              <Section
+                d={d}
+                games={menu[section.id] ?? []}
+                section={section}
                 tastingNotes={tastingNotes}
               />
             </View>

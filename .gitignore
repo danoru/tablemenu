@@ -66,3 +66,9 @@ dist/
 # =====================
 .vscode/
 .idea/
+
+# =====================
+# Generated / personal (never committed)
+# =====================
+scripts/pdfverify/out-*.pdf
+*.local.md

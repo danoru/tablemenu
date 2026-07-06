@@ -1,7 +1,9 @@
-import CourseCard from "@/components/rooms/CourseCard";
 import ExportMenuButton from "@/components/pdf/ExportMenuButton";
+import SectionCard from "@/components/menu/SectionCard";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
+import { generateMenu, makeRng, rerollSlot } from "@/lib/menu/generate";
+import type { GeneratedMenu, SectionConfig } from "@/lib/menu/types";
 import {
   BORDER_INK,
   BRICK,
@@ -9,17 +11,11 @@ import {
   FONT_SERIF,
   INK,
   OLIVE,
-  PLUM,
   SHADOW_HARD,
   SHADOW_HARD_LG,
-  TEAL,
   TEXT_DIM,
   TEXT_FAINT,
-  TINT_BRICK,
   TINT_MUSTARD,
-  TINT_OLIVE,
-  TINT_PLUM,
-  TINT_TEAL,
 } from "@/styles/theme";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CasinoIcon from "@mui/icons-material/Casino";
@@ -42,69 +38,18 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import React from "react";
 
-const COURSES = [
-  {
-    id: "appetizer",
-    icon: "🥨",
-    label: "Appetizers",
-    subtitle: "While everyone arrives",
-    color: TINT_OLIVE,
-    border: OLIVE,
-    accent: OLIVE,
-    filter: (g: LibraryGame) => g.maxPlaytime <= 20,
-    picks: 2,
-  },
-  {
-    id: "entree",
-    icon: "🍽️",
-    label: "Entrées",
-    subtitle: "The main event",
-    color: TINT_BRICK,
-    border: BRICK,
-    accent: BRICK,
-    filter: (g: LibraryGame) => g.minPlaytime >= 30 && g.maxPlaytime <= 89,
-    picks: 2,
-  },
-  {
-    id: "epic",
-    icon: "🏰",
-    label: "Epic Course",
-    subtitle: "Go all in",
-    color: TINT_PLUM,
-    border: PLUM,
-    accent: PLUM,
-    filter: (g: LibraryGame) => g.minPlaytime >= 90,
-    picks: 1,
-  },
-  {
-    id: "dessert",
-    icon: "🎂",
-    label: "Desserts",
-    subtitle: "Wind down the night",
-    color: TINT_TEAL,
-    border: TEAL,
-    accent: TEAL,
-    filter: (g: LibraryGame) => g.maxPlaytime <= 29,
-    picks: 2,
-  },
-] as const;
-
-type CourseId = (typeof COURSES)[number]["id"];
-
-function pickRandom<T>(arr: T[], n: number): T[] {
-  const shuffled = [...arr].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, n);
-}
-interface MenuSelection {
-  [courseId: string]: LibraryGame[];
-}
-
 interface Props {
   library: LibraryGame[];
   username: string;
+  userId: number;
 }
 
-export default function MenuPage({ library, username }: Props) {
+/** Stable YYYY-MM-DD for seeding the day's menu. */
+function todayStamp(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export default function MenuPage({ library, username, userId }: Props) {
   const [mode, setMode] = React.useState<"solo" | "room">("solo");
   const [roomCode, setRoomCode] = React.useState("");
   const [roomError, setRoomError] = React.useState("");
@@ -112,9 +57,12 @@ export default function MenuPage({ library, username }: Props) {
   const [roomPool, setRoomPool] = React.useState<LibraryGame[] | null>(null);
   const [roomName, setRoomName] = React.useState("");
 
-  const [menu, setMenu] = React.useState<MenuSelection | null>(null);
+  const [menu, setMenu] = React.useState<GeneratedMenu | null>(null);
   const [generating, setGenerating] = React.useState(false);
-  const [rerolling, setRerolling] = React.useState<{ courseId: string; idx: number } | null>(null);
+  const [rerolling, setRerolling] = React.useState<{ sectionId: string; idx: number } | null>(null);
+  // Bumped by "New menu" and every reroll so the seeded RNG produces fresh picks.
+  const [nonce, setNonce] = React.useState(0);
+  const rerollCount = React.useRef(0);
 
   const [snackbar, setSnackbar] = React.useState<{
     open: boolean;
@@ -123,6 +71,10 @@ export default function MenuPage({ library, username }: Props) {
   }>({ open: false, message: "", severity: "success" });
 
   const activePool: LibraryGame[] = mode === "room" && roomPool ? roomPool : library;
+
+  function seedBase(withNonce: number): string {
+    return `${todayStamp()}-${userId}-${mode}-${withNonce}`;
+  }
 
   async function handleRoomConnect() {
     if (!roomCode.trim()) return;
@@ -142,19 +94,33 @@ export default function MenuPage({ library, username }: Props) {
       }
       const pool: LibraryGame[] = data.room.suggestions
         .filter((s: any) => s.bringing)
-        .map((s: any) => ({
-          id: s.gameId,
-          name: s.name,
-          imageUrl: s.imageUrl,
-          minPlayers: s.minPlayers,
-          maxPlayers: s.maxPlayers,
-          minPlaytime: s.minPlaytime,
-          maxPlaytime: s.maxPlaytime,
-          complexity: null,
-          bggRating: null,
-          categories: [],
-          bggId: null,
-        }));
+        .map(
+          (s: any): LibraryGame => ({
+            userGameId: s.gameId,
+            gameId: s.gameId,
+            addedAt: "",
+            weight: 1,
+            notes: null,
+            bggId: null,
+            name: s.name,
+            description: null,
+            imageUrl: s.imageUrl,
+            isFavorite: false,
+            isWishlist: false,
+            minPlayers: s.minPlayers,
+            maxPlayers: s.maxPlayers,
+            minPlaytime: s.minPlaytime,
+            maxPlaytime: s.maxPlaytime,
+            complexity: null,
+            bggRating: null,
+            categories: [],
+            mechanics: [],
+            designers: [],
+            publishers: [],
+            yearPublished: null,
+            userStars: null,
+          })
+        );
       setRoomPool(pool);
       setRoomName(data.room.name);
       setMode("room");
@@ -175,47 +141,42 @@ export default function MenuPage({ library, username }: Props) {
     setMenu(null);
   }
 
-  function generateMenu() {
+  function buildMenu(withNonce: number) {
     setGenerating(true);
     setMenu(null);
-
     setTimeout(() => {
-      const selection: MenuSelection = {};
-      for (const course of COURSES) {
-        const eligible = activePool.filter(course.filter);
-        selection[course.id] = pickRandom(eligible, course.picks);
-      }
-      setMenu(selection);
+      setMenu(generateMenu(activePool, seedBase(withNonce)));
       setGenerating(false);
     }, 600);
   }
 
-  function handleRerollGame(courseId: CourseId, idx: number) {
+  function handleGenerate() {
+    buildMenu(nonce);
+  }
+
+  function handleNewMenu() {
+    const next = nonce + 1;
+    setNonce(next);
+    buildMenu(next);
+  }
+
+  function handleRerollGame(section: SectionConfig, idx: number) {
     if (!menu) return;
-    setRerolling({ courseId, idx });
+    setRerolling({ sectionId: section.id, idx });
 
     setTimeout(() => {
-      const course = COURSES.find((c) => c.id === courseId)!;
-      const eligible = activePool.filter(course.filter);
-      const current = menu[courseId];
-
-      const currentIds = new Set(current.map((g) => g.gameId));
-      const candidates = eligible.filter((g) => !currentIds.has(g.gameId));
-      const pick =
-        candidates.length > 0
-          ? candidates[Math.floor(Math.random() * candidates.length)]
-          : eligible[Math.floor(Math.random() * eligible.length)];
-
+      rerollCount.current += 1;
+      const rng = makeRng(`${seedBase(nonce)}-reroll-${section.id}-${idx}-${rerollCount.current}`);
+      const pick = rerollSlot(activePool, section, menu.selection, rng);
       if (!pick) {
         setRerolling(null);
         return;
       }
-
       setMenu((prev) => {
         if (!prev) return prev;
-        const updated = [...prev[courseId]];
+        const updated = [...(prev.selection[section.id] ?? [])];
         updated[idx] = pick;
-        return { ...prev, [courseId]: updated };
+        return { ...prev, selection: { ...prev.selection, [section.id]: updated } };
       });
       setRerolling(null);
     }, 400);
@@ -257,7 +218,7 @@ export default function MenuPage({ library, username }: Props) {
             <Typography
               sx={{ fontFamily: FONT_SANS, fontSize: "15px", fontWeight: 400, color: TEXT_DIM }}
             >
-              A curated evening of games — from warm-up to send-off.
+              A curated evening of games — courses by playtime, plus tonight&apos;s special.
             </Typography>
           </Box>
 
@@ -441,7 +402,7 @@ export default function MenuPage({ library, username }: Props) {
           </Box>
           <Button
             fullWidth
-            onClick={generateMenu}
+            onClick={handleGenerate}
             disabled={generating || (mode === "room" && !roomPool)}
             startIcon={
               generating ? (
@@ -466,7 +427,7 @@ export default function MenuPage({ library, username }: Props) {
                 : "Plan my evening"}
           </Button>
 
-          {hasMenu && !generating && (
+          {hasMenu && !generating && menu && (
             <Box>
               <Box
                 sx={{
@@ -508,11 +469,11 @@ export default function MenuPage({ library, username }: Props) {
                 <Box sx={{ borderTop: `2px solid ${INK}`, mb: "3px" }} />
                 <Box sx={{ borderTop: "1px solid rgba(51,39,26,0.3)", mb: "30px" }} />
 
-                {COURSES.map((course, courseIdx) => {
-                  const picks = menu[course.id] ?? [];
+                {menu.sections.map((section, sectionIdx) => {
+                  const picks = menu.selection[section.id] ?? [];
                   return (
-                    <Box key={course.id}>
-                      {courseIdx > 0 && (
+                    <Box key={section.id}>
+                      {sectionIdx > 0 && (
                         <Typography
                           aria-hidden
                           sx={{
@@ -527,12 +488,11 @@ export default function MenuPage({ library, username }: Props) {
                           ✳
                         </Typography>
                       )}
-                      <CourseCard
-                        course={course}
+                      <SectionCard
+                        section={section}
                         games={picks}
-                        empty={picks.length === 0}
-                        rerollingIdx={rerolling?.courseId === course.id ? rerolling.idx : null}
-                        onRerollGame={(idx) => handleRerollGame(course.id, idx)}
+                        rerollingIdx={rerolling?.sectionId === section.id ? rerolling.idx : null}
+                        onRerollGame={(idx) => handleRerollGame(section, idx)}
                       />
                     </Box>
                   );
@@ -550,16 +510,16 @@ export default function MenuPage({ library, username }: Props) {
               >
                 <Button
                   variant="outlined"
-                  onClick={generateMenu}
+                  onClick={handleNewMenu}
                   startIcon={<CasinoIcon />}
                   sx={{
                     fontSize: "14px",
                     padding: "10px 20px",
                   }}
                 >
-                  Start over
+                  New menu
                 </Button>
-                <ExportMenuButton menu={menu} courses={COURSES} />
+                <ExportMenuButton menu={menu.selection} sections={menu.sections} />
               </Box>
             </Box>
           )}
@@ -578,7 +538,7 @@ export default function MenuPage({ library, username }: Props) {
                 Your evening awaits
               </Typography>
               <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_FAINT }}>
-                Hit the button above and we'll build a full game night menu from your library.
+                Hit the button above and we&apos;ll build a full game night menu from your library.
               </Typography>
             </Box>
           )}
@@ -610,5 +570,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const library = await getUserLibrary(currentUserId);
 
-  return { props: { library, username: (session.user as any).username ?? "" } };
+  return {
+    props: { library, username: (session.user as any).username ?? "", userId: currentUserId },
+  };
 };
