@@ -11,6 +11,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "postinstall": "prisma generate",
+    "backfill:bgg": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/backfill-bgg-links.ts",
     "test": "pnpm run lint && pnpm run test:format && pnpm run test:types",
     "test:format": "pnpm run format:check",
     "test:types": "tsc --noEmit"

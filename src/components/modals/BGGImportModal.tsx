@@ -64,6 +64,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
   const [games, setGames] = React.useState<BGGCollectionGame[]>([]);
   const [fetchError, setFetchError] = React.useState("");
   const [importResult, setImportResult] = React.useState<ImportResult | null>(null);
+  const [progressLabel, setProgressLabel] = React.useState("");
   const [snackbar, setSnackbar] = React.useState<{
     open: boolean;
     message: string;
@@ -77,6 +78,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
     setGames([]);
     setFetchError("");
     setImportResult(null);
+    setProgressLabel("");
     onClose();
   }
 
@@ -113,6 +115,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
 
   async function handleImport() {
     setStep("importing");
+    setProgressLabel("");
     try {
       const BATCH_SIZE = 50;
       let totalAdded = 0;
@@ -133,6 +136,24 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
           totalFailed += data.failed;
         } else {
           totalFailed += batch.length;
+        }
+      }
+
+      // Backfill mechanics/categories/etc. that the collection API can't return.
+      // Non-fatal: on failure the data self-heals on the next backfill run.
+      const ENRICH_CHUNK = 20;
+      const bggIds = games.map((g) => g.bggId);
+      const enrichChunks = Math.ceil(bggIds.length / ENRICH_CHUNK);
+      for (let i = 0; i < bggIds.length; i += ENRICH_CHUNK) {
+        setProgressLabel(`Enriching game details… chunk ${i / ENRICH_CHUNK + 1}/${enrichChunks}`);
+        try {
+          await fetch("/api/bgg/enrich", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bggIds: bggIds.slice(i, i + ENRICH_CHUNK) }),
+          });
+        } catch {
+          // ignore — import already succeeded
         }
       }
 
@@ -429,7 +450,8 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
             <Typography
               sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM, mb: "24px" }}
             >
-              This may take a moment for large collections. Please don't close this window.
+              {progressLabel ||
+                "This may take a moment for large collections. Please don't close this window."}
             </Typography>
             <LinearProgress
               sx={{

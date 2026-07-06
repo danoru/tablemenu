@@ -33,6 +33,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   for (const game of games) {
     try {
+      // Collection imports can't return link arrays, so don't let an empty
+      // incoming array clobber data a prior enrich/backfill already populated.
+      const nonEmpty = <T>(incoming: T[]): { set: T[] } | undefined =>
+        incoming.length > 0 ? { set: incoming } : undefined;
+
       const dbGame = await prisma.games.upsert({
         where: { bggId: game.bggId },
         update: {
@@ -44,11 +49,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           maxPlaytime: game.maxPlaytime,
           complexity: game.complexity,
           bggRating: game.bggRating,
-          categories: game.categories,
-          mechanics: game.mechanics,
-          designers: game.designers,
-          publishers: game.publishers,
-          countries: game.countries,
+          categories: nonEmpty(game.categories),
+          mechanics: nonEmpty(game.mechanics),
+          designers: nonEmpty(game.designers),
+          publishers: nonEmpty(game.publishers),
+          countries: nonEmpty(game.countries),
           bggLastSynced: new Date(),
         },
         create: {
