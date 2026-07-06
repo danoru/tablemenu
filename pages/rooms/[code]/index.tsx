@@ -935,6 +935,23 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const isMember = room.invites.some((inv) => inv.userId === currentUserId);
   if (!isMember) {
+    // INVITE_ONLY rooms must not silently absorb any authenticated viewer.
+    // Show them the same locked preview as logged-out visitors.
+    if (room.visibility === "INVITE_ONLY") {
+      return {
+        props: {
+          preview: true as const,
+          room: {
+            name: room.name,
+            code: room.code,
+            hostUsername: room.host.username,
+            memberCount: room.invites.length,
+            suggestionCount: room.gameSuggs.length,
+          },
+        },
+      };
+    }
+
     await prisma.roomInvites.create({
       data: { roomId: room.id, userId: currentUserId, status: "ACCEPTED" },
     });

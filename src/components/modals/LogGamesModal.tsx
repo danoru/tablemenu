@@ -1,5 +1,13 @@
 import { gameColor, initials } from "@/lib/helpers";
-import { FONT_SANS, FONT_SERIF, INK, TEXT_DIM, TEXT_FAINT, TINT_MUSTARD } from "@/styles/theme";
+import {
+  FONT_SANS,
+  FONT_SERIF,
+  INK,
+  MUSTARD_DARK,
+  TEXT_DIM,
+  TEXT_FAINT,
+  TINT_MUSTARD,
+} from "@/styles/theme";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -323,11 +331,11 @@ export default function LogGamesModal({
                     onClick={() => toggleWinner(member.userId)}
                     size="small"
                     sx={{
-                      color: winnerIds.includes(member.userId) ? "#a87a20" : TEXT_FAINT,
+                      color: winnerIds.includes(member.userId) ? MUSTARD_DARK : TEXT_FAINT,
                       background: winnerIds.includes(member.userId) ? TINT_MUSTARD : "transparent",
-                      border: `1.5px solid ${winnerIds.includes(member.userId) ? "#a87a20" : "transparent"}`,
+                      border: `1.5px solid ${winnerIds.includes(member.userId) ? MUSTARD_DARK : "transparent"}`,
                       borderRadius: "8px",
-                      "&:hover": { color: "#a87a20" },
+                      "&:hover": { color: MUSTARD_DARK },
                     }}
                   >
                     <EmojiEventsIcon sx={{ fontSize: "15px" }} />

@@ -5,6 +5,7 @@ import {
   INK,
   OLIVE,
   PLUM,
+  SHADOW_HARD,
   TEAL,
   TEXT_DIM,
   TEXT_FAINT,
@@ -79,6 +80,7 @@ export default function CourseCard({
             background: courseStyle.fill,
             border: `2px solid ${INK}`,
             borderRadius: "999px",
+            boxShadow: SHADOW_HARD,
             padding: "5px 18px",
           }}
         >

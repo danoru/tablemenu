@@ -83,7 +83,7 @@ export default function RoomQuickGenModal({
           <Typography
             sx={{
               fontFamily: FONT_SERIF,
-              fontSize: "24px",
+              fontSize: "22px",
               fontWeight: 700,
               color: "text.primary",
             }}

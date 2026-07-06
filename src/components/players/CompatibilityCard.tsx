@@ -7,6 +7,7 @@ import {
   FONT_SERIF,
   INK,
   MUSTARD,
+  MUSTARD_DARK,
   OLIVE,
   SHADOW_HARD,
   SHADOW_HARD_HOVER,
@@ -46,7 +47,7 @@ const SlideUp = React.forwardRef(function SlideUp(
 
 function scoreColor(score: number): { ring: string; text: string } {
   if (score >= 70) return { ring: OLIVE, text: OLIVE };
-  if (score >= 50) return { ring: MUSTARD, text: "#a87a20" };
+  if (score >= 50) return { ring: MUSTARD, text: MUSTARD_DARK };
   return { ring: "rgba(51,39,26,0.3)", text: TEXT_FAINT };
 }
 
@@ -433,6 +434,7 @@ export default function CompatibilityCard({ username }: Props) {
             position: "absolute",
             top: "12px",
             right: "12px",
+            zIndex: 1,
             color: TEXT_FAINT,
             "&:hover": { color: TEXT_DIM },
           }}

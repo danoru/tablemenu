@@ -1,9 +1,9 @@
-import { FONT_SANS, FONT_SERIF } from "@/styles/theme";
+import { BORDER_SUBTLE, FONT_SANS, FONT_SERIF, TEXT_FAINT } from "@/styles/theme";
 import Box from "@mui/material/Box";
 
 const styles = {
   footer: {
-    borderTop: "2px solid rgba(51,39,26,0.15)",
+    borderTop: `2px solid ${BORDER_SUBTLE}`,
     padding: "20px 32px",
     display: "flex",
     justifyContent: "space-between",
@@ -16,13 +16,13 @@ const styles = {
     fontStyle: "italic",
     fontWeight: 700,
     fontSize: "14px",
-    color: "rgba(51,39,26,0.45)",
+    color: TEXT_FAINT,
   },
 
   footerCopy: {
     fontFamily: FONT_SANS,
     fontSize: "12px",
-    color: "rgba(51,39,26,0.4)",
+    color: TEXT_FAINT,
   },
 };
 

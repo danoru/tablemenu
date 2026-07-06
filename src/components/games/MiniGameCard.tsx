@@ -1,4 +1,4 @@
-import { BORDER_AMBER, FONT_SANS, TEXT_FAINT } from "@/styles/theme";
+import { FONT_SANS, INK, SHADOW_HARD, TEXT_FAINT } from "@/styles/theme";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import { LibraryGame } from "@pages/api/games/library";
@@ -24,10 +24,10 @@ export function MiniGameCard({
         gap: "14px",
         padding: "14px 16px",
         backgroundColor: "background.paper",
-        border: `2px solid ${BORDER_AMBER}`,
+        border: `2px solid ${INK}`,
         borderRadius: "10px",
         transition: "transform 0.12s ease, box-shadow 0.12s ease",
-        "&:hover": { boxShadow: `3px 3px 0 ${BORDER_AMBER}`, transform: "translate(-1px, -1px)" },
+        "&:hover": { boxShadow: SHADOW_HARD, transform: "translate(-1px, -1px)" },
         opacity: rerolling ? 0.5 : 1,
       }}
     >

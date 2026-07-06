@@ -11,6 +11,7 @@ import {
   FONT_SERIF,
   INK,
   MUSTARD,
+  MUSTARD_DARK,
   OLIVE,
   SHADOW_HARD,
   TEAL,
@@ -100,8 +101,8 @@ function complexityLabel(c: number) {
 function complexityColor(c: number) {
   if (c < 1.5) return OLIVE;
   if (c < 2.5) return OLIVE;
-  if (c < 3.5) return "#a87a20";
-  if (c < 4.2) return "#a87a20";
+  if (c < 3.5) return MUSTARD_DARK;
+  if (c < 4.2) return MUSTARD_DARK;
   return BRICK;
 }
 

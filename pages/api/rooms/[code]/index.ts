@@ -58,7 +58,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   const session = await getServerSession(req, res, authOptions);
-  const currentUserId = session ? Number((session.user as any).id) : null;
+  if (!session?.user) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+  const currentUserId = Number((session.user as any).id);
 
   try {
     const room = await prisma.rooms.findUnique({
@@ -74,6 +77,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     if (!room) {
       return res.status(404).json({ error: "Room not found" });
+    }
+
+    // Only accepted members (the host is auto-added as one) may read the full
+    // roster + members' wishlists. Non-members get nothing beyond a 403.
+    const isMember = room.invites.some(
+      (inv) => inv.userId === currentUserId && inv.status === "ACCEPTED"
+    );
+    if (!isMember) {
+      return res.status(403).json({ error: "You are not a member of this room" });
     }
 
     const lastClosedSession = await prisma.roomSessions.findFirst({

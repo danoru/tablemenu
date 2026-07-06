@@ -27,6 +27,7 @@ const BRICK_LIGHT = "#d4573c"; // hover state
 const BRICK_DARK = "#9c3823"; // pressed / active
 
 export const MUSTARD = "#d9a036"; // ratings, highlights, Medium weight
+export const MUSTARD_DARK = "#a87a20"; // legible mustard for text/icons on cream
 export const OLIVE = "#6b7f3f"; // success, Light weight
 export const TEAL = "#3f7f77"; // info, links-of-second-rank
 export const PLUM = "#8e5a78"; // avatars, occasional flair
@@ -43,7 +44,7 @@ const TEXT_PRIMARY = INK;
 const TEXT_SECONDARY = "rgba(51,39,26,0.72)";
 const TEXT_DISABLED = "rgba(51,39,26,0.38)";
 
-const BORDER_SUBTLE = "rgba(51,39,26,0.18)"; // dividers, hairlines
+export const BORDER_SUBTLE = "rgba(51,39,26,0.18)"; // dividers, hairlines
 const BORDER_DEFAULT = "rgba(51,39,26,0.4)"; // resting input outlines
 
 // Structure tokens — the signature look
@@ -56,20 +57,9 @@ export const SHADOW_HARD_HOVER = `5px 5px 0 ${INK}`;
 // Pre-redesign token names mapped onto Café Press values so the app re-skins
 // wholesale. Retire these per-file during the page sweep; do not add new uses.
 
-export const AMBER_DIM = TINT_BRICK; // was active-chip amber wash
-export const BG_BLUE = TINT_TEAL;
 export const BG_ELEVATED = SURFACE; // modals, drawers
-export const BG_GREEN = TINT_OLIVE;
-export const BLUE = TEAL;
-export const BORDER_AMBER = INK; // emphasis/hover borders are now ink
-export const BORDER_BLUE = TEAL;
-export const BORDER_GREEN = OLIVE;
-export const GOLD = BRICK; // was gold accent text on dark
-export const GOLD_FADED = "rgba(192,69,44,0.65)";
-export const GOLD_LIGHT = INK;
 export const TEXT_DIM = TEXT_SECONDARY;
 export const TEXT_FAINT = "rgba(51,39,26,0.5)";
-export const RED = BRICK;
 
 // ─── Typography ───────────────────────────────────────────────────────────────
 export const FONT_SERIF = `${fraunces.style.fontFamily}, serif`;

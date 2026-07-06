@@ -162,15 +162,19 @@ export default function Navbar() {
                     onClick={() => handlePageClick(page)}
                     sx={{
                       background: "transparent",
+                      border: "1.5px solid rgba(51,39,26,0.3)",
                       borderRadius: "999px",
                       color: TEXT_DIM,
                       fontFamily: FONT_SANS,
                       fontSize: "14px",
                       fontWeight: 500,
-                      padding: "7px 14px",
+                      padding: "7px 16px",
                       textTransform: "none",
+                      transition:
+                        "border-color 0.12s ease, background-color 0.12s ease, color 0.12s ease",
                       "&:hover": {
                         background: "rgba(51,39,26,0.06)",
+                        borderColor: INK,
                         color: INK,
                       },
                     }}

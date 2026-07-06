@@ -5,6 +5,7 @@ import {
   FONT_SANS,
   FONT_SERIF,
   INK,
+  MUSTARD_DARK,
   SHADOW_HARD,
   SHADOW_HARD_HOVER,
   SHADOW_HARD_LG,
@@ -318,7 +319,7 @@ export default function TasteProfileCard({ profile, username, isSelf }: Props) {
             flexShrink: 0,
           }}
         >
-          <RestaurantMenuIcon sx={{ fontSize: "18px", color: "#a87a20" }} />
+          <RestaurantMenuIcon sx={{ fontSize: "18px", color: MUSTARD_DARK }} />
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
@@ -387,6 +388,7 @@ export default function TasteProfileCard({ profile, username, isSelf }: Props) {
             position: "absolute",
             top: "12px",
             right: "12px",
+            zIndex: 1,
             color: TEXT_FAINT,
             "&:hover": { color: TEXT_DIM },
           }}

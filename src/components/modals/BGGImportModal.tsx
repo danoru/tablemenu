@@ -1,4 +1,15 @@
-import { BRICK, FONT_SANS, FONT_SERIF, OLIVE, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
+import {
+  BORDER_INK,
+  BRICK,
+  FONT_SANS,
+  FONT_SERIF,
+  MUSTARD_DARK,
+  OLIVE,
+  SHADOW_HARD,
+  TEXT_DIM,
+  TEXT_FAINT,
+  TINT_MUSTARD,
+} from "@/styles/theme";
 import type { BGGCollectionGame } from "@api/bgg/collection";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
@@ -306,9 +317,9 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                 maxHeight: "280px",
                 overflowY: "auto",
                 backgroundColor: "background.paper",
-                border: "1px solid",
-                borderColor: "divider",
+                border: BORDER_INK,
                 borderRadius: "10px",
+                boxShadow: SHADOW_HARD,
                 mb: "20px",
               }}
             >
@@ -344,7 +355,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                           width: "36px",
                           height: "36px",
                           borderRadius: "6px",
-                          background: "rgba(180,110,30,0.2)",
+                          background: TINT_MUSTARD,
                           flexShrink: 0,
                         }}
                       />
@@ -377,7 +388,7 @@ export default function BggImportModal({ open, onClose, onImported }: Props) {
                           fontFamily: FONT_SANS,
                           fontSize: "11px",
                           fontWeight: 500,
-                          color: "#a87a20",
+                          color: MUSTARD_DARK,
                         }}
                       >
                         ★ {game.bggRating.toFixed(1)}

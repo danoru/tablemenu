@@ -3,12 +3,13 @@ import prisma from "@data/db";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-const SAFE_USER_SELECT = {
+// Fields safe to expose to anyone. `email` is intentionally omitted — it is
+// private and must never be returned for another user's profile.
+const PUBLIC_USER_SELECT = {
   id: true,
   username: true,
   firstName: true,
   lastName: true,
-  email: true,
   location: true,
   website: true,
   bio: true,
@@ -17,14 +18,23 @@ const SAFE_USER_SELECT = {
   joinDate: true,
 } as const;
 
+// Adds private fields (email); only returned to the profile's own owner.
+const PRIVATE_USER_SELECT = {
+  ...PUBLIC_USER_SELECT,
+  email: true,
+} as const;
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { username } = req.query;
 
   if (req.method === "GET") {
     try {
+      const session = await getServerSession(req, res, authOptions);
+      const isOwnProfile = !!session?.user && (session.user as any).username === String(username);
+
       const user = await prisma.users.findUnique({
         where: { username: String(username) },
-        select: SAFE_USER_SELECT,
+        select: isOwnProfile ? PRIVATE_USER_SELECT : PUBLIC_USER_SELECT,
       });
 
       if (!user) return res.status(404).json({ message: "User not found." });
@@ -53,7 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const updatedUser = await prisma.users.update({
         where: { username },
         data: { firstName, lastName, location, website, bio },
-        select: SAFE_USER_SELECT,
+        select: PRIVATE_USER_SELECT,
       });
 
       return res.status(200).json(updatedUser);

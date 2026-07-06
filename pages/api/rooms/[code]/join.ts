@@ -28,11 +28,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     const room = await prisma.rooms.findUnique({
       where: { code: code.toUpperCase() },
-      select: { id: true, isActive: true },
+      select: { id: true, isActive: true, visibility: true },
     });
 
     if (!room) return res.status(404).json({ error: "Room not found" });
     if (!room.isActive) return res.status(400).json({ error: "This room is no longer active" });
+
+    const existingInvite = await prisma.roomInvites.findUnique({
+      where: { roomId_userId: { roomId: room.id, userId } },
+      select: { id: true },
+    });
+
+    // INVITE_ONLY rooms require a pre-existing invite from the host. PUBLIC and
+    // LINK_ONLY rooms can be joined by anyone who has the code.
+    if (room.visibility === "INVITE_ONLY" && !existingInvite) {
+      return res.status(403).json({ error: "This room is invite-only" });
+    }
 
     await prisma.roomInvites.upsert({
       where: { roomId_userId: { roomId: room.id, userId } },
