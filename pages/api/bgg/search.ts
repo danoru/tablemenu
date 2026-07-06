@@ -1,5 +1,7 @@
-import { XMLParser } from "fast-xml-parser";
+import { authOptions } from "@/lib/authOptions";
+import { bggFetch, parseBggXml } from "@/lib/bgg/client";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth/next";
 
 export interface BggSearchResult {
   bggId: number;
@@ -23,6 +25,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(400).json({ error: "Query must be at least 2 characters" });
   }
 
+  const session = await getServerSession(req, res, authOptions);
+  if (!session?.user) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
   try {
     const bggUrl = new URLSearchParams({
       query: q.trim(),
@@ -31,20 +38,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
     if (exact === "1") bggUrl.set("exact", "1");
 
-    const bggRes = await fetch(`https://boardgamegeek.com/xmlapi2/search?${bggUrl.toString()}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.BGG_API_TOKEN}`,
-        Accept: "application/xml",
-      },
-    });
+    const bggRes = await bggFetch(`https://boardgamegeek.com/xmlapi2/search?${bggUrl.toString()}`);
 
     if (!bggRes.ok) {
       return res.status(502).json({ error: "BGG API unavailable" });
     }
 
-    const xml = await bggRes.text();
-    const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
-    const parsed = parser.parse(xml);
+    const parsed = parseBggXml(await bggRes.text());
 
     const items = parsed?.items?.item;
 

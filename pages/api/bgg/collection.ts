@@ -1,5 +1,7 @@
-import { XMLParser } from "fast-xml-parser";
+import { authOptions } from "@/lib/authOptions";
+import { bggFetch, parseBggXml } from "@/lib/bgg/client";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth/next";
 
 export interface BGGCollectionGame {
   bggId: number;
@@ -25,13 +27,9 @@ interface ApiResponse {
   retrying?: boolean;
 }
 
-async function fetchWithRetry(
-  url: string,
-  headers: Record<string, string>,
-  maxRetries = 5
-): Promise<Response> {
+async function fetchWithRetry(url: string, maxRetries = 5): Promise<Response> {
   for (let i = 0; i < maxRetries; i++) {
-    const res = await fetch(url, { headers });
+    const res = await bggFetch(url);
     if (res.status !== 202) return res;
     await new Promise((r) => setTimeout(r, 2000 + i * 1000));
   }
@@ -46,17 +44,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(400).json({ error: "BGG username is required" });
   }
 
-  const headers = {
-    Authorization: `Bearer ${process.env.BGG_API_TOKEN}`,
-    Accept: "application/xml",
-  };
+  const session = await getServerSession(req, res, authOptions);
+  if (!session?.user) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
 
   try {
     const url = `https://boardgamegeek.com/xmlapi2/collection?username=${encodeURIComponent(username.trim())}&own=1&excludesubtype=boardgameexpansion&stats=1`;
 
     let bggRes: Response;
     try {
-      bggRes = await fetchWithRetry(url, headers);
+      bggRes = await fetchWithRetry(url);
     } catch {
       return res.status(202).json({
         error: "BGG is preparing the collection. Please try again in a moment.",
@@ -74,9 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(502).json({ error: "BGG API unavailable" });
     }
 
-    const xml = await bggRes.text();
-    const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
-    const parsed = parser.parse(xml);
+    const parsed = parseBggXml(await bggRes.text());
 
     if (parsed?.errors?.error) {
       return res

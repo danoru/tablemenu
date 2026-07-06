@@ -91,6 +91,17 @@ export default function QuickGenModal({
     });
   }
 
+  const spinInterval = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function stopSpin() {
+    if (spinInterval.current) {
+      clearInterval(spinInterval.current);
+      spinInterval.current = null;
+    }
+  }
+
+  React.useEffect(() => stopSpin, []);
+
   function spin() {
     const pool = getPool();
     if (pool.length === 0) {
@@ -98,16 +109,17 @@ export default function QuickGenModal({
       setResult(null);
       return;
     }
+    stopSpin();
     setNoResults(false);
     setSpinning(true);
     setResult(null);
 
     let flashes = 0;
-    const interval = setInterval(() => {
+    spinInterval.current = setInterval(() => {
       setResult(pool[Math.floor(Math.random() * pool.length)]);
       flashes++;
       if (flashes >= 12) {
-        clearInterval(interval);
+        stopSpin();
         setResult(weightedPick(pool));
         setSpinning(false);
       }
@@ -115,6 +127,7 @@ export default function QuickGenModal({
   }
 
   function handleClose() {
+    stopSpin();
     setPlayers(null);
     setTimeIdx(0);
     setSpinning(false);

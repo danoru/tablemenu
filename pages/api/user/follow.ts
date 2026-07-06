@@ -31,8 +31,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     if (action === "follow") {
-      await prisma.following.create({
-        data: {
+      const target = await prisma.users.findUnique({
+        where: { id: Number(followingUserId) },
+        select: { id: true },
+      });
+      if (!target) return res.status(404).json({ error: "User not found." });
+
+      // Idempotent: re-following is a no-op, not a unique-constraint 500.
+      await prisma.following.upsert({
+        where: {
+          userId_followingUserId: {
+            followingUserId: Number(followingUserId),
+            userId,
+          },
+        },
+        update: {},
+        create: {
           followingUserId: Number(followingUserId),
           userId,
         },
@@ -41,12 +55,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (action === "unfollow") {
-      await prisma.following.delete({
+      // Idempotent: unfollowing someone you don't follow is a no-op.
+      await prisma.following.deleteMany({
         where: {
-          userId_followingUserId: {
-            followingUserId: Number(followingUserId),
-            userId,
-          },
+          followingUserId: Number(followingUserId),
+          userId,
         },
       });
       return res.status(200).json({ message: "Successfully unfollowed user." });

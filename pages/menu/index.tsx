@@ -131,6 +131,11 @@ export default function MenuPage({ library, username }: Props) {
     try {
       const res = await fetch(`/api/rooms/${roomCode.toUpperCase()}`);
       const data = await res.json();
+      if (res.status === 403) {
+        // A room's game pool is member data — the main GET is member-only.
+        setRoomError("Join this room first to use its game pool.");
+        return;
+      }
       if (!res.ok || !data.room) {
         setRoomError("Room not found. Check the code and try again.");
         return;

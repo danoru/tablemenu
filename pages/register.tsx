@@ -49,9 +49,11 @@ const inputSx = {
 const validationSchema = Yup.object({
   username: Yup.string()
     .min(5, "Username must be at least 5 characters.")
+    .max(32, "Username must be at most 32 characters.")
+    .matches(/^[a-zA-Z0-9_-]+$/, "Letters, numbers, underscores, and dashes only.")
     .required("Username is required."),
   password: Yup.string()
-    .min(5, "Password must be at least 5 characters.")
+    .min(8, "Password must be at least 8 characters.")
     .required("Password is required."),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Passwords must match.")
@@ -221,7 +223,7 @@ export default function RegistrationForm() {
                     mt: "-8px",
                   }}
                 >
-                  At least 5 characters
+                  At least 8 characters
                 </Typography>
 
                 <Button

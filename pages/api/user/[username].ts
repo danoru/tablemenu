@@ -30,7 +30,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
       const session = await getServerSession(req, res, authOptions);
-      const isOwnProfile = !!session?.user && (session.user as any).username === String(username);
+      // username is citext in Postgres — match its case-insensitivity here.
+      const isOwnProfile =
+        !!session?.user &&
+        ((session.user as any).username as string).toLowerCase() === String(username).toLowerCase();
 
       const user = await prisma.users.findUnique({
         where: { username: String(username) },

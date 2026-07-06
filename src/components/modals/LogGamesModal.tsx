@@ -70,6 +70,22 @@ export default function LogGamesModal({
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
 
+  const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => {
+    return () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, []);
+
+  // The members prop refreshes while the dialog is closed (the room page
+  // polls) — recompute the default selection each time the dialog opens.
+  React.useEffect(() => {
+    if (open) {
+      setSelectedPlayers(members.filter((m) => m.status === "ACCEPTED").map((m) => m.userId));
+      setWinnerIds([]);
+    }
+  }, [open]);
+
   function handleClose() {
     setSelectedGame(null);
     setSelectedPlayers(acceptedMembers.map((m) => m.userId));
@@ -93,7 +109,7 @@ export default function LogGamesModal({
   }
 
   async function handleLog() {
-    if (!selectedGame) return;
+    if (!selectedGame || selectedPlayers.length === 0) return;
     setSubmitting(true);
     try {
       const res = await fetch(`/api/rooms/${code}/session/log`, {
@@ -113,7 +129,9 @@ export default function LogGamesModal({
       const data = await res.json();
       if (res.ok) {
         setSnackbar({ open: true, message: "Game logged!", severity: "success" });
-        setTimeout(() => {
+        // Stay disabled until the dialog closes — re-enabling during this
+        // window allowed double-logging the same game.
+        closeTimer.current = setTimeout(() => {
           onLogged();
           handleClose();
         }, 1000);
@@ -123,10 +141,10 @@ export default function LogGamesModal({
           message: data.error ?? "Failed to log game.",
           severity: "error",
         });
+        setSubmitting(false);
       }
     } catch {
       setSnackbar({ open: true, message: "Something went wrong.", severity: "error" });
-    } finally {
       setSubmitting(false);
     }
   }
@@ -350,7 +368,7 @@ export default function LogGamesModal({
           fullWidth
           variant="contained"
           onClick={handleLog}
-          disabled={!selectedGame || submitting}
+          disabled={!selectedGame || selectedPlayers.length === 0 || submitting}
           sx={{ fontSize: "15px", padding: "10px" }}
         >
           {submitting ? <CircularProgress size={20} sx={{ color: "inherit" }} /> : "Log game"}

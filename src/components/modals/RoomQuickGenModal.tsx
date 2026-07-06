@@ -53,15 +53,27 @@ export default function RoomQuickGenModal({
   const [result, setResult] = React.useState<RoomSuggestion | null>(null);
   const pool = suggestions.filter((s) => s.bringing && s.vetoCount === 0);
 
+  const spinInterval = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function stopSpin() {
+    if (spinInterval.current) {
+      clearInterval(spinInterval.current);
+      spinInterval.current = null;
+    }
+  }
+
+  React.useEffect(() => stopSpin, []);
+
   function spin() {
     if (pool.length === 0) return;
+    stopSpin();
     setSpinning(true);
     setResult(null);
     let flashes = 0;
-    const interval = setInterval(() => {
+    spinInterval.current = setInterval(() => {
       setResult(pool[Math.floor(Math.random() * pool.length)]);
       if (++flashes >= 14) {
-        clearInterval(interval);
+        stopSpin();
         setResult(weightedPick(pool));
         setSpinning(false);
       }
@@ -69,6 +81,7 @@ export default function RoomQuickGenModal({
   }
 
   function handleClose() {
+    stopSpin();
     setSpinning(false);
     setResult(null);
     onClose();

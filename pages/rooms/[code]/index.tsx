@@ -27,7 +27,17 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import NightlifeIcon from "@mui/icons-material/Nightlife";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { Alert, Box, Button, CircularProgress, Divider, Snackbar, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  Divider,
+  Snackbar,
+  Typography,
+} from "@mui/material";
 import { LibraryGame } from "@pages/api/games/library";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
@@ -40,6 +50,9 @@ interface PreviewRoom {
   hostUsername: string;
   memberCount: number;
   suggestionCount: number;
+  // "GUEST" = not signed in. The rest mirror the viewer's invite status for
+  // an invite-only room they can't enter yet.
+  viewerStatus: "GUEST" | "PENDING" | "NONE" | "DECLINED";
 }
 
 type Props =
@@ -55,6 +68,26 @@ type Props =
 function RoomPreview({ room }: { room: PreviewRoom }) {
   const router = useRouter();
   const next = encodeURIComponent(`/rooms/${room.code}`);
+  const [joining, setJoining] = React.useState(false);
+  const [joinError, setJoinError] = React.useState("");
+
+  async function handleAcceptInvite() {
+    setJoining(true);
+    setJoinError("");
+    try {
+      const res = await fetch(`/api/rooms/${room.code}/join`, { method: "POST" });
+      if (res.ok) {
+        router.reload();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setJoinError(data.error ?? "Couldn't join the room. Try again.");
+      }
+    } catch {
+      setJoinError("Couldn't join the room. Try again.");
+    } finally {
+      setJoining(false);
+    }
+  }
 
   return (
     <>
@@ -124,21 +157,51 @@ function RoomPreview({ room }: { room: PreviewRoom }) {
             {room.code}
           </Typography>
 
-          <Button
-            variant="contained"
-            onClick={() => router.push(`/login?next=${next}`)}
-            sx={{ fontSize: "14px", padding: "10px 22px", width: "100%", mb: "10px" }}
-          >
-            Sign in to join
-          </Button>
+          {room.viewerStatus === "GUEST" && (
+            <>
+              <Button
+                variant="contained"
+                onClick={() => router.push(`/login?next=${next}`)}
+                sx={{ fontSize: "14px", padding: "10px 22px", width: "100%", mb: "10px" }}
+              >
+                Sign in to join
+              </Button>
 
-          <Button
-            variant="outlined"
-            onClick={() => router.push(`/register?next=${next}`)}
-            sx={{ fontSize: "14px", padding: "10px 22px", width: "100%" }}
-          >
-            Create an account
-          </Button>
+              <Button
+                variant="outlined"
+                onClick={() => router.push(`/register?next=${next}`)}
+                sx={{ fontSize: "14px", padding: "10px 22px", width: "100%" }}
+              >
+                Create an account
+              </Button>
+            </>
+          )}
+
+          {(room.viewerStatus === "PENDING" || room.viewerStatus === "DECLINED") && (
+            <>
+              <Button
+                disabled={joining}
+                variant="contained"
+                onClick={handleAcceptInvite}
+                sx={{ fontSize: "14px", padding: "10px 22px", width: "100%" }}
+              >
+                {joining ? "Joining…" : "Accept invite & join"}
+              </Button>
+              {joinError && (
+                <Typography
+                  sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: BRICK, mt: "12px" }}
+                >
+                  {joinError}
+                </Typography>
+              )}
+            </>
+          )}
+
+          {room.viewerStatus === "NONE" && (
+            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM }}>
+              This table is invite-only. Ask {room.hostUsername} for an invite.
+            </Typography>
+          )}
         </Box>
       </Box>
     </>
@@ -184,6 +247,7 @@ function AuthenticatedRoomPage({
     initialRoom.activeSessionId ?? null
   );
   const [sessionLoading, setSessionLoading] = React.useState(false);
+  const [confirmCloseOpen, setConfirmCloseOpen] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState<{
     open: boolean;
     message: string;
@@ -296,6 +360,7 @@ function AuthenticatedRoomPage({
   }
 
   async function handleCloseSession() {
+    setConfirmCloseOpen(false);
     setSessionLoading(true);
     try {
       const res = await fetch(`/api/rooms/${code}/session/close`, {
@@ -528,7 +593,7 @@ function AuthenticatedRoomPage({
                       disabled={sessionLoading}
                       startIcon={<CheckCircleIcon />}
                       variant="outlined"
-                      onClick={handleCloseSession}
+                      onClick={() => setConfirmCloseOpen(true)}
                       sx={{ fontSize: "13px", padding: "8px 16px" }}
                     >
                       {sessionLoading ? (
@@ -872,6 +937,42 @@ function AuthenticatedRoomPage({
         onLogged={() => setLogOpen(false)}
       />
 
+      <Dialog open={confirmCloseOpen} maxWidth="xs" onClose={() => setConfirmCloseOpen(false)}>
+        <DialogContent sx={{ padding: "28px" }}>
+          <Typography
+            sx={{
+              fontFamily: FONT_SERIF,
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "text.primary",
+              mb: "10px",
+            }}
+          >
+            Close tonight's session?
+          </Typography>
+          <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM, mb: "24px" }}>
+            This clears the table — every game in the pool and all votes are removed so next game
+            night starts fresh.
+          </Typography>
+          <Box sx={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+            <Button
+              variant="outlined"
+              onClick={() => setConfirmCloseOpen(false)}
+              sx={{ fontSize: "13px", padding: "8px 16px" }}
+            >
+              Keep it open
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleCloseSession}
+              sx={{ fontSize: "13px", padding: "8px 16px" }}
+            >
+              Close & clear the table
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
@@ -911,6 +1012,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           hostUsername: room.host.username,
           memberCount: room._count.invites,
           suggestionCount: room._count.gameSuggs,
+          viewerStatus: "GUEST" as const,
         },
       },
     };
@@ -933,10 +1035,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let room = await prisma.rooms.findUnique(queryArgs);
   if (!room) return { notFound: true };
 
-  const isMember = room.invites.some((inv) => inv.userId === currentUserId);
+  // Only an ACCEPTED invite counts as membership — the API GET applies the
+  // same rule, so anything less would render a page whose every fetch 403s.
+  const myInvite = room.invites.find((inv) => inv.userId === currentUserId);
+  const isMember = myInvite?.status === "ACCEPTED";
   if (!isMember) {
     // INVITE_ONLY rooms must not silently absorb any authenticated viewer.
-    // Show them the same locked preview as logged-out visitors.
+    // Show the locked preview; PENDING invitees get an accept affordance.
     if (room.visibility === "INVITE_ONLY") {
       return {
         props: {
@@ -945,15 +1050,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             name: room.name,
             code: room.code,
             hostUsername: room.host.username,
-            memberCount: room.invites.length,
+            memberCount: room.invites.filter((inv) => inv.status === "ACCEPTED").length,
             suggestionCount: room.gameSuggs.length,
+            viewerStatus: (myInvite?.status ?? "NONE") as "PENDING" | "DECLINED" | "NONE",
           },
         },
       };
     }
 
-    await prisma.roomInvites.create({
-      data: { roomId: room.id, userId: currentUserId, status: "ACCEPTED" },
+    // Upsert, not create — the viewer may hold a PENDING/DECLINED invite row.
+    await prisma.roomInvites.upsert({
+      where: { roomId_userId: { roomId: room.id, userId: currentUserId } },
+      update: { status: "ACCEPTED" },
+      create: { roomId: room.id, userId: currentUserId, status: "ACCEPTED" },
     });
     room = await prisma.rooms.findUnique(queryArgs);
     if (!room) return { notFound: true };

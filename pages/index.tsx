@@ -297,8 +297,10 @@ export default function HomePage() {
     setError("");
 
     try {
-      const res = await fetch(`/api/rooms/${roomCode.toUpperCase()}`);
-      if (res.ok) {
+      // Preview works for non-members (the main room GET is member-only). A
+      // 401 just means not logged in — the room page renders a public preview.
+      const res = await fetch(`/api/rooms/${roomCode.toUpperCase()}/preview`);
+      if (res.ok || res.status === 401) {
         router.push(`/rooms/${roomCode.toUpperCase()}`);
       } else {
         setError("Room not found. Check your code and try again.");
