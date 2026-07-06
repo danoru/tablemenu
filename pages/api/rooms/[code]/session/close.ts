@@ -39,9 +39,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     if (!activeSession) return res.status(400).json({ error: "No active session to close" });
 
+    // playerCount is a derived historical snapshot: the number of members
+    // marked present tonight (falling back to the ACCEPTED member count when
+    // no attendance rows exist, e.g. legacy sessions).
+    const presentCount = await prisma.roomSessionAttendance.count({
+      where: { sessionId: activeSession.id, present: true },
+    });
+    const anyRows = await prisma.roomSessionAttendance.count({
+      where: { sessionId: activeSession.id },
+    });
+    const playerCount =
+      anyRows > 0
+        ? presentCount
+        : await prisma.roomInvites.count({ where: { roomId: room.id, status: "ACCEPTED" } });
+
     await prisma.roomSessions.update({
       where: { id: activeSession.id },
-      data: { status: "CLOSED", closedAt: new Date() },
+      data: { status: "CLOSED", closedAt: new Date(), playerCount },
     });
 
     if (req.body.clearSession) {

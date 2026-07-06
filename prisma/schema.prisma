@@ -77,6 +77,7 @@ model Users {
   achievements     UserAchievements[]
   gameSessions     GameSessionPlayers[]
   hostedSessions   RoomSessions[]          @relation("SessionHost")
+  sessionAttendance RoomSessionAttendance[]
 }
 
 model Following {
@@ -213,6 +214,20 @@ model RoomSessions {
   room        Rooms         @relation(fields: [roomId], references: [id], onDelete: Cascade)
   host        Users         @relation("SessionHost", fields: [hostId], references: [id])
   gamePlayed  GameSessions[]
+  attendance  RoomSessionAttendance[]
+}
+
+model RoomSessionAttendance {
+  id        Int      @id @default(autoincrement())
+  sessionId Int
+  userId    Int
+  present   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  session RoomSessions @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    Users        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
 }
 
 model RoomGameSuggestions {

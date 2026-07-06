@@ -43,6 +43,7 @@ export default function LogGamesModal({
   onClose,
   suggestions,
   members,
+  presentMemberIds,
   code,
   isCompetitive,
   onLogged,
@@ -51,16 +52,26 @@ export default function LogGamesModal({
   onClose: () => void;
   suggestions: RoomSuggestion[];
   members: RoomMember[];
+  /** Members present tonight — the default player selection. Undefined → all. */
+  presentMemberIds?: number[];
   code: string;
   isCompetitive: boolean;
   onLogged: () => void;
 }) {
   const acceptedMembers = members.filter((m) => m.status === "ACCEPTED");
 
+  // Default to the members marked present tonight (attendance is soft — anyone
+  // can still be hand-checked in the list below). Falls back to all members.
+  const defaultPlayerIds = React.useCallback(() => {
+    const present = presentMemberIds ? new Set(presentMemberIds) : null;
+    return members
+      .filter((m) => m.status === "ACCEPTED")
+      .filter((m) => !present || present.has(m.userId))
+      .map((m) => m.userId);
+  }, [members, presentMemberIds]);
+
   const [selectedGame, setSelectedGame] = React.useState<RoomSuggestion | null>(null);
-  const [selectedPlayers, setSelectedPlayers] = React.useState<number[]>(
-    acceptedMembers.map((m) => m.userId)
-  );
+  const [selectedPlayers, setSelectedPlayers] = React.useState<number[]>(defaultPlayerIds());
   const [winnerIds, setWinnerIds] = React.useState<number[]>([]);
   const [duration, setDuration] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
@@ -77,18 +88,18 @@ export default function LogGamesModal({
     };
   }, []);
 
-  // The members prop refreshes while the dialog is closed (the room page
-  // polls) — recompute the default selection each time the dialog opens.
+  // The members/attendance props refresh while the dialog is closed (the room
+  // page polls) — recompute the default selection each time it opens.
   React.useEffect(() => {
     if (open) {
-      setSelectedPlayers(members.filter((m) => m.status === "ACCEPTED").map((m) => m.userId));
+      setSelectedPlayers(defaultPlayerIds());
       setWinnerIds([]);
     }
-  }, [open]);
+  }, [open, defaultPlayerIds]);
 
   function handleClose() {
     setSelectedGame(null);
-    setSelectedPlayers(acceptedMembers.map((m) => m.userId));
+    setSelectedPlayers(defaultPlayerIds());
     setWinnerIds([]);
     setDuration("");
     setSubmitting(false);

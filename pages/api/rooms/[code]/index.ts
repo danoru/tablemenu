@@ -40,6 +40,8 @@ export interface RoomData {
   lastSessionGameIds: number[];
   members: RoomMember[];
   suggestions: RoomSuggestion[];
+  /** Per-userId presence for the ACTIVE session; missing userId → present. */
+  attendance: Record<number, boolean>;
 }
 
 interface ApiResponse {
@@ -71,7 +73,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         invites: { include: { user: { select: { id: true, username: true } } } },
         gameSuggs: { include: { game: true, room: false } },
         votes: true,
-        sessions: { where: { status: "ACTIVE" }, select: { id: true }, take: 1 },
+        sessions: {
+          where: { status: "ACTIVE" },
+          select: { id: true, attendance: { select: { userId: true, present: true } } },
+          take: 1,
+        },
       },
     });
 
@@ -146,6 +152,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       };
     });
 
+    const activeSession = room.sessions?.[0] ?? null;
+    const attendance: Record<number, boolean> = {};
+    for (const row of activeSession?.attendance ?? []) {
+      attendance[row.userId] = row.present;
+    }
+
     const roomData: RoomData = {
       id: room.id,
       code: room.code,
@@ -157,10 +169,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       isCompetitive: room.isCompetitive,
       hostId: room.host.id,
       hostUsername: room.host.username,
-      activeSessionId: room.sessions?.[0]?.id ?? null,
+      activeSessionId: activeSession?.id ?? null,
       lastSessionGameIds,
       members,
       suggestions,
+      attendance,
     };
 
     res.setHeader("Cache-Control", "private, max-age=5");

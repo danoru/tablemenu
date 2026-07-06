@@ -25,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     const room = await prisma.rooms.findUnique({
       where: { code: code.toUpperCase() },
-      select: { id: true, hostId: true, isActive: true, playerCount: true },
+      select: { id: true, hostId: true, isActive: true },
     });
 
     if (!room) return res.status(404).json({ error: "Room not found" });
@@ -38,15 +38,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       data: { status: "CLOSED", closedAt: new Date() },
     });
 
+    // playerCount is no longer taken from the client — it's derived at close
+    // from the attendance rows we seed here (one per ACCEPTED member).
     const roomSession = await prisma.roomSessions.create({
       data: {
         roomId: room.id,
         hostId: userId,
         status: "ACTIVE",
         openedAt: new Date(),
-        playerCount: req.body.playerCount ?? room.playerCount,
       },
     });
+
+    const acceptedMembers = await prisma.roomInvites.findMany({
+      where: { roomId: room.id, status: "ACCEPTED" },
+      select: { userId: true },
+    });
+    if (acceptedMembers.length > 0) {
+      await prisma.roomSessionAttendance.createMany({
+        data: acceptedMembers.map((m) => ({
+          sessionId: roomSession.id,
+          userId: m.userId,
+          present: true,
+        })),
+        skipDuplicates: true,
+      });
+    }
 
     await prisma.rooms.update({
       where: { id: room.id },

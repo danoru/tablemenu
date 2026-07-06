@@ -247,6 +247,7 @@ function AuthenticatedRoomPage({
     initialRoom.activeSessionId ?? null
   );
   const [sessionLoading, setSessionLoading] = React.useState(false);
+  const [attendanceLoadingId, setAttendanceLoadingId] = React.useState<number | null>(null);
   const [confirmCloseOpen, setConfirmCloseOpen] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState<{
     open: boolean;
@@ -295,6 +296,35 @@ function AuthenticatedRoomPage({
     }
   }
 
+  // A member is present unless there's an attendance row saying otherwise.
+  const isPresent = (userId: number) => room.attendance[userId] !== false;
+
+  async function handleToggleAttendance(userId: number, present: boolean) {
+    setAttendanceLoadingId(userId);
+    try {
+      const res = await fetch(`/api/rooms/${code}/session/attendance`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, present }),
+      });
+      if (res.ok) {
+        const data = await (await fetch(`/api/rooms/${code}`)).json();
+        if (data.room) setRoom(data.room);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setSnackbar({
+          open: true,
+          message: data.error ?? "Failed to update attendance.",
+          severity: "error",
+        });
+      }
+    } catch {
+      setSnackbar({ open: true, message: "Failed to update attendance.", severity: "error" });
+    } finally {
+      setAttendanceLoadingId(null);
+    }
+  }
+
   async function handleVote(gameId: number, interested: boolean) {
     setLoadingGameId(gameId);
     try {
@@ -339,11 +369,15 @@ function AuthenticatedRoomPage({
       const res = await fetch(`/api/rooms/${code}/session/open`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerCount: room.playerCount }),
       });
       const data = await res.json();
       if (res.ok) {
         setActiveSessionId(data.sessionId);
+        // Pull in the freshly-seeded attendance rows for the new session.
+        try {
+          const refreshed = await (await fetch(`/api/rooms/${code}`)).json();
+          if (refreshed.room) setRoom(refreshed.room);
+        } catch {}
         setSnackbar({ open: true, message: "Tonight's session is open!", severity: "success" });
       } else {
         setSnackbar({
@@ -792,77 +826,126 @@ function AuthenticatedRoomPage({
               >
                 {room.members
                   .filter((m) => m.status === "ACCEPTED")
-                  .map((member, i, arr) => (
-                    <Box key={member.userId}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                          padding: "12px 16px",
-                        }}
-                      >
+                  .map((member, i, arr) => {
+                    const sessionActive = activeSessionId !== null;
+                    const present = isPresent(member.userId);
+                    const away = sessionActive && !present;
+                    const canToggle = sessionActive && (isHost || member.userId === currentUserId);
+                    return (
+                      <Box key={member.userId}>
                         <Box
                           sx={{
-                            width: "34px",
-                            height: "34px",
-                            borderRadius: "50%",
-                            background: avatarColor(member.username),
-                            border: BORDER_INK,
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
+                            gap: "12px",
+                            padding: "12px 16px",
+                            backgroundColor: sessionActive && present ? TINT_OLIVE : "transparent",
+                            transition: "background-color 0.2s",
                           }}
                         >
-                          <Typography
+                          <Box
                             sx={{
-                              fontFamily: FONT_SERIF,
-                              fontSize: "13px",
-                              fontWeight: 700,
-                              color: "rgba(255,251,240,0.9)",
-                              userSelect: "none",
+                              width: "34px",
+                              height: "34px",
+                              borderRadius: "50%",
+                              background: avatarColor(member.username),
+                              border: BORDER_INK,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                              opacity: away ? 0.4 : 1,
                             }}
                           >
-                            {member.username.slice(0, 1).toUpperCase()}
-                          </Typography>
-                        </Box>
-                        <Typography
-                          sx={{
-                            fontFamily: FONT_SANS,
-                            fontSize: "14px",
-                            fontWeight: 500,
-                            color: "text.primary",
-                            flex: 1,
-                          }}
-                        >
-                          {member.username}
-                          {member.userId === room.hostId && (
-                            <Box
-                              component="span"
+                            <Typography
                               sx={{
-                                ml: "8px",
-                                fontFamily: FONT_SANS,
-                                fontSize: "10px",
+                                fontFamily: FONT_SERIF,
+                                fontSize: "13px",
                                 fontWeight: 700,
-                                letterSpacing: "0.8px",
-                                textTransform: "uppercase",
-                                color: INK,
-                                background: TINT_MUSTARD,
-                                border: `1.5px solid ${INK}`,
-                                padding: "2px 7px",
-                                borderRadius: "10px",
-                                verticalAlign: "middle",
+                                color: "rgba(255,251,240,0.9)",
+                                userSelect: "none",
                               }}
                             >
-                              Host
-                            </Box>
+                              {member.username.slice(0, 1).toUpperCase()}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography
+                              sx={{
+                                fontFamily: FONT_SANS,
+                                fontSize: "14px",
+                                fontWeight: 500,
+                                color: away ? TEXT_FAINT : "text.primary",
+                              }}
+                            >
+                              {member.username}
+                              {member.userId === room.hostId && (
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    ml: "8px",
+                                    fontFamily: FONT_SANS,
+                                    fontSize: "10px",
+                                    fontWeight: 700,
+                                    letterSpacing: "0.8px",
+                                    textTransform: "uppercase",
+                                    color: INK,
+                                    background: TINT_MUSTARD,
+                                    border: `1.5px solid ${INK}`,
+                                    padding: "2px 7px",
+                                    borderRadius: "10px",
+                                    verticalAlign: "middle",
+                                  }}
+                                >
+                                  Host
+                                </Box>
+                              )}
+                            </Typography>
+                            {sessionActive && (
+                              <Typography
+                                sx={{
+                                  fontFamily: FONT_SANS,
+                                  fontSize: "11px",
+                                  fontWeight: 600,
+                                  color: present ? OLIVE : TEXT_FAINT,
+                                  mt: "1px",
+                                }}
+                              >
+                                {present ? "✓ Here tonight" : "Away tonight"}
+                              </Typography>
+                            )}
+                          </Box>
+                          {canToggle && (
+                            <Button
+                              disabled={attendanceLoadingId === member.userId}
+                              onClick={() => handleToggleAttendance(member.userId, !present)}
+                              sx={{
+                                fontFamily: FONT_SANS,
+                                fontSize: "11px",
+                                fontWeight: 600,
+                                textTransform: "none",
+                                color: present ? TEXT_DIM : OLIVE,
+                                minWidth: 0,
+                                padding: "4px 10px",
+                                borderRadius: "999px",
+                                border: `1.5px solid ${present ? "rgba(51,39,26,0.2)" : OLIVE}`,
+                                "&:hover": { borderColor: present ? TEXT_DIM : OLIVE },
+                              }}
+                            >
+                              {attendanceLoadingId === member.userId ? (
+                                <CircularProgress size={12} sx={{ color: "inherit" }} />
+                              ) : present ? (
+                                "Mark away"
+                              ) : (
+                                "Mark here"
+                              )}
+                            </Button>
                           )}
-                        </Typography>
+                        </Box>
+                        {i < arr.length - 1 && <Divider sx={{ borderColor: "divider" }} />}
                       </Box>
-                      {i < arr.length - 1 && <Divider sx={{ borderColor: "divider" }} />}
-                    </Box>
-                  ))}
+                    );
+                  })}
               </Box>
 
               <Box
@@ -932,6 +1015,9 @@ function AuthenticatedRoomPage({
         onClose={() => setLogOpen(false)}
         suggestions={room.suggestions}
         members={room.members}
+        presentMemberIds={room.members
+          .filter((m) => m.status === "ACCEPTED" && isPresent(m.userId))
+          .map((m) => m.userId)}
         code={code}
         isCompetitive={room.isCompetitive}
         onLogged={() => setLogOpen(false)}
@@ -1028,7 +1114,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       invites: { include: { user: { select: { id: true, username: true } } } },
       gameSuggs: { include: { game: true } },
       votes: true,
-      sessions: { where: { status: "ACTIVE" as const }, select: { id: true }, take: 1 },
+      sessions: {
+        where: { status: "ACTIVE" as const },
+        select: { id: true, attendance: { select: { userId: true, present: true } } },
+        take: 1,
+      },
     },
   } as const;
 
@@ -1126,6 +1216,12 @@ function buildRoomData(
     };
   });
 
+  const activeSession = room.sessions?.[0] ?? null;
+  const attendance: Record<number, boolean> = {};
+  for (const row of activeSession?.attendance ?? []) {
+    attendance[row.userId] = row.present;
+  }
+
   return {
     id: room.id,
     code: room.code,
@@ -1137,9 +1233,10 @@ function buildRoomData(
     isCompetitive: room.isCompetitive,
     hostId: room.host.id,
     hostUsername: room.host.username,
-    activeSessionId: room.sessions?.[0]?.id ?? null,
+    activeSessionId: activeSession?.id ?? null,
     lastSessionGameIds,
     members,
     suggestions,
+    attendance,
   };
 }
