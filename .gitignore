@@ -71,4 +71,6 @@ dist/
 # Generated / personal (never committed)
 # =====================
 scripts/pdfverify/out-*.pdf
+.claude/
+local/
 *.local.md
