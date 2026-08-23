@@ -3,7 +3,13 @@ import { LibraryGame } from "@pages/api/games/library";
 
 import GameCard from "./GameCard";
 
-export default function GameGrid({ games }: { games: LibraryGame[] }) {
+export default function GameGrid({
+  games,
+  onRemove,
+}: {
+  games: LibraryGame[];
+  onRemove?: (game: LibraryGame) => void;
+}) {
   return (
     <Box
       sx={{
@@ -18,7 +24,7 @@ export default function GameGrid({ games }: { games: LibraryGame[] }) {
       }}
     >
       {games.map((game) => (
-        <GameCard key={game.gameId} game={game} />
+        <GameCard key={game.gameId} game={game} onRemove={onRemove} />
       ))}
     </Box>
   );

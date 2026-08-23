@@ -7,6 +7,7 @@ import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import {
   BORDER_INK,
+  BRICK,
   FONT_SANS,
   FONT_SERIF,
   INK,
@@ -18,9 +19,20 @@ import {
 import { LibraryGame } from "@pages/api/games/library";
 import AddIcon from "@mui/icons-material/Add";
 import CasinoIcon from "@mui/icons-material/Casino";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DownloadIcon from "@mui/icons-material/Download";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, InputAdornment, OutlinedInput, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  InputAdornment,
+  OutlinedInput,
+  Typography,
+} from "@mui/material";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import { getServerSession } from "next-auth";
@@ -42,6 +54,8 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
   const [importOpen, setImportOpen] = React.useState(false);
   const [sortBy, setSortBy] = React.useState("name");
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
+  const [pendingRemove, setPendingRemove] = React.useState<LibraryGame | null>(null);
+  const [removeLoading, setRemoveLoading] = React.useState(false);
 
   const filtered = React.useMemo(() => {
     let result = library;
@@ -75,6 +89,20 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
       if (prev.find((g) => g.gameId === game.gameId)) return prev;
       return [game, ...prev];
     });
+  }
+
+  async function handleConfirmRemove() {
+    if (!pendingRemove) return;
+    const gameId = pendingRemove.gameId;
+    setRemoveLoading(true);
+    try {
+      const res = await fetch(`/api/games/${gameId}/library`, { method: "DELETE" });
+      if (!res.ok) return;
+      setLibrary((prev) => prev.filter((g) => g.gameId !== gameId));
+      setPendingRemove(null);
+    } finally {
+      setRemoveLoading(false);
+    }
   }
 
   return (
@@ -288,7 +316,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
             </Box>
           )}
 
-          <GameGrid games={filtered} />
+          <GameGrid games={filtered} onRemove={isSelf ? setPendingRemove : undefined} />
         </Box>
       </Box>
 
@@ -303,6 +331,36 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
       />
 
       <QuickGenModal open={quickGenOpen} onClose={() => setQuickGenOpen(false)} library={library} />
+
+      <Dialog fullWidth maxWidth="xs" open={!!pendingRemove} onClose={() => setPendingRemove(null)}>
+        <DialogContent sx={{ padding: "24px 24px 8px" }}>
+          <Typography sx={{ fontFamily: FONT_SERIF, fontSize: "20px", color: INK, mb: "10px" }}>
+            Remove {pendingRemove?.name}?
+          </Typography>
+          <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM }}>
+            This takes it out of your library along with your notes and favorite mark. Your rating
+            is kept, and you can add the game back at any time.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ padding: "12px 24px 20px", gap: "8px" }}>
+          <Button
+            disabled={removeLoading}
+            sx={{ fontSize: "14px", color: TEXT_DIM }}
+            onClick={() => setPendingRemove(null)}
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={removeLoading}
+            startIcon={removeLoading ? <CircularProgress size={14} /> : <DeleteOutlineIcon />}
+            sx={{ fontSize: "14px", padding: "8px 18px", backgroundColor: BRICK }}
+            variant="contained"
+            onClick={handleConfirmRemove}
+          >
+            Remove
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

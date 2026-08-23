@@ -26,6 +26,7 @@ import AddIcon from "@mui/icons-material/Add";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CheckIcon from "@mui/icons-material/Check";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -37,6 +38,9 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
   Divider,
   IconButton,
   TextareaAutosize,
@@ -147,6 +151,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
   const [isFavorite, setIsFavorite] = React.useState(game.userGame?.isFavorite ?? false);
   const [isWantToPlay, setIsWantToPlay] = React.useState(game.userGame?.isWishlist ?? false);
   const [libraryLoading, setLibraryLoading] = React.useState(false);
+  const [confirmRemoveOpen, setConfirmRemoveOpen] = React.useState(false);
 
   const [notes, setNotes] = React.useState(game.userGame?.notes ?? "");
   const [notesSaved, setNotesSaved] = React.useState(false);
@@ -175,6 +180,21 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
       setIsWantToPlay(false);
     } finally {
       setLibraryLoading(false);
+    }
+  }
+
+  async function handleRemoveFromLibrary() {
+    setLibraryLoading(true);
+    try {
+      const res = await fetch(`/api/games/${game.gameId}/library`, { method: "DELETE" });
+      if (!res.ok) return;
+      setInLibrary(false);
+      setIsFavorite(false);
+      setIsWantToPlay(false);
+      setNotes("");
+    } finally {
+      setLibraryLoading(false);
+      setConfirmRemoveOpen(false);
     }
   }
 
@@ -451,7 +471,30 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                   </Box>
                 )}
 
-                {isSelf && (
+                {isSelf && inLibrary && (
+                  <Tooltip title="Remove from library">
+                    <IconButton
+                      disabled={libraryLoading}
+                      onClick={() => setConfirmRemoveOpen(true)}
+                      sx={{
+                        border: "2px solid rgba(51,39,26,0.3)",
+                        borderRadius: "8px",
+                        color: TEXT_FAINT,
+                        padding: "9px",
+                        transition: "all 0.2s",
+                        "&:hover": {
+                          color: BRICK,
+                          borderColor: BRICK,
+                          backgroundColor: TINT_BRICK,
+                        },
+                      }}
+                    >
+                      <DeleteOutlineIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+
+                {isSelf && inLibrary && (
                   <Tooltip title={isFavorite ? "Remove from favorites" : "Mark as favorite"}>
                     <IconButton
                       onClick={handleToggleFavorite}
@@ -821,6 +864,41 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
           </Box>
         </Box>
       </Box>
+
+      <Dialog
+        fullWidth
+        maxWidth="xs"
+        open={confirmRemoveOpen}
+        onClose={() => setConfirmRemoveOpen(false)}
+      >
+        <DialogContent sx={{ padding: "24px 24px 8px" }}>
+          <Typography sx={{ fontFamily: FONT_SERIF, fontSize: "20px", color: INK, mb: "10px" }}>
+            Remove {game.name}?
+          </Typography>
+          <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM }}>
+            This takes it out of your library along with your notes and favorite mark. Your rating
+            is kept, and you can add the game back at any time.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ padding: "12px 24px 20px", gap: "8px" }}>
+          <Button
+            disabled={libraryLoading}
+            sx={{ fontSize: "14px", color: TEXT_DIM }}
+            onClick={() => setConfirmRemoveOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={libraryLoading}
+            startIcon={libraryLoading ? <CircularProgress size={14} /> : <DeleteOutlineIcon />}
+            sx={{ fontSize: "14px", padding: "8px 18px", backgroundColor: BRICK }}
+            variant="contained"
+            onClick={handleRemoveFromLibrary}
+          >
+            Remove
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
