@@ -36,6 +36,16 @@ Font.register({
 
 const { default: MenuPdfDocument } = await import("@/components/pdf/MenuPDFDocument");
 
+// A real square PNG data URI stands in for the /api/games/cover proxy (which
+// the browser supplies) so the cover-image geometry is exercised offline.
+const { default: sharp } = await import("sharp");
+const coverPng = await sharp({
+  create: { width: 64, height: 64, channels: 3, background: { r: 107, g: 127, b: 63 } },
+})
+  .png()
+  .toBuffer();
+const COVER_URI = `data:image/png;base64,${coverPng.toString("base64")}`;
+
 const LONG_NAME = "The Exceedingly Grand Expedition to the Far Reaches of Catan Deluxe Edition";
 const LONG_DESC =
   "In this sprawling strategy epic, players guide rival trading houses across a shifting archipelago, brokering fragile alliances and racing to control the richest ports. Every turn tightens the screws.";
@@ -108,14 +118,19 @@ function countPages(buf: Buffer): number {
   return matches ? matches.length : 0;
 }
 
-async function renderCase(label: string, pool: LibraryGame[]) {
+async function renderCase(label: string, pool: LibraryGame[], withCovers: boolean) {
   const menu = generateMenu(pool, `2026-07-06-verify-${label}`);
   const total = menu.sections.reduce((n, s) => n + (menu.selection[s.id]?.length ?? 0), 0);
   const tastingNotes = buildTastingNotes(Object.values(menu.selection).flat());
+  const covers: Record<string, string> = {};
+  if (withCovers) {
+    for (const g of Object.values(menu.selection).flat()) covers[String(g.gameId)] = COVER_URI;
+  }
   const el = React.createElement(MenuPdfDocument, {
     menu: menu.selection,
     sections: menu.sections,
     tastingNotes,
+    covers,
     date: new Date("2026-07-06T12:00:00Z"),
   });
   const buf = await renderToBuffer(el as any);
@@ -147,8 +162,9 @@ async function main() {
     makeGame(4, { minPlaytime: 120, maxPlaytime: 150 }),
     makeGame(5, { minPlaytime: 20, maxPlaytime: 30, isFavorite: true, userStars: 5 }),
   ];
-  const p1 = await renderCase("small", small);
-  const p2 = await renderCase("max", maxPool());
+  // small = sparse menu, monogram tiles (no covers); max = 12-game cap with covers
+  const p1 = await renderCase("small", small, false);
+  const p2 = await renderCase("max", maxPool(), true);
   const ok = p1 === 1 && p2 === 1 && !overflowed;
   if (overflowed) console.log("RESULT: CONTENT OVERFLOW (clipped) ✗");
   console.log(ok ? "RESULT: all cases 1 page, no overflow ✓" : "RESULT: FAIL ✗");

@@ -1,22 +1,3 @@
-import ExportMenuButton from "@/components/pdf/ExportMenuButton";
-import SectionCard from "@/components/menu/SectionCard";
-import { getUserLibrary } from "@/data/games";
-import { authOptions } from "@/lib/authOptions";
-import { generateMenu, makeRng, rerollSlot } from "@/lib/menu/generate";
-import type { GeneratedMenu, SectionConfig } from "@/lib/menu/types";
-import {
-  BORDER_INK,
-  BRICK,
-  FONT_SANS,
-  FONT_SERIF,
-  INK,
-  OLIVE,
-  SHADOW_HARD,
-  SHADOW_HARD_LG,
-  TEXT_DIM,
-  TEXT_FAINT,
-  TINT_MUSTARD,
-} from "@/styles/theme";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CasinoIcon from "@mui/icons-material/Casino";
 import CloseIcon from "@mui/icons-material/Close";
@@ -34,9 +15,31 @@ import {
 } from "@mui/material";
 import { LibraryGame } from "@pages/api/games/library";
 import { GetServerSideProps } from "next";
-import { getServerSession } from "next-auth";
 import Head from "next/head";
+import { getServerSession } from "next-auth";
 import React from "react";
+
+import RibbonLabel from "@/components/menu/RibbonLabel";
+import SectionCard from "@/components/menu/SectionCard";
+import ExportMenuButton from "@/components/pdf/ExportMenuButton";
+import { getUserLibrary } from "@/data/games";
+import { authOptions } from "@/lib/authOptions";
+import { generateMenu, makeRng, rerollSlot } from "@/lib/menu/generate";
+import { menuStats, playHoursLabel, sawtoothPoints, splitSections } from "@/lib/menu/layout";
+import type { GeneratedMenu, SectionConfig } from "@/lib/menu/types";
+import {
+  BORDER_INK,
+  FONT_SANS,
+  FONT_SERIF,
+  INK,
+  OLIVE,
+  SHADOW_HARD,
+  SHADOW_HARD_LG,
+  SURFACE,
+  TEXT_DIM,
+  TEXT_FAINT,
+  TINT_MUSTARD,
+} from "@/styles/theme";
 
 interface Props {
   library: LibraryGame[];
@@ -47,6 +50,79 @@ interface Props {
 /** Stable YYYY-MM-DD for seeding the day's menu. */
 function todayStamp(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function formatLongDate(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+const SAW_POINTS = sawtoothPoints(612, 9);
+
+/** Circular ticket-stub stat badge on the masthead band (mirrors the PDF). */
+function StatBadge({
+  side,
+  value,
+  label,
+}: {
+  side: "left" | "right";
+  value: string;
+  label: string;
+}) {
+  return (
+    <Box
+      sx={{
+        position: "absolute",
+        top: "50%",
+        transform: "translateY(-50%)",
+        [side]: { sm: "20px", md: "30px" },
+        width: "68px",
+        height: "68px",
+        borderRadius: "50%",
+        border: "1.5px solid rgba(255,251,240,0.8)",
+        display: { xs: "none", sm: "flex" },
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          inset: "4px",
+          borderRadius: "50%",
+          border: "1px dashed rgba(255,251,240,0.45)",
+        },
+      }}
+    >
+      <Typography
+        sx={{
+          fontFamily: FONT_SERIF,
+          fontSize: "20px",
+          fontWeight: 900,
+          color: SURFACE,
+          lineHeight: 1,
+        }}
+      >
+        {value}
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: FONT_SANS,
+          fontSize: "8px",
+          fontWeight: 700,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          color: "rgba(255,251,240,0.62)",
+          mt: "3px",
+        }}
+      >
+        {label}
+      </Typography>
+    </Box>
+  );
 }
 
 export default function MenuPage({ library, username, userId }: Props) {
@@ -185,6 +261,12 @@ export default function MenuPage({ library, username, userId }: Props) {
   const hasMenu = menu !== null;
   const poolSize = activePool.length;
 
+  // Programme sheet layout — same two-column + feature split as the PDF.
+  const programme = menu ? splitSections(menu.sections, menu.selection) : null;
+  const stats = menu ? menuStats(menu.sections, menu.selection) : null;
+  const hours = stats ? playHoursLabel(stats.minutes) : "";
+  const [hoursValue, ...hoursUnitParts] = hours.split(" ");
+
   return (
     <>
       <Head>
@@ -256,7 +338,6 @@ export default function MenuPage({ library, username, userId }: Props) {
               }}
             >
               <Button
-                onClick={handleSwitchToSolo}
                 startIcon={<PersonIcon sx={{ fontSize: "15px !important" }} />}
                 sx={{
                   background: mode === "solo" ? TINT_MUSTARD : "background.paper",
@@ -271,6 +352,7 @@ export default function MenuPage({ library, username, userId }: Props) {
                   textTransform: "none",
                   "&:hover": { background: TINT_MUSTARD, borderColor: INK },
                 }}
+                onClick={handleSwitchToSolo}
               >
                 My library
                 {mode === "solo" && (
@@ -285,7 +367,6 @@ export default function MenuPage({ library, username, userId }: Props) {
 
               <Button
                 startIcon={<MeetingRoomIcon sx={{ fontSize: "15px !important" }} />}
-                onClick={() => mode !== "room" && setMode("room")}
                 sx={{
                   background: mode === "room" ? TINT_MUSTARD : "background.paper",
                   border: `2px solid ${mode === "room" ? INK : "rgba(51,39,26,0.3)"}`,
@@ -302,6 +383,7 @@ export default function MenuPage({ library, username, userId }: Props) {
                     borderColor: INK,
                   },
                 }}
+                onClick={() => mode !== "room" && setMode("room")}
               >
                 {mode === "room" && roomName ? roomName : "Room pool"}
                 {mode === "room" && roomPool && (
@@ -318,14 +400,9 @@ export default function MenuPage({ library, username, userId }: Props) {
             {mode === "room" && !roomPool && (
               <Box sx={{ display: "flex", gap: "8px", mt: "16px", flexWrap: "wrap" }}>
                 <OutlinedInput
-                  value={roomCode}
-                  onChange={(e) => {
-                    setRoomCode(e.target.value.toUpperCase());
-                    setRoomError("");
-                  }}
-                  placeholder="ROOM CODE"
-                  inputProps={{ maxLength: 6 }}
                   error={!!roomError}
+                  inputProps={{ maxLength: 6 }}
+                  placeholder="ROOM CODE"
                   sx={{
                     fontFamily: FONT_SANS,
                     fontSize: "15px",
@@ -340,15 +417,20 @@ export default function MenuPage({ library, username, userId }: Props) {
                       fontSize: "13px",
                     },
                   }}
+                  value={roomCode}
+                  onChange={(e) => {
+                    setRoomCode(e.target.value.toUpperCase());
+                    setRoomError("");
+                  }}
                 />
                 <Button
-                  variant="contained"
-                  onClick={handleRoomConnect}
                   disabled={roomLoading || !roomCode.trim()}
                   sx={{
                     fontSize: "13px",
                     padding: "9px 18px",
                   }}
+                  variant="contained"
+                  onClick={handleRoomConnect}
                 >
                   {roomLoading ? (
                     <CircularProgress size={16} sx={{ color: "text.disabled" }} />
@@ -391,9 +473,9 @@ export default function MenuPage({ library, username, userId }: Props) {
                   Connected to {roomName}
                 </Typography>
                 <IconButton
-                  onClick={handleSwitchToSolo}
                   size="small"
                   sx={{ color: TEXT_FAINT, ml: "auto", "&:hover": { color: TEXT_DIM } }}
+                  onClick={handleSwitchToSolo}
                 >
                   <CloseIcon sx={{ fontSize: "14px" }} />
                 </IconButton>
@@ -402,7 +484,6 @@ export default function MenuPage({ library, username, userId }: Props) {
           </Box>
           <Button
             fullWidth
-            onClick={handleGenerate}
             disabled={generating || (mode === "room" && !roomPool)}
             startIcon={
               generating ? (
@@ -411,7 +492,6 @@ export default function MenuPage({ library, username, userId }: Props) {
                 <AutoAwesomeIcon />
               )
             }
-            variant="contained"
             sx={{
               fontFamily: FONT_SERIF,
               fontSize: "17px",
@@ -419,6 +499,8 @@ export default function MenuPage({ library, username, userId }: Props) {
               padding: "14px",
               mb: "36px",
             }}
+            variant="contained"
+            onClick={handleGenerate}
           >
             {generating
               ? "Planning your evening…"
@@ -427,7 +509,7 @@ export default function MenuPage({ library, username, userId }: Props) {
                 : "Plan my evening"}
           </Button>
 
-          {hasMenu && !generating && menu && (
+          {hasMenu && !generating && menu && programme && stats && (
             <Box>
               <Box
                 sx={{
@@ -435,19 +517,26 @@ export default function MenuPage({ library, username, userId }: Props) {
                   border: BORDER_INK,
                   borderRadius: "13px",
                   boxShadow: SHADOW_HARD_LG,
-                  padding: { xs: "32px 22px", md: "44px 52px" },
+                  overflow: "hidden",
                 }}
               >
-                <Box sx={{ textAlign: "center", mb: "10px" }}>
+                <Box
+                  sx={{
+                    position: "relative",
+                    backgroundColor: INK,
+                    textAlign: "center",
+                    padding: { xs: "26px 20px 20px", sm: "30px 116px 22px" },
+                  }}
+                >
                   <Typography
                     sx={{
                       fontFamily: FONT_SANS,
                       fontSize: "10px",
                       fontWeight: 700,
-                      color: BRICK,
-                      letterSpacing: "0.22em",
+                      color: "rgba(255,251,240,0.62)",
+                      letterSpacing: "0.26em",
                       textTransform: "uppercase",
-                      mb: "10px",
+                      mb: "8px",
                     }}
                   >
                     Tablekeeper · An evening of games
@@ -456,47 +545,154 @@ export default function MenuPage({ library, username, userId }: Props) {
                     sx={{
                       fontFamily: FONT_SERIF,
                       fontStyle: "italic",
-                      fontSize: { xs: "28px", md: "34px" },
+                      fontSize: { xs: "30px", md: "38px" },
                       fontWeight: 900,
-                      color: "text.primary",
-                      lineHeight: 1.1,
+                      color: SURFACE,
+                      lineHeight: 1.05,
                     }}
                   >
                     Tonight&apos;s Programme
                   </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: FONT_SANS,
+                      fontSize: "12px",
+                      fontWeight: 500,
+                      color: "rgba(255,251,240,0.78)",
+                      letterSpacing: "0.08em",
+                      mt: "7px",
+                    }}
+                  >
+                    {formatLongDate(new Date())}
+                  </Typography>
+                  <StatBadge label="games" side="left" value={String(stats.count)} />
+                  {hours && (
+                    <StatBadge
+                      label={`${hoursUnitParts.join(" ")} play`}
+                      side="right"
+                      value={hoursValue}
+                    />
+                  )}
+                </Box>
+                <Box
+                  component="svg"
+                  preserveAspectRatio="none"
+                  sx={{ display: "block", width: "100%", height: "10px" }}
+                  viewBox="0 0 612 9"
+                >
+                  <polygon fill={INK} points={SAW_POINTS} />
                 </Box>
 
-                <Box sx={{ borderTop: `2px solid ${INK}`, mb: "3px" }} />
-                <Box sx={{ borderTop: "1px solid rgba(51,39,26,0.3)", mb: "30px" }} />
+                <Box sx={{ padding: { xs: "26px 18px 30px", md: "34px 40px 36px" } }}>
+                  <Box
+                    sx={{
+                      position: "relative",
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                      columnGap: "52px",
+                      rowGap: "30px",
+                      "&::before": {
+                        content: '""',
+                        position: "absolute",
+                        left: "50%",
+                        top: "4px",
+                        bottom: "4px",
+                        borderLeft: "1px dotted rgba(51,39,26,0.35)",
+                        display: { xs: "none", md: "block" },
+                      },
+                    }}
+                  >
+                    {[programme.left, programme.right].map((column, colIdx) => (
+                      <Box
+                        key={colIdx}
+                        sx={{ display: "flex", flexDirection: "column", gap: "30px" }}
+                      >
+                        {column.map((section) => (
+                          <SectionCard
+                            key={section.id}
+                            games={menu.selection[section.id] ?? []}
+                            rerollingIdx={
+                              rerolling?.sectionId === section.id ? rerolling.idx : null
+                            }
+                            section={section}
+                            onRerollGame={(idx) => handleRerollGame(section, idx)}
+                          />
+                        ))}
+                      </Box>
+                    ))}
+                  </Box>
 
-                {menu.sections.map((section, sectionIdx) => {
-                  const picks = menu.selection[section.id] ?? [];
-                  return (
-                    <Box key={section.id}>
-                      {sectionIdx > 0 && (
-                        <Typography
-                          aria-hidden
-                          sx={{
-                            textAlign: "center",
-                            color: BRICK,
-                            fontSize: "15px",
-                            lineHeight: 1,
-                            my: "26px",
-                            userSelect: "none",
-                          }}
-                        >
-                          ✳
-                        </Typography>
-                      )}
+                  {programme.special && (
+                    <Box
+                      sx={{
+                        position: "relative",
+                        mt: "46px",
+                        border: BORDER_INK,
+                        borderRadius: "12px",
+                        padding: { xs: "34px 18px 24px", sm: "36px 28px 26px" },
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          inset: "5px",
+                          border: "1px solid rgba(51,39,26,0.3)",
+                          borderRadius: "8px",
+                          pointerEvents: "none",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: "-16px",
+                          left: 0,
+                          right: 0,
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <RibbonLabel
+                          icon={programme.special.icon}
+                          label={programme.special.label}
+                        />
+                      </Box>
+                      <Typography
+                        sx={{
+                          fontFamily: FONT_SERIF,
+                          fontStyle: "italic",
+                          fontSize: "14px",
+                          color: TEXT_FAINT,
+                          textAlign: "center",
+                          mb: "18px",
+                        }}
+                      >
+                        {programme.special.subtitle}
+                      </Typography>
                       <SectionCard
-                        section={section}
-                        games={picks}
-                        rerollingIdx={rerolling?.sectionId === section.id ? rerolling.idx : null}
-                        onRerollGame={(idx) => handleRerollGame(section, idx)}
+                        hideHeader
+                        twoColumn
+                        games={menu.selection[programme.special.id] ?? []}
+                        rerollingIdx={
+                          rerolling?.sectionId === programme.special.id ? rerolling.idx : null
+                        }
+                        section={programme.special}
+                        onRerollGame={(idx) => handleRerollGame(programme.special!, idx)}
                       />
                     </Box>
-                  );
-                })}
+                  )}
+
+                  <Typography
+                    sx={{
+                      fontFamily: FONT_SERIF,
+                      fontStyle: "italic",
+                      fontSize: "13px",
+                      color: TEXT_FAINT,
+                      textAlign: "center",
+                      mt: "32px",
+                    }}
+                  >
+                    — Substitutions gladly accommodated · ask your table keeper —
+                  </Typography>
+                </Box>
               </Box>
 
               <Box
@@ -509,13 +705,13 @@ export default function MenuPage({ library, username, userId }: Props) {
                 }}
               >
                 <Button
-                  variant="outlined"
-                  onClick={handleNewMenu}
                   startIcon={<CasinoIcon />}
                   sx={{
                     fontSize: "14px",
                     padding: "10px 20px",
                   }}
+                  variant="outlined"
+                  onClick={handleNewMenu}
                 >
                   New menu
                 </Button>
@@ -546,10 +742,10 @@ export default function MenuPage({ library, username, userId }: Props) {
       </Box>
 
       <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        autoHideDuration={4000}
+        open={snackbar.open}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
       >
         <Alert severity={snackbar.severity} sx={{ fontFamily: FONT_SANS }}>
           {snackbar.message}

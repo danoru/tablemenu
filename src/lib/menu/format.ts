@@ -16,12 +16,21 @@ const NAMED_ENTITIES: Record<string, string> = {
   nbsp: " ",
 };
 
+/** String.fromCodePoint, except invalid code points (>0x10FFFF, surrogates) become U+FFFD. */
+function codePointChar(n: number): string {
+  try {
+    return String.fromCodePoint(n);
+  } catch {
+    return "�";
+  }
+}
+
 /** Strip HTML tags and decode the entities BGG descriptions carry. */
 export function decodeHtml(raw: string): string {
   return raw
     .replace(/<[^>]+>/g, " ")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&#(\d+);/g, (_, n) => codePointChar(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => codePointChar(parseInt(n, 16)))
     .replace(/&([a-z]+);/gi, (m, name) => NAMED_ENTITIES[name.toLowerCase()] ?? m)
     .replace(/\s+/g, " ")
     .trim();
