@@ -14,7 +14,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const session = await getServerSession(req, res, authOptions);
-  const userId = session ? (session.user as any).id : null;
+  // authorize() returns id as a string, so this has to be converted before it
+  // reaches Prisma — an unconverted value fails with "Argument `userId`:
+  // Invalid value provided. Expected Int, provided String", which the catch
+  // below turns into a 500. Same fix as b7b3ea7 applied to the four sibling
+  // routes; this one was missed.
+  const userId = session ? Number((session.user as any).id) : null;
 
   try {
     const game = await prisma.games.findUnique({
