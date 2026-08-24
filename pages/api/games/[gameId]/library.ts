@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const session = await getServerSession(req, res, authOptions);
   if (!session?.user) return res.status(401).json({ error: "Not authenticated" });
 
-  const userId = (session.user as any).id as number;
+  const userId = Number((session.user as any).id);
   const gameId = parseInt(req.query.gameId as string);
 
   if (isNaN(gameId)) return res.status(400).json({ error: "Invalid gameId" });

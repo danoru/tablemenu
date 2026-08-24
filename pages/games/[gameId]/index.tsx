@@ -34,6 +34,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import TimerIcon from "@mui/icons-material/Timer";
 import StarIcon from "@mui/icons-material/Star";
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -43,6 +44,7 @@ import {
   DialogContent,
   Divider,
   IconButton,
+  Snackbar,
   TextareaAutosize,
   Tooltip,
   Typography,
@@ -152,6 +154,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
   const [isWantToPlay, setIsWantToPlay] = React.useState(game.userGame?.isWishlist ?? false);
   const [libraryLoading, setLibraryLoading] = React.useState(false);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = React.useState(false);
+  const [removeError, setRemoveError] = React.useState<string | null>(null);
 
   const [notes, setNotes] = React.useState(game.userGame?.notes ?? "");
   const [notesSaved, setNotesSaved] = React.useState(false);
@@ -187,11 +190,20 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
     setLibraryLoading(true);
     try {
       const res = await fetch(`/api/games/${game.gameId}/library`, { method: "DELETE" });
-      if (!res.ok) return;
+      if (!res.ok) {
+        setRemoveError(
+          res.status === 404
+            ? "That game is no longer in your library."
+            : "Couldn't remove this game. Please try again."
+        );
+        return;
+      }
       setInLibrary(false);
       setIsFavorite(false);
       setIsWantToPlay(false);
       setNotes("");
+    } catch {
+      setRemoveError("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setLibraryLoading(false);
       setConfirmRemoveOpen(false);
@@ -899,6 +911,17 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        autoHideDuration={5000}
+        open={!!removeError}
+        onClose={() => setRemoveError(null)}
+      >
+        <Alert severity="error" sx={{ fontFamily: FONT_SANS }} onClose={() => setRemoveError(null)}>
+          {removeError}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

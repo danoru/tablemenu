@@ -23,6 +23,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DownloadIcon from "@mui/icons-material/Download";
 import SearchIcon from "@mui/icons-material/Search";
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -31,6 +32,7 @@ import {
   DialogContent,
   InputAdornment,
   OutlinedInput,
+  Snackbar,
   Typography,
 } from "@mui/material";
 import { GetServerSideProps } from "next";
@@ -56,6 +58,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
   const [pendingRemove, setPendingRemove] = React.useState<LibraryGame | null>(null);
   const [removeLoading, setRemoveLoading] = React.useState(false);
+  const [removeError, setRemoveError] = React.useState<string | null>(null);
 
   const filtered = React.useMemo(() => {
     let result = library;
@@ -97,8 +100,19 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
     setRemoveLoading(true);
     try {
       const res = await fetch(`/api/games/${gameId}/library`, { method: "DELETE" });
-      if (!res.ok) return;
+      if (!res.ok) {
+        setRemoveError(
+          res.status === 404
+            ? "That game is no longer in your library."
+            : "Couldn't remove this game. Please try again."
+        );
+        setPendingRemove(null);
+        return;
+      }
       setLibrary((prev) => prev.filter((g) => g.gameId !== gameId));
+      setPendingRemove(null);
+    } catch {
+      setRemoveError("Couldn't reach the server. Check your connection and try again.");
       setPendingRemove(null);
     } finally {
       setRemoveLoading(false);
@@ -361,6 +375,17 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        autoHideDuration={5000}
+        open={!!removeError}
+        onClose={() => setRemoveError(null)}
+      >
+        <Alert severity="error" sx={{ fontFamily: FONT_SANS }} onClose={() => setRemoveError(null)}>
+          {removeError}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

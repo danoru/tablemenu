@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(401).json({ error: "Not authenticated" });
   }
 
-  const userId = (session.user as any).id as number;
+  const userId = Number((session.user as any).id);
 
   try {
     const userGames = await prisma.userGames.findMany({
