@@ -20,6 +20,7 @@ import {
 import { Form, Formik } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import * as Yup from "yup";
 
@@ -86,13 +87,34 @@ export default function RegistrationForm() {
       const data = await res.json();
 
       if (res.ok) {
-        setSnackbar({ open: true, message: "Account created! Redirecting…", severity: "success" });
-        resetForm();
+        setSnackbar({
+          open: true,
+          message: "Account created! Signing you in…",
+          severity: "success",
+        });
         const next = safeNextPath(router.query);
-        const loginUrl = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
-        setTimeout(() => router.push(loginUrl), 1500);
+
+        // Sign the new account straight in rather than bouncing to /login and
+        // making someone retype the credentials they just chose.
+        const signInRes = await signIn("credentials", {
+          username: values.username,
+          password: values.password,
+          redirect: false,
+        });
+        resetForm();
+
+        if (signInRes?.error) {
+          // Account exists, session doesn't — send them to sign in manually.
+          const loginUrl = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
+          router.push(loginUrl);
+          return;
+        }
+        router.replace(next ?? "/dashboard");
       } else {
-        if (data.error === "Username already exists.") {
+        // A 400 here is effectively always "that username is taken" — the
+        // format and length rules are enforced client-side before submit — so
+        // pin the message to the field instead of only flashing a snackbar.
+        if (res.status === 400 && data.error) {
           setFieldError("username", data.error);
         }
         setSnackbar({

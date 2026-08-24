@@ -154,7 +154,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
   const [isWantToPlay, setIsWantToPlay] = React.useState(game.userGame?.isWishlist ?? false);
   const [libraryLoading, setLibraryLoading] = React.useState(false);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = React.useState(false);
-  const [removeError, setRemoveError] = React.useState<string | null>(null);
+  const [actionError, setActionError] = React.useState<string | null>(null);
 
   const [notes, setNotes] = React.useState(game.userGame?.notes ?? "");
   const [notesSaved, setNotesSaved] = React.useState(false);
@@ -174,13 +174,21 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
   async function handleAddToLibrary() {
     setLibraryLoading(true);
     try {
-      await fetch("/api/games/add", {
+      const res = await fetch("/api/games/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gameId: game.gameId }),
       });
+      // Flipping the button before knowing the write landed meant an expired
+      // session showed "In your library" for a game that was never added.
+      if (!res.ok) {
+        setActionError("Couldn't add this game. Please try again.");
+        return;
+      }
       setInLibrary(true);
       setIsWantToPlay(false);
+    } catch {
+      setActionError("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setLibraryLoading(false);
     }
@@ -191,7 +199,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
     try {
       const res = await fetch(`/api/games/${game.gameId}/library`, { method: "DELETE" });
       if (!res.ok) {
-        setRemoveError(
+        setActionError(
           res.status === 404
             ? "That game is no longer in your library."
             : "Couldn't remove this game. Please try again."
@@ -203,31 +211,54 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
       setIsWantToPlay(false);
       setNotes("");
     } catch {
-      setRemoveError("Couldn't reach the server. Check your connection and try again.");
+      setActionError("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setLibraryLoading(false);
       setConfirmRemoveOpen(false);
     }
   }
 
+  // Both toggles stay optimistic (they should feel instant) but now roll back
+  // and say so when the write is rejected, instead of leaving the UI showing a
+  // state the server never accepted.
   async function handleToggleFavorite() {
     const next = !isFavorite;
     setIsFavorite(next);
-    await fetch(`/api/games/${game.gameId}/favorite`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isFavorite: next }),
-    });
+    try {
+      const res = await fetch(`/api/games/${game.gameId}/favorite`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFavorite: next }),
+      });
+      if (!res.ok) {
+        setIsFavorite(!next);
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error ?? "Couldn't update favourite. Please try again.");
+      }
+    } catch {
+      setIsFavorite(!next);
+      setActionError("Couldn't reach the server. Check your connection and try again.");
+    }
   }
 
   async function handleToggleWantToPlay() {
     const next = !isWantToPlay;
     setIsWantToPlay(next);
-    await fetch(`/api/games/${game.gameId}/wishlist`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isWishlist: next }),
-    });
+    try {
+      const res = await fetch(`/api/games/${game.gameId}/wishlist`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isWishlist: next }),
+      });
+      if (!res.ok) {
+        setIsWantToPlay(!next);
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error ?? "Couldn't update your wishlist. Please try again.");
+      }
+    } catch {
+      setIsWantToPlay(!next);
+      setActionError("Couldn't reach the server. Check your connection and try again.");
+    }
   }
 
   function handleNotesChange(value: string) {
@@ -236,27 +267,45 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
     if (notesTimeout.current) clearTimeout(notesTimeout.current);
     notesTimeout.current = setTimeout(async () => {
       setNotesLoading(true);
-      await fetch(`/api/games/${game.gameId}/notes`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notes: value }),
-      });
-      setNotesLoading(false);
-      setNotesSaved(true);
-      setTimeout(() => setNotesSaved(false), 2000);
+      try {
+        const res = await fetch(`/api/games/${game.gameId}/notes`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notes: value }),
+        });
+        // "Saved ✓" used to appear even when the write failed.
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setActionError(data.error ?? "Couldn't save your notes. Please try again.");
+          return;
+        }
+        setNotesSaved(true);
+        setTimeout(() => setNotesSaved(false), 2000);
+      } catch {
+        setActionError("Couldn't reach the server. Your notes weren't saved.");
+      } finally {
+        setNotesLoading(false);
+      }
     }, 800);
   }
 
   async function handleSaveRating() {
     setRatingLoading(true);
     try {
-      await fetch(`/api/games/${game.gameId}/rate`, {
+      const res = await fetch(`/api/games/${game.gameId}/rate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stars, review }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error ?? "Couldn't save your rating. Please try again.");
+        return;
+      }
       setRatingSaved(true);
       setTimeout(() => setRatingSaved(false), 2000);
+    } catch {
+      setActionError("Couldn't reach the server. Your rating wasn't saved.");
     } finally {
       setRatingLoading(false);
     }
@@ -915,11 +964,11 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         autoHideDuration={5000}
-        open={!!removeError}
-        onClose={() => setRemoveError(null)}
+        open={!!actionError}
+        onClose={() => setActionError(null)}
       >
-        <Alert severity="error" sx={{ fontFamily: FONT_SANS }} onClose={() => setRemoveError(null)}>
-          {removeError}
+        <Alert severity="error" sx={{ fontFamily: FONT_SANS }} onClose={() => setActionError(null)}>
+          {actionError}
         </Alert>
       </Snackbar>
     </>

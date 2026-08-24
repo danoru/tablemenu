@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     const room = await prisma.rooms.findUnique({
       where: { code: code.toUpperCase() },
-      select: { id: true, isActive: true },
+      select: { id: true, isActive: true, hostId: true },
     });
 
     if (!room) return res.status(404).json({ error: "Room not found" });
@@ -66,6 +66,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         });
         return res.status(200).json({ message: "Game added to tonight's list" });
       }
+    }
+
+    // The host clears the table; anyone else may only take back their own game
+    // (handled by "bring" above). This branch was declared in the Action union
+    // but never implemented, so the request fell through to "Invalid action".
+    if (action.type === "remove") {
+      if (room.hostId !== userId) {
+        return res.status(403).json({ error: "Only the host can remove another player's game" });
+      }
+      const removed = await prisma.roomGameSuggestions.deleteMany({
+        where: { roomId: room.id, gameId: action.gameId },
+      });
+      if (removed.count === 0) {
+        return res.status(404).json({ error: "That game isn't on the table" });
+      }
+      // Votes for a game that's no longer on the table would otherwise linger
+      // and reappear if someone brings it back.
+      await prisma.roomGameVotes.deleteMany({ where: { roomId: room.id, gameId: action.gameId } });
+      return res.status(200).json({ message: "Game removed from tonight's list" });
     }
 
     if (action.type === "vote") {

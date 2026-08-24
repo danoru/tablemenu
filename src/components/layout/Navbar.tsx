@@ -27,10 +27,13 @@ interface NavPage {
 function getPages(session: any, onSignOut: () => void): NavPage[] {
   if (session) {
     return [
-      { id: 1, title: "Games", link: "/games", variant: "tab" },
-      { id: 2, title: "Menu", link: "/menu", variant: "tab" },
-      { id: 3, title: "Players", link: "/players", variant: "tab" },
-      { id: 4, title: "Sign out", action: onSignOut, variant: "muted" },
+      // Rooms live on the dashboard; without this entry a member who joined by
+      // link had no route back to the table.
+      { id: 1, title: "My tables", link: "/dashboard", variant: "tab" },
+      { id: 2, title: "Games", link: "/games", variant: "tab" },
+      { id: 3, title: "Menu", link: "/menu", variant: "tab" },
+      { id: 4, title: "Players", link: "/players", variant: "tab" },
+      { id: 5, title: "Sign out", action: onSignOut, variant: "muted" },
     ];
   }
 

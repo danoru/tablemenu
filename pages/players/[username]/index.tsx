@@ -119,6 +119,20 @@ export default function UserProfilePage({
   const [followerCount, setFollowerCount] = React.useState(initialFollowerCount);
   const [followLoading, setFollowLoading] = React.useState(false);
 
+  // The website field is free text a user controls and the API doesn't
+  // validate. Only render it as a link if it's really http(s) — otherwise a
+  // `javascript:` value would be handed to the browser as a navigation target,
+  // and a bare "mysite.com" would resolve against our own origin.
+  const safeWebsite = React.useMemo(() => {
+    if (!profileUser.website) return null;
+    try {
+      const url = new URL(profileUser.website);
+      return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : null;
+    } catch {
+      return null;
+    }
+  }, [profileUser.website]);
+
   const libraryPreview = [...library]
     .sort((a, b) => {
       if (a.isFavorite !== b.isFavorite) return a.isFavorite ? -1 : 1;
@@ -300,15 +314,18 @@ export default function UserProfilePage({
                       </Typography>
                     </Box>
                   )}
-                  {profileUser.website && (
+                  {safeWebsite && (
                     <Box
+                      component="a"
+                      href={safeWebsite}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow ugc"
                       sx={{
                         display: "flex",
                         alignItems: "center",
                         gap: "4px",
-                        cursor: "pointer",
+                        textDecoration: "none",
                       }}
-                      onClick={() => window.open(profileUser.website!, "_blank")}
                     >
                       <LinkIcon sx={{ fontSize: "14px", color: BRICK }} />
                       <Typography
@@ -321,7 +338,7 @@ export default function UserProfilePage({
                           transition: "color 0.15s",
                         }}
                       >
-                        {profileUser.website.replace(/^https?:\/\//, "")}
+                        {safeWebsite.replace(/^https?:\/\//, "")}
                       </Typography>
                     </Box>
                   )}

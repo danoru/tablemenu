@@ -134,7 +134,7 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
           }}
         >
           <Typography
-            onClick={() => router.push(`/users/${profileUsername}`)}
+            onClick={() => router.push(`/players/${profileUsername}`)}
             sx={{
               fontFamily: FONT_SANS,
               fontSize: "12px",

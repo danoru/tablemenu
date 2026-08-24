@@ -15,6 +15,7 @@ import StatCard from "@/components/ui/StatCard";
 import GameArt from "@/components/games/GameArt";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
+import { loginRedirect } from "@/lib/redirect";
 import CasinoIcon from "@mui/icons-material/Casino";
 import GroupsIcon from "@mui/icons-material/Groups";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
@@ -72,6 +73,8 @@ interface DashboardProps {
     type: string;
     playerCount: number | null;
     createdAt: string;
+    isHost: boolean;
+    hostUsername: string;
   }[];
   library: LibraryGame[];
   nightsHosted: number;
@@ -352,7 +355,11 @@ export default function DashboardPage({
                           }}
                         >
                           {room.code}
-                          {room.playerCount ? ` · ${room.playerCount} players` : ""}
+                          {room.isHost
+                            ? room.playerCount
+                              ? ` · ${room.playerCount} players`
+                              : ""
+                            : ` · hosted by ${room.hostUsername}`}
                         </Typography>
                       </Box>
                       <Box
@@ -427,18 +434,32 @@ export default function DashboardPage({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
-  if (!session?.user) return { redirect: { destination: "/login", permanent: false } };
+  if (!session?.user) return loginRedirect(context.resolvedUrl);
 
   const userId = Number((session.user as any).id);
   const username = (session.user as any).username ?? "Player";
 
   const { default: prisma } = await import("@data/db");
 
+  // Every active table you're at, not just the ones you host — a member who
+  // joined by link has no other way back to the room.
   const [activeRooms, sessionCount] = await Promise.all([
     prisma.rooms.findMany({
-      where: { hostId: userId, isActive: true },
+      where: {
+        isActive: true,
+        invites: { some: { userId, status: "ACCEPTED" } },
+      },
       orderBy: { createdAt: "desc" },
-      select: { id: true, name: true, code: true, type: true, playerCount: true, createdAt: true },
+      select: {
+        id: true,
+        name: true,
+        code: true,
+        type: true,
+        playerCount: true,
+        createdAt: true,
+        hostId: true,
+        host: { select: { username: true } },
+      },
     }),
     prisma.roomSessions.count({ where: { hostId: userId, status: "CLOSED" } }),
   ]);
@@ -447,9 +468,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
-      activeRooms: activeRooms.map((r) => ({
+      activeRooms: activeRooms.map(({ host, hostId, ...r }) => ({
         ...r,
         createdAt: r.createdAt.toISOString(),
+        isHost: hostId === userId,
+        hostUsername: host.username,
       })),
       library,
       nightsHosted: sessionCount,

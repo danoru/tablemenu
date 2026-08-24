@@ -8,3 +8,21 @@ export function safeNextPath(query: {
   if (next.startsWith("//")) return null;
   return next;
 }
+
+/**
+ * The getServerSideProps redirect for a signed-out visitor, carrying where they
+ * were headed so /login can return them there. Without the `next` hop, anyone
+ * following a shared link to a gated page landed on /dashboard instead.
+ *
+ * `resolvedUrl` is trusted (Next builds it from the matched route), but it is
+ * run through the same same-origin check as any client-supplied value.
+ */
+export function loginRedirect(resolvedUrl: string) {
+  const next = safeNextPath({ next: resolvedUrl });
+  return {
+    redirect: {
+      destination: next ? `/login?next=${encodeURIComponent(next)}` : "/login",
+      permanent: false,
+    },
+  };
+}

@@ -34,6 +34,7 @@ import React from "react";
 import * as Yup from "yup";
 
 import { authOptions } from "@/lib/authOptions";
+import { loginRedirect } from "@/lib/redirect";
 import prisma from "@data/db";
 
 const inputSx = {
@@ -663,7 +664,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { code } = context.params as { code: string };
   const session = await getServerSession(context.req, context.res, authOptions);
 
-  if (!session?.user) return { redirect: { destination: "/login", permanent: false } };
+  if (!session?.user) return loginRedirect(context.resolvedUrl);
 
   const userId = Number((session.user as any).id);
   const username = (session.user as any).username ?? "";

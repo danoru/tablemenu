@@ -11,9 +11,7 @@ import {
   Alert,
   Box,
   Button,
-  Checkbox,
   CircularProgress,
-  FormControlLabel,
   Snackbar,
   TextField,
   Typography,
@@ -60,13 +58,12 @@ export default function LoginForm() {
   const [snackbarSeverity, setSnackbarSeverity] = React.useState<"success" | "error">("success");
 
   async function handleSubmit(
-    values: { username: string; password: string; rememberMe: boolean },
+    values: { username: string; password: string },
     { setSubmitting, setErrors }: any
   ) {
     const response = await signIn("credentials", {
       username: values.username,
       password: values.password,
-      remember: values.rememberMe,
       redirect: false,
     });
 
@@ -143,7 +140,7 @@ export default function LoginForm() {
           }}
         >
           <Formik
-            initialValues={{ username: "", password: "", rememberMe: false }}
+            initialValues={{ username: "", password: "" }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
@@ -180,29 +177,6 @@ export default function LoginForm() {
                   onBlur={handleBlur}
                   onChange={handleChange}
                   sx={inputSx}
-                />
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={values.rememberMe}
-                      name="rememberMe"
-                      onChange={handleChange}
-                      sx={{
-                        color: "rgba(51,39,26,0.4)",
-                        "&.Mui-checked": { color: "primary.main" },
-                        padding: "6px 8px",
-                      }}
-                    />
-                  }
-                  label={
-                    <Typography
-                      sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: "text.secondary" }}
-                    >
-                      Remember me
-                    </Typography>
-                  }
-                  sx={{ mb: "20px", ml: "-6px" }}
                 />
 
                 <Button

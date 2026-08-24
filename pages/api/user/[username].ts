@@ -58,8 +58,47 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const session = await getServerSession(req, res, authOptions);
 
-    if (!session?.user || (session.user as any).username !== username) {
+    // username is citext in Postgres, and the GET above already compares
+    // case-insensitively. Comparing raw here meant visiting your own profile
+    // at a different case rendered an editable page whose save then 403'd.
+    const isOwnProfile =
+      !!session?.user &&
+      ((session.user as any).username as string).toLowerCase() === username.toLowerCase();
+    if (!isOwnProfile) {
       return res.status(403).json({ message: "Unauthorized." });
+    }
+
+    // The client form enforces these with Yup, but the endpoint is reachable
+    // directly — an unvalidated `website` becomes a link rendered to every
+    // visitor of the profile.
+    for (const [field, value, max] of [
+      ["firstName", firstName, 50],
+      ["lastName", lastName, 50],
+      ["location", location, 100],
+      ["bio", bio, 280],
+    ] as const) {
+      if (value === undefined || value === null) continue;
+      if (typeof value !== "string") {
+        return res.status(400).json({ message: `${field} must be text.` });
+      }
+      if (value.length > max) {
+        return res.status(400).json({ message: `${field} must be ${max} characters or fewer.` });
+      }
+    }
+
+    if (website !== undefined && website !== null && website !== "") {
+      if (typeof website !== "string") {
+        return res.status(400).json({ message: "Website must be text." });
+      }
+      let parsed: URL;
+      try {
+        parsed = new URL(website);
+      } catch {
+        return res.status(400).json({ message: "Website must be a full URL including https://" });
+      }
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+        return res.status(400).json({ message: "Website must be an http or https URL." });
+      }
     }
 
     try {

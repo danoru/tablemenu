@@ -16,6 +16,7 @@ import {
 import { LibraryGame } from "@pages/api/games/library";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { getServerSession } from "next-auth";
 import React from "react";
 
@@ -24,6 +25,7 @@ import SectionCard from "@/components/menu/SectionCard";
 import ExportMenuButton from "@/components/pdf/ExportMenuButton";
 import { getUserLibrary } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
+import { loginRedirect } from "@/lib/redirect";
 import { generateMenu, makeRng, rerollSlot } from "@/lib/menu/generate";
 import { menuStats, playHoursLabel, sawtoothPoints, splitSections } from "@/lib/menu/layout";
 import type { GeneratedMenu, SectionConfig } from "@/lib/menu/types";
@@ -126,6 +128,7 @@ function StatBadge({
 }
 
 export default function MenuPage({ library, username, userId }: Props) {
+  const router = useRouter();
   const [mode, setMode] = React.useState<"solo" | "room">("solo");
   const [roomCode, setRoomCode] = React.useState("");
   const [roomError, setRoomError] = React.useState("");
@@ -157,48 +160,28 @@ export default function MenuPage({ library, username, userId }: Props) {
     setRoomLoading(true);
     setRoomError("");
     try {
-      const res = await fetch(`/api/rooms/${roomCode.toUpperCase()}`);
-      const data = await res.json();
+      // Full game records, not the trimmed shapes the room poll carries. The
+      // poll has no categories/mechanics/complexity/description, so building
+      // the pool from it silently produced a worse menu than solo mode: no
+      // Today's Special (needs tags), no Desserts (needs favourites/ratings),
+      // and no tasting notes, spice meters or rating badges on any row.
+      const res = await fetch(`/api/rooms/${roomCode.toUpperCase()}/pool`);
+      const data = await res.json().catch(() => ({}));
       if (res.status === 403) {
-        // A room's game pool is member data — the main GET is member-only.
+        // A room's game pool is member data — the endpoint is member-only.
         setRoomError("Join this room first to use its game pool.");
         return;
       }
-      if (!res.ok || !data.room) {
+      if (!res.ok || !Array.isArray(data.pool)) {
         setRoomError("Room not found. Check the code and try again.");
         return;
       }
-      const pool: LibraryGame[] = data.room.suggestions
-        .filter((s: any) => s.bringing)
-        .map(
-          (s: any): LibraryGame => ({
-            userGameId: s.gameId,
-            gameId: s.gameId,
-            addedAt: "",
-            weight: 1,
-            notes: null,
-            bggId: null,
-            name: s.name,
-            description: null,
-            imageUrl: s.imageUrl,
-            isFavorite: false,
-            isWishlist: false,
-            minPlayers: s.minPlayers,
-            maxPlayers: s.maxPlayers,
-            minPlaytime: s.minPlaytime,
-            maxPlaytime: s.maxPlaytime,
-            complexity: null,
-            bggRating: null,
-            categories: [],
-            mechanics: [],
-            designers: [],
-            publishers: [],
-            yearPublished: null,
-            userStars: null,
-          })
-        );
-      setRoomPool(pool);
-      setRoomName(data.room.name);
+      if (data.pool.length === 0) {
+        setRoomError("That room has no games on the table yet.");
+        return;
+      }
+      setRoomPool(data.pool as LibraryGame[]);
+      setRoomName(data.roomName ?? "");
       setMode("room");
       setMenu(null);
     } catch {
@@ -260,6 +243,9 @@ export default function MenuPage({ library, username, userId }: Props) {
 
   const hasMenu = menu !== null;
   const poolSize = activePool.length;
+  // Only the solo path can be empty here — room mode refuses to connect to a
+  // room with nothing on the table.
+  const emptyPool = mode === "solo" && poolSize === 0;
 
   // Programme sheet layout — same two-column + feature split as the PDF.
   const programme = menu ? splitSections(menu.sections, menu.selection) : null;
@@ -482,32 +468,73 @@ export default function MenuPage({ library, username, userId }: Props) {
               </Box>
             )}
           </Box>
-          <Button
-            fullWidth
-            disabled={generating || (mode === "room" && !roomPool)}
-            startIcon={
-              generating ? (
-                <CircularProgress size={18} sx={{ color: "text.disabled" }} />
-              ) : (
-                <AutoAwesomeIcon />
-              )
-            }
-            sx={{
-              fontFamily: FONT_SERIF,
-              fontSize: "17px",
-              fontStyle: "italic",
-              padding: "14px",
-              mb: "36px",
-            }}
-            variant="contained"
-            onClick={handleGenerate}
-          >
-            {generating
-              ? "Planning your evening…"
-              : hasMenu
-                ? "Regenerate menu"
-                : "Plan my evening"}
-          </Button>
+          {/* An empty pool produced a full programme sheet of "left to the
+              chef's discretion" with no hint of what to do about it. */}
+          {emptyPool ? (
+            <Box
+              sx={{
+                backgroundColor: "background.paper",
+                border: BORDER_INK,
+                borderRadius: "13px",
+                boxShadow: SHADOW_HARD,
+                padding: "36px 28px",
+                textAlign: "center",
+                mb: "36px",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontFamily: FONT_SERIF,
+                  fontStyle: "italic",
+                  fontSize: "20px",
+                  fontWeight: 700,
+                  color: "text.primary",
+                  mb: "8px",
+                }}
+              >
+                The pantry&apos;s empty
+              </Typography>
+              <Typography
+                sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM, mb: "20px" }}
+              >
+                Add a few games to your library and Tablekeeper will build the evening around them.
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={() => router.push(`/players/${username}/library`)}
+                sx={{ fontSize: "14px", padding: "10px 24px" }}
+              >
+                Add games to my library
+              </Button>
+            </Box>
+          ) : (
+            <Button
+              fullWidth
+              disabled={generating || (mode === "room" && !roomPool)}
+              startIcon={
+                generating ? (
+                  <CircularProgress size={18} sx={{ color: "text.disabled" }} />
+                ) : (
+                  <AutoAwesomeIcon />
+                )
+              }
+              sx={{
+                fontFamily: FONT_SERIF,
+                fontSize: "17px",
+                fontStyle: "italic",
+                padding: "14px",
+                mb: "36px",
+              }}
+              variant="contained"
+              onClick={handleGenerate}
+            >
+              {generating
+                ? "Planning your evening…"
+                : hasMenu
+                  ? "Regenerate menu"
+                  : "Plan my evening"}
+            </Button>
+          )}
 
           {hasMenu && !generating && menu && programme && stats && (
             <Box>
@@ -759,7 +786,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
 
   if (!session?.user) {
-    return { redirect: { destination: "/login", permanent: false } };
+    return loginRedirect(context.resolvedUrl);
   }
 
   const currentUserId = Number((session.user as any).id);

@@ -14,6 +14,7 @@ import {
   TINT_OLIVE,
 } from "@/styles/theme";
 import type { RoomSuggestion } from "@api/rooms/[code]/index";
+import CloseIcon from "@mui/icons-material/Close";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
@@ -26,19 +27,34 @@ export default function GameDetailSuggestions({
   currentUserId,
   onVote,
   onToggleBring,
+  onHostRemove,
   loadingGameId,
   playedLastSession,
+  suggestedByUsername,
 }: {
   suggestion: RoomSuggestion;
   isHost: boolean;
   currentUserId: number;
   onVote: (gameId: number, interested: boolean) => void;
   onToggleBring: (gameId: number) => void;
+  /** Host-only: clear anyone's game off the table. */
+  onHostRemove: (gameId: number) => void;
   loadingGameId: number | null;
   playedLastSession?: boolean;
+  /** Display name of whoever put this game on the table, when known. */
+  suggestedByUsername?: string;
 }) {
   const isBringing = suggestion.suggestedBy === currentUserId;
   const isLoading = loadingGameId === suggestion.gameId;
+  // Only the person who brought a game may take it off the table (the API
+  // enforces this). Showing an enabled button to everyone else meant a click
+  // that could only ever 403 — disable it and say whose game it is instead.
+  const broughtByOther = suggestion.suggestedBy !== null && !isBringing;
+  const bringTooltip = isBringing
+    ? "Remove from tonight"
+    : broughtByOther
+      ? `${suggestedByUsername ?? "Another player"} is bringing this`
+      : "I'm bringing this";
 
   return (
     <Box
@@ -167,24 +183,27 @@ export default function GameDetailSuggestions({
         </Box>
       </Box>
       <Box sx={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-        <Tooltip title={isBringing ? "Remove from tonight" : "I'm bringing this"} placement="top">
-          <IconButton
-            onClick={() => onToggleBring(suggestion.gameId)}
-            disabled={isLoading}
-            size="small"
-            sx={{
-              background: isBringing ? TINT_OLIVE : "transparent",
-              border: `1.5px solid ${isBringing ? OLIVE : "rgba(51,39,26,0.3)"}`,
-              borderRadius: "8px",
-              color: isBringing ? OLIVE : TEXT_FAINT,
-              "&:hover": {
-                background: isBringing ? TINT_OLIVE : "rgba(51,39,26,0.05)",
-                borderColor: isBringing ? OLIVE : INK,
-              },
-            }}
-          >
-            <DirectionsWalkIcon sx={{ fontSize: "16px" }} />
-          </IconButton>
+        <Tooltip title={bringTooltip} placement="top">
+          {/* span keeps the tooltip alive while the button is disabled */}
+          <span>
+            <IconButton
+              onClick={() => onToggleBring(suggestion.gameId)}
+              disabled={isLoading || broughtByOther}
+              size="small"
+              sx={{
+                background: isBringing ? TINT_OLIVE : "transparent",
+                border: `1.5px solid ${isBringing ? OLIVE : "rgba(51,39,26,0.3)"}`,
+                borderRadius: "8px",
+                color: isBringing ? OLIVE : TEXT_FAINT,
+                "&:hover": {
+                  background: isBringing ? TINT_OLIVE : "rgba(51,39,26,0.05)",
+                  borderColor: isBringing ? OLIVE : INK,
+                },
+              }}
+            >
+              <DirectionsWalkIcon sx={{ fontSize: "16px" }} />
+            </IconButton>
+          </span>
         </Tooltip>
         <Tooltip title="I want to play this" placement="top">
           <IconButton
@@ -218,6 +237,24 @@ export default function GameDetailSuggestions({
             <ThumbDownIcon sx={{ fontSize: "16px" }} />
           </IconButton>
         </Tooltip>
+        {isHost && broughtByOther && (
+          <Tooltip title="Take this off the table" placement="top">
+            <IconButton
+              onClick={() => onHostRemove(suggestion.gameId)}
+              disabled={isLoading}
+              size="small"
+              sx={{
+                background: "transparent",
+                border: "1.5px solid rgba(51,39,26,0.3)",
+                borderRadius: "8px",
+                color: TEXT_FAINT,
+                "&:hover": { background: TINT_BRICK, borderColor: BRICK, color: BRICK },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: "16px" }} />
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
     </Box>
   );

@@ -1,4 +1,5 @@
 import { authOptions } from "@/lib/authOptions";
+import { loginRedirect } from "@/lib/redirect";
 import {
   BORDER_INK,
   FONT_SANS,
@@ -350,7 +351,7 @@ export default function NewRoomPage({ username }: Props) {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
   if (!session?.user) {
-    return { redirect: { destination: "/login", permanent: false } };
+    return loginRedirect(context.resolvedUrl);
   }
   return {
     props: { username: (session.user as any).username ?? "" },

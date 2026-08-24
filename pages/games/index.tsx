@@ -53,6 +53,7 @@ export default function GamesIndexPage() {
   const [total, setTotal] = React.useState(0);
   const [page, setPage] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
+  const [loadError, setLoadError] = React.useState("");
   const [filtersOpen, setFiltersOpen] = React.useState(false);
 
   const [filters, setFilters] = React.useState<Filters>({
@@ -85,6 +86,7 @@ export default function GamesIndexPage() {
 
   async function fetchGames(f: Filters, p: number, append = false) {
     setLoading(true);
+    setLoadError("");
     try {
       const params = new URLSearchParams();
       if (f.q) params.set("q", f.q);
@@ -97,10 +99,18 @@ export default function GamesIndexPage() {
       params.set("page", String(p));
 
       const res = await fetch(`/api/games?${params.toString()}`);
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
+      // Without this guard a failed request set `games` to undefined and the
+      // grid crashed to a blank page instead of showing anything.
+      if (!res.ok || !Array.isArray(data?.games)) {
+        setLoadError("Couldn't load games. Please try again.");
+        return;
+      }
       setGames((prev) => (append ? [...prev, ...data.games] : data.games));
-      setTotal(data.total);
+      setTotal(typeof data.total === "number" ? data.total : 0);
       setPage(p);
+    } catch {
+      setLoadError("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -190,7 +200,11 @@ export default function GamesIndexPage() {
               <Typography
                 sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_FAINT, mt: "4px" }}
               >
-                {total > 0 ? `${total.toLocaleString()} games in the database` : "Loading…"}
+                {loading && games.length === 0
+                  ? "Loading…"
+                  : loadError
+                    ? "Couldn't load the catalogue"
+                    : `${total.toLocaleString()} games in the database`}
               </Typography>
             </Box>
 
@@ -425,6 +439,29 @@ export default function GamesIndexPage() {
               >
                 Try adjusting your search or filters
               </Typography>
+            </Box>
+          )}
+          {loadError && (
+            <Box
+              sx={{
+                backgroundColor: "background.paper",
+                border: BORDER_INK,
+                borderRadius: "13px",
+                padding: "28px 24px",
+                textAlign: "center",
+                mb: "20px",
+              }}
+            >
+              <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: BRICK }}>
+                {loadError}
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={() => fetchGames(filters, 0)}
+                sx={{ mt: "14px", fontSize: "13px", padding: "8px 20px" }}
+              >
+                Retry
+              </Button>
             </Box>
           )}
           <GameGrid games={games} />

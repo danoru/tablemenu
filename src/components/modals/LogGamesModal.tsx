@@ -28,6 +28,7 @@ import {
   Typography,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
+import type { LibraryGame } from "@pages/api/games/library";
 import { RoomMember, RoomSuggestion } from "@pages/api/rooms/[code]";
 import React from "react";
 
@@ -38,10 +39,18 @@ const SlideUp = React.forwardRef(function SlideUp(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
+/** A game the host can log: the room pool plus their own library. */
+interface LoggableGame {
+  gameId: number;
+  name: string;
+  inPool: boolean;
+}
+
 export default function LogGamesModal({
   open,
   onClose,
   suggestions,
+  library,
   members,
   presentMemberIds,
   code,
@@ -51,6 +60,8 @@ export default function LogGamesModal({
   open: boolean;
   onClose: () => void;
   suggestions: RoomSuggestion[];
+  /** The host's library, so an unplanned game can still be logged. */
+  library: LibraryGame[];
   members: RoomMember[];
   /** Members present tonight — the default player selection. Undefined → all. */
   presentMemberIds?: number[];
@@ -62,15 +73,38 @@ export default function LogGamesModal({
 
   // Default to the members marked present tonight (attendance is soft — anyone
   // can still be hand-checked in the list below). Falls back to all members.
-  const defaultPlayerIds = React.useCallback(() => {
+  //
+  // Held in a ref, not a useCallback: the room page rebuilds `members` and
+  // `presentMemberIds` on every 5s poll, so a callback identity that tracked
+  // them would re-fire the reset effect below mid-edit and wipe the host's
+  // ticked players and winners. The effect keys off `open` alone; this ref
+  // makes sure it still reads the freshest roster when it does run.
+  const defaultPlayerIdsRef = React.useRef<() => number[]>(() => []);
+  defaultPlayerIdsRef.current = () => {
     const present = presentMemberIds ? new Set(presentMemberIds) : null;
     return members
       .filter((m) => m.status === "ACCEPTED")
       .filter((m) => !present || present.has(m.userId))
       .map((m) => m.userId);
-  }, [members, presentMemberIds]);
+  };
+  const defaultPlayerIds = () => defaultPlayerIdsRef.current();
 
-  const [selectedGame, setSelectedGame] = React.useState<RoomSuggestion | null>(null);
+  const [gameQuery, setGameQuery] = React.useState("");
+  const [selectedGame, setSelectedGame] = React.useState<LoggableGame | null>(null);
+
+  // The pool first (that was the plan), then anything else in the host's
+  // library, so an unplanned game can still be recorded.
+  const gameOptions: LoggableGame[] = React.useMemo(() => {
+    const pooled = new Set(suggestions.map((s) => s.gameId));
+    const combined: LoggableGame[] = [
+      ...suggestions.map((s) => ({ gameId: s.gameId, name: s.name, inPool: true })),
+      ...library
+        .filter((g) => !pooled.has(g.gameId))
+        .map((g) => ({ gameId: g.gameId, name: g.name, inPool: false })),
+    ];
+    const q = gameQuery.trim().toLowerCase();
+    return q ? combined.filter((g) => g.name.toLowerCase().includes(q)) : combined;
+  }, [suggestions, library, gameQuery]);
   const [selectedPlayers, setSelectedPlayers] = React.useState<number[]>(defaultPlayerIds());
   const [winnerIds, setWinnerIds] = React.useState<number[]>([]);
   const [duration, setDuration] = React.useState("");
@@ -89,16 +123,18 @@ export default function LogGamesModal({
   }, []);
 
   // The members/attendance props refresh while the dialog is closed (the room
-  // page polls) — recompute the default selection each time it opens.
+  // page polls) — recompute the default selection each time it opens. Depends
+  // on `open` only, so a poll landing mid-edit can't reset the form.
   React.useEffect(() => {
     if (open) {
-      setSelectedPlayers(defaultPlayerIds());
+      setSelectedPlayers(defaultPlayerIdsRef.current());
       setWinnerIds([]);
     }
-  }, [open, defaultPlayerIds]);
+  }, [open]);
 
   function handleClose() {
     setSelectedGame(null);
+    setGameQuery("");
     setSelectedPlayers(defaultPlayerIds());
     setWinnerIds([]);
     setDuration("");
@@ -199,8 +235,26 @@ export default function LogGamesModal({
         >
           Which game?
         </Typography>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: "6px", mb: "24px" }}>
-          {suggestions.length === 0 ? (
+        {/* Nights rarely stick to the plan — let the host log something that
+            was never put on the table, not just what's in the pool. */}
+        <OutlinedInput
+          fullWidth
+          value={gameQuery}
+          onChange={(e) => setGameQuery(e.target.value)}
+          placeholder="Search the pool or your library…"
+          sx={{ fontFamily: FONT_SANS, fontSize: "14px", mb: "10px" }}
+        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px",
+            mb: "24px",
+            maxHeight: "260px",
+            overflowY: "auto",
+          }}
+        >
+          {gameOptions.length === 0 ? (
             <Typography
               sx={{
                 fontFamily: FONT_SANS,
@@ -209,10 +263,12 @@ export default function LogGamesModal({
                 fontStyle: "italic",
               }}
             >
-              No games in the pool yet.
+              {gameQuery
+                ? "No games match that search."
+                : "No games in the pool or your library yet."}
             </Typography>
           ) : (
-            suggestions.map((s) => (
+            gameOptions.map((s) => (
               <Box
                 key={s.gameId}
                 onClick={() => setSelectedGame(s)}
@@ -264,6 +320,21 @@ export default function LogGamesModal({
                 >
                   {s.name}
                 </Typography>
+                {!s.inPool && (
+                  <Typography
+                    sx={{
+                      fontFamily: FONT_SANS,
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      letterSpacing: "0.6px",
+                      textTransform: "uppercase",
+                      color: TEXT_FAINT,
+                      flexShrink: 0,
+                    }}
+                  >
+                    from library
+                  </Typography>
+                )}
                 {selectedGame?.gameId === s.gameId && (
                   <CheckCircleIcon sx={{ fontSize: "16px", color: "primary.main" }} />
                 )}

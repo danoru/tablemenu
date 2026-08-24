@@ -257,16 +257,52 @@ function AuthenticatedRoomPage({
 
   const isHost = room.hostId === currentUserId;
 
+  /**
+   * Pull the room and re-sync everything derived from it. `activeSessionId` is
+   * kept in its own state so the host's open/close buttons respond instantly,
+   * but it must track the server too — otherwise a member who loaded the page
+   * before the host opened tonight never sees the session go live.
+   */
+  const refreshRoom = React.useCallback(async () => {
+    const res = await fetch(`/api/rooms/${code}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.room) return;
+    setRoom(data.room);
+    setActiveSessionId(data.room.activeSessionId ?? null);
+  }, [code]);
+
   React.useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/rooms/${code}`);
-        const data = await res.json();
-        if (res.ok && data.room) setRoom(data.room);
-      } catch {}
+    const interval = setInterval(() => {
+      refreshRoom().catch(() => {});
     }, 5000);
     return () => clearInterval(interval);
-  }, [code]);
+  }, [refreshRoom]);
+
+  /**
+   * POST a room action, refresh on success, and surface the server's reason on
+   * failure. Every one of these can legitimately 403 — bringing a game someone
+   * else added, acting in a room you've been removed from — and a button that
+   * silently does nothing reads as a broken app.
+   */
+  async function postRoomAction(body: unknown, fallbackMessage: string): Promise<boolean> {
+    try {
+      const res = await fetch(`/api/rooms/${code}/games`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setSnackbar({ open: true, message: data.error ?? fallbackMessage, severity: "error" });
+        return false;
+      }
+      await refreshRoom();
+      return true;
+    } catch {
+      setSnackbar({ open: true, message: fallbackMessage, severity: "error" });
+      return false;
+    }
+  }
 
   function handleCopyCode() {
     navigator.clipboard.writeText(room.code);
@@ -280,17 +316,7 @@ function AuthenticatedRoomPage({
   async function handleToggleBring(gameId: number) {
     setLoadingGameId(gameId);
     try {
-      const res = await fetch(`/api/rooms/${code}/games`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "bring", gameId }),
-      });
-      if (res.ok) {
-        const data = await (await fetch(`/api/rooms/${code}`)).json();
-        if (data.room) setRoom(data.room);
-      }
-    } catch {
-      setSnackbar({ open: true, message: "Failed to update.", severity: "error" });
+      await postRoomAction({ type: "bring", gameId }, "Failed to update.");
     } finally {
       setLoadingGameId(null);
     }
@@ -308,8 +334,7 @@ function AuthenticatedRoomPage({
         body: JSON.stringify({ userId, present }),
       });
       if (res.ok) {
-        const data = await (await fetch(`/api/rooms/${code}`)).json();
-        if (data.room) setRoom(data.room);
+        await refreshRoom();
       } else {
         const data = await res.json().catch(() => ({}));
         setSnackbar({
@@ -328,17 +353,7 @@ function AuthenticatedRoomPage({
   async function handleVote(gameId: number, interested: boolean) {
     setLoadingGameId(gameId);
     try {
-      const res = await fetch(`/api/rooms/${code}/games`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "vote", gameId, interested }),
-      });
-      if (res.ok) {
-        const data = await (await fetch(`/api/rooms/${code}`)).json();
-        if (data.room) setRoom(data.room);
-      }
-    } catch {
-      setSnackbar({ open: true, message: "Failed to record vote.", severity: "error" });
+      await postRoomAction({ type: "vote", gameId, interested }, "Failed to record vote.");
     } finally {
       setLoadingGameId(null);
     }
@@ -347,17 +362,16 @@ function AuthenticatedRoomPage({
   async function handleAddFromLibrary(gameId: number) {
     setLoadingGameId(gameId);
     try {
-      const res = await fetch(`/api/rooms/${code}/games`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "bring", gameId }),
-      });
-      if (res.ok) {
-        const data = await (await fetch(`/api/rooms/${code}`)).json();
-        if (data.room) setRoom(data.room);
-      }
-    } catch {
-      setSnackbar({ open: true, message: "Failed to add game.", severity: "error" });
+      await postRoomAction({ type: "bring", gameId }, "Failed to add game.");
+    } finally {
+      setLoadingGameId(null);
+    }
+  }
+
+  async function handleHostRemove(gameId: number) {
+    setLoadingGameId(gameId);
+    try {
+      await postRoomAction({ type: "remove", gameId }, "Failed to remove game.");
     } finally {
       setLoadingGameId(null);
     }
@@ -374,10 +388,7 @@ function AuthenticatedRoomPage({
       if (res.ok) {
         setActiveSessionId(data.sessionId);
         // Pull in the freshly-seeded attendance rows for the new session.
-        try {
-          const refreshed = await (await fetch(`/api/rooms/${code}`)).json();
-          if (refreshed.room) setRoom(refreshed.room);
-        } catch {}
+        await refreshRoom().catch(() => {});
         setSnackbar({ open: true, message: "Tonight's session is open!", severity: "success" });
       } else {
         setSnackbar({
@@ -406,8 +417,7 @@ function AuthenticatedRoomPage({
       if (res.ok) {
         setActiveSessionId(null);
         setSnackbar({ open: true, message: "Session closed. Good night!", severity: "success" });
-        const pollData = await (await fetch(`/api/rooms/${code}`)).json();
-        if (pollData.room) setRoom(pollData.room);
+        await refreshRoom().catch(() => {});
       } else {
         setSnackbar({
           open: true,
@@ -702,8 +712,12 @@ function AuthenticatedRoomPage({
                     currentUserId={currentUserId}
                     onVote={handleVote}
                     onToggleBring={handleToggleBring}
+                    onHostRemove={handleHostRemove}
                     loadingGameId={loadingGameId}
                     playedLastSession={room.lastSessionGameIds.includes(s.gameId)}
+                    suggestedByUsername={
+                      room.members.find((m) => m.userId === s.suggestedBy)?.username
+                    }
                   />
                 ))
               )}
@@ -1014,6 +1028,7 @@ function AuthenticatedRoomPage({
         open={logOpen}
         onClose={() => setLogOpen(false)}
         suggestions={room.suggestions}
+        library={library}
         members={room.members}
         presentMemberIds={room.members
           .filter((m) => m.status === "ACCEPTED" && isPresent(m.userId))
@@ -1085,7 +1100,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         name: true,
         code: true,
         host: { select: { username: true } },
-        _count: { select: { invites: true, gameSuggs: true } },
+        // Count ACCEPTED invites only — `_count.invites` included PENDING and
+        // DECLINED rows, so the signed-out preview advertised a bigger table
+        // than the signed-in one for the same room.
+        invites: { where: { status: "ACCEPTED" }, select: { userId: true } },
+        _count: { select: { gameSuggs: true } },
       },
     });
     if (!room) return { notFound: true };
@@ -1096,7 +1115,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           name: room.name,
           code: room.code,
           hostUsername: room.host.username,
-          memberCount: room._count.invites,
+          memberCount: room.invites.length,
           suggestionCount: room._count.gameSuggs,
           viewerStatus: "GUEST" as const,
         },

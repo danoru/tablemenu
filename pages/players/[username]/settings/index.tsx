@@ -88,7 +88,7 @@ export default function EditProfilePage({ username, initial }: Props) {
 
       if (res.ok) {
         setSnackbar({ open: true, message: "Profile updated!", severity: "success" });
-        setTimeout(() => router.push(`/users/${username}`), 1200);
+        setTimeout(() => router.push(`/players/${username}`), 1200);
       } else {
         const data = await res.json();
         setSnackbar({
@@ -131,7 +131,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                 cursor: "pointer",
                 "&:hover": { color: TEXT_DIM },
               }}
-              onClick={() => router.push(`/users/${username}`)}
+              onClick={() => router.push(`/players/${username}`)}
             >
               ← Back to profile
             </Typography>
@@ -367,7 +367,7 @@ export default function EditProfilePage({ username, initial }: Props) {
                       )}
                     </Button>
                     <Button
-                      onClick={() => router.push(`/users/${username}`)}
+                      onClick={() => router.push(`/players/${username}`)}
                       sx={{
                         backgroundColor: "background.paper",
                         border: BORDER_INK,
@@ -417,8 +417,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { username } = context.params as { username: string };
   const session = await getServerSession(context.req, context.res, authOptions);
 
-  if (!session?.user || (session.user as any).username !== username) {
-    return { redirect: { destination: `/users/${username}`, permanent: false } };
+  // Case-insensitive to match the citext username column (and the API).
+  const isOwnProfile =
+    !!session?.user &&
+    ((session.user as any).username as string).toLowerCase() === username.toLowerCase();
+  if (!isOwnProfile) {
+    return { redirect: { destination: `/players/${username}`, permanent: false } };
   }
 
   const { default: prisma } = await import("@data/db");

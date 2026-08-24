@@ -58,7 +58,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       data: { status: "CLOSED", closedAt: new Date(), playerCount },
     });
 
-    if (req.body.clearSession) {
+    // req.body is undefined for a POST sent without a body — reading through
+    // it threw before this guard.
+    if ((req.body ?? {}).clearSession) {
       await prisma.roomGameSuggestions.deleteMany({ where: { roomId: room.id } });
       await prisma.roomGameVotes.deleteMany({ where: { roomId: room.id } });
     }
