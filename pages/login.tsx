@@ -69,7 +69,14 @@ export default function LoginForm() {
 
     if (response?.error) {
       setErrors({ submit: response.error });
-      setSnackbarMessage("Login failed. Your credentials do not match.");
+      // next-auth reports bad credentials as the "CredentialsSignin" code;
+      // anything else is a real message thrown by authorize() (rate limiting)
+      // and should be shown as-is.
+      setSnackbarMessage(
+        response.error === "CredentialsSignin"
+          ? "Login failed. Your credentials do not match."
+          : response.error
+      );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } else {
