@@ -33,29 +33,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   for (const game of games) {
     try {
-      // Collection imports can't return link arrays, so don't let an empty
-      // incoming array clobber data a prior enrich/backfill already populated.
-      const nonEmpty = <T>(incoming: T[]): { set: T[] } | undefined =>
-        incoming.length > 0 ? { set: incoming } : undefined;
-
+      // `update: {}` on purpose: Games is a shared catalogue and this payload
+      // is client-supplied, so updating an existing row from it let any user
+      // rewrite the record every other player sees. An existing row wins; the
+      // upsert stays race-safe for concurrent first imports of the same game.
+      // The enrich route (which fetches from BGG server-side) fills in missing
+      // link data safely.
       const dbGame = await prisma.games.upsert({
         where: { bggId: game.bggId },
-        update: {
-          name: game.name,
-          imageUrl: game.imageUrl || null,
-          minPlayers: game.minPlayers,
-          maxPlayers: game.maxPlayers,
-          minPlaytime: game.minPlaytime,
-          maxPlaytime: game.maxPlaytime,
-          complexity: game.complexity,
-          bggRating: game.bggRating,
-          categories: nonEmpty(game.categories),
-          mechanics: nonEmpty(game.mechanics),
-          designers: nonEmpty(game.designers),
-          publishers: nonEmpty(game.publishers),
-          countries: nonEmpty(game.countries),
-          bggLastSynced: new Date(),
-        },
+        update: {},
         create: {
           bggId: game.bggId,
           name: game.name,

@@ -58,25 +58,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         return res.status(400).json({ error: "Missing required game fields" });
       }
 
+      // The image URL is rendered as an <img src> to every user who sees this
+      // game — accept only real http(s) URLs.
+      if (body.imageUrl) {
+        let parsed: URL;
+        try {
+          parsed = new URL(body.imageUrl);
+        } catch {
+          return res.status(400).json({ error: "imageUrl must be a valid URL" });
+        }
+        if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+          return res.status(400).json({ error: "imageUrl must be an http(s) URL" });
+        }
+      }
+
+      // `update: {}` on purpose: the Games table is a shared catalogue, and the
+      // request body is client-supplied — updating an existing row from it let
+      // any user rewrite the record (name, art, stats) every other player sees.
+      // An existing row wins; the upsert stays race-safe for concurrent first
+      // adds of the same bggId. Refreshing stale BGG data belongs to the
+      // server-side enrich path, which fetches from BGG itself.
       const game = await prisma.games.upsert({
         where: { bggId: bggId ?? -1 },
-        update: {
-          name,
-          description: body.description,
-          imageUrl: body.imageUrl,
-          minPlayers,
-          maxPlayers,
-          minPlaytime: body.minPlaytime,
-          maxPlaytime: body.maxPlaytime,
-          complexity: body.complexity,
-          bggRating: body.bggRating,
-          categories: body.categories ?? [],
-          bggLastSynced: new Date(),
-          mechanics: body.mechanics ?? [],
-          designers: body.designers ?? [],
-          publishers: body.publishers ?? [],
-          countries: body.countries ?? [],
-        },
+        update: {},
         create: {
           bggId: bggId ?? null,
           name,
