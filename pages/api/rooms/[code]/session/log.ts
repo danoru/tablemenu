@@ -125,14 +125,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
 
     // Achievements run outside the transaction — they're fire-safe (internally
-    // try/caught) and must not roll back a committed log.
-    for (let i = 0; i < createdSessionIds.length; i++) {
-      for (const pid of playerIdsByGame[i]) {
-        await checkAchievements(pid, {
-          event: "SESSION_CLOSED",
-          sessionId: createdSessionIds[i],
-        });
-      }
+    // try/caught) and must not roll back a committed log. One check per unique
+    // player: the SESSION_CLOSED checks recompute from the player's whole
+    // history, so per-game repeats were identical work (a 3-game night for 6
+    // players ran 18 full passes before the host got a response).
+    const uniquePlayerIds = new Set(playerIdsByGame.flat());
+    for (const pid of uniquePlayerIds) {
+      await checkAchievements(pid, {
+        event: "SESSION_CLOSED",
+        sessionId: createdSessionIds[createdSessionIds.length - 1],
+      });
     }
 
     return res.status(201).json({ message: "Games logged successfully" });
