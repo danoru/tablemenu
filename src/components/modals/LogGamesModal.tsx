@@ -28,7 +28,7 @@ import {
   Typography,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
-import type { LibraryGame } from "@pages/api/games/library";
+import type { SlimGame } from "@/data/games";
 import { RoomMember, RoomSuggestion } from "@pages/api/rooms/[code]";
 import React from "react";
 
@@ -60,8 +60,8 @@ export default function LogGamesModal({
   open: boolean;
   onClose: () => void;
   suggestions: RoomSuggestion[];
-  /** The host's library, so an unplanned game can still be logged. */
-  library: LibraryGame[];
+  /** The host's library (names only), so an unplanned game can still be logged. */
+  library: SlimGame[];
   members: RoomMember[];
   /** Members present tonight — the default player selection. Undefined → all. */
   presentMemberIds?: number[];

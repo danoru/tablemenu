@@ -1,8 +1,14 @@
 import { gameColor, initials } from "@/lib/helpers";
 import { FONT_SERIF, INK } from "@/styles/theme";
 import { Box, Typography } from "@mui/material";
-import { LibraryGame } from "@pages/api/games/library";
 import React from "react";
+
+/** Everything this component actually reads — any game-shaped object will do,
+ *  not just a full LibraryGame. */
+export interface GameArtGame {
+  name: string;
+  imageUrl: string | null;
+}
 
 // flush: rendered inside a bordered card frame that supplies its own border/radius
 // fullWidth: fill the parent's width as a square (grid-card art) instead of a fixed pixel size
@@ -12,7 +18,7 @@ export default function GameArt({
   flush = false,
   fullWidth = false,
 }: {
-  game: LibraryGame;
+  game: GameArtGame;
   size?: number;
   flush?: boolean;
   fullWidth?: boolean;
