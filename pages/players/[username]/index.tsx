@@ -1,7 +1,8 @@
 import GameArt from "@/components/games/GameArt";
 import CompatibilityCard from "@/components/players/CompatibilityCard";
+import { NOT_SYSTEM_USER } from "@data/users";
 import TasteProfileCard from "@/components/players/TasteProfileCard";
-import { getUserGamesForTaste, getUserLibrary } from "@/data/games";
+import { getUserGamesForTaste, getWishlistSlim, type SlimGame } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import { avatarColor } from "@/lib/helpers";
 import { buildTasteProfile, type TasteProfile } from "@/services/tasteProfile";
@@ -27,7 +28,6 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import { Box, Button, CircularProgress, Divider, Typography } from "@mui/material";
 import Header from "@/components/layout/Header";
-import { LibraryGame } from "@pages/api/games/library";
 import type { Users } from "@prisma/client";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
@@ -97,8 +97,11 @@ interface Props {
   isFollowing: boolean;
   followerCount: number;
   followingCount: number;
-  library: LibraryGame[];
-  wantToPlay: LibraryGame[];
+  /** Owned-game total; the full library never ships to this page. */
+  libraryCount: number;
+  /** Top six cards, already sorted server-side (favorites, then stars, then recency). */
+  libraryPreview: SlimGame[];
+  wantToPlay: SlimGame[];
   tasteProfile: TasteProfile;
   showCompatibility: boolean;
 }
@@ -109,7 +112,8 @@ export default function UserProfilePage({
   isFollowing: initialIsFollowing,
   followerCount: initialFollowerCount,
   followingCount,
-  library,
+  libraryCount,
+  libraryPreview,
   wantToPlay,
   tasteProfile,
   showCompatibility,
@@ -133,15 +137,6 @@ export default function UserProfilePage({
     }
   }, [profileUser.website]);
 
-  const libraryPreview = [...library]
-    .sort((a, b) => {
-      if (a.isFavorite !== b.isFavorite) return a.isFavorite ? -1 : 1;
-      const aStars = a.userStars ?? -1;
-      const bStars = b.userStars ?? -1;
-      if (aStars !== bStars) return bStars - aStars;
-      return b.addedAt.localeCompare(a.addedAt);
-    })
-    .slice(0, 6);
   const wantToPlayPreview = wantToPlay.slice(0, 6);
 
   async function handleFollow() {
@@ -174,7 +169,7 @@ export default function UserProfilePage({
         description={
           profileUser.bio
             ? profileUser.bio
-            : `${profileUser.username}'s board game library on Tablekeeper — ${library.length} ${library.length === 1 ? "game" : "games"}${wantToPlay.length > 0 ? `, ${wantToPlay.length} on the wishlist` : ""}.`
+            : `${profileUser.username}'s board game library on Tablekeeper — ${libraryCount} ${libraryCount === 1 ? "game" : "games"}${wantToPlay.length > 0 ? `, ${wantToPlay.length} on the wishlist` : ""}.`
         }
         type="profile"
       />
@@ -439,7 +434,7 @@ export default function UserProfilePage({
               />
               <PlayerPill
                 label="games owned"
-                value={library.length}
+                value={libraryCount}
                 onClick={() => router.push(`/players/${profileUser.username}/library`)}
               />
               {wantToPlay.length > 0 && (
@@ -505,7 +500,7 @@ export default function UserProfilePage({
                   transition: "color 0.15s",
                 }}
               >
-                View all {library.length} games →
+                View all {libraryCount} games →
               </Typography>
             </Box>
 
@@ -682,10 +677,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       image: true,
       badge: true,
       joinDate: true,
+      // Filtered the same way the followers/following lists are, so the
+      // counts on the profile match the rows those pages actually render.
       _count: {
         select: {
-          followedBy: true,
-          following: true,
+          followedBy: { where: { user: NOT_SYSTEM_USER } },
+          following: { where: { following: NOT_SYSTEM_USER } },
         },
       },
     },
@@ -695,12 +692,26 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { notFound: true };
   }
 
-  const [library, tasteGames] = await Promise.all([
-    getUserLibrary(user.id),
+  // One slim scan feeds the taste profile, the count, and the preview;
+  // wishlist rows come from their own query — getUserLibrary excludes them by
+  // design, which is why the old `library.filter(g => g.isWishlist)` here was
+  // always empty and "Want to Play" never rendered.
+  const [tasteGames, wantToPlay] = await Promise.all([
     getUserGamesForTaste(user.id),
+    getWishlistSlim(user.id),
   ]);
-  const wantToPlay = library.filter((g) => g.isWishlist);
   const tasteProfile = buildTasteProfile(tasteGames);
+
+  const libraryPreview: SlimGame[] = [...tasteGames]
+    .sort((a, b) => {
+      if (a.isFavorite !== b.isFavorite) return a.isFavorite ? -1 : 1;
+      const aStars = a.userStars ?? -1;
+      const bStars = b.userStars ?? -1;
+      if (aStars !== bStars) return bStars - aStars;
+      return b.addedAt.localeCompare(a.addedAt);
+    })
+    .slice(0, 6)
+    .map((g) => ({ gameId: g.gameId, name: g.name, imageUrl: g.imageUrl }));
 
   let isFollowing = false;
   if (currentUserId && currentUserId !== user.id) {
@@ -715,7 +726,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     isFollowing = !!follow;
   }
 
-  const isSelf = currentUsername === username;
+  // Compare against the DB's canonical casing — usernames are citext, so
+  // /players/AnnaM must still read as "self" for annam (same fix the user API
+  // already carries).
+  const isSelf =
+    !!currentUsername && (currentUsername as string).toLowerCase() === user.username.toLowerCase();
   const showCompatibility = !!currentUserId && !isSelf;
 
   const { _count, ...profileUser } = user;
@@ -726,7 +741,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     isFollowing,
     followerCount: _count.followedBy,
     followingCount: _count.following,
-    library,
+    libraryCount: tasteGames.length,
+    libraryPreview,
     wantToPlay,
     tasteProfile,
     showCompatibility,
