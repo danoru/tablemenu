@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import * as yup from "yup";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
 import prisma from "@data/db";
+import { isSystemUsername } from "@data/users";
 
 const schema = yup.object({
   username: yup
@@ -36,7 +37,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     const { username, password } = body;
 
-    const existingUser = await prisma.users.findUnique({ where: { username } });
+    // Reserved for the seeded/QA bot accounts the social surfaces hide. Without
+    // this a real player could pick a name that makes them invisible.
+    const existingUser = isSystemUsername(username)
+      ? true
+      : await prisma.users.findUnique({ where: { username } });
     if (existingUser) {
       // Deliberately vague — don't confirm which usernames exist.
       return res.status(400).json({ error: "That username can't be used. Please pick another." });

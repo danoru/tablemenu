@@ -1,6 +1,6 @@
 import { authOptions } from "@/lib/authOptions";
 import { avatarColor } from "@/lib/helpers";
-import { getAllUsers } from "@data/users";
+import { getAllUsers, type PublicUser } from "@data/users";
 import {
   BORDER_INK,
   BRICK,
@@ -26,7 +26,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import type { Users } from "@prisma/client";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
@@ -39,7 +38,7 @@ function avatarInitial(name: string): string {
 }
 
 interface Props {
-  users: Users[];
+  users: PublicUser[];
   currentUserId: number | null;
   currentUsername: string | null;
   initialFollowing: number[];
@@ -58,12 +57,11 @@ export default function UsersPage({
 
   const filtered = React.useMemo(() => {
     const q = search.toLowerCase().trim();
-    return users
-      .filter((u) => u.username !== "guest")
-      .filter((u) => !q || u.username.toLowerCase().includes(q));
+    // Bot/system accounts are already excluded server-side by getAllUsers.
+    return users.filter((u) => !q || u.username.toLowerCase().includes(q));
   }, [users, search]);
 
-  async function handleFollow(targetUser: Users) {
+  async function handleFollow(targetUser: PublicUser) {
     if (!currentUserId) {
       router.push("/login");
       return;

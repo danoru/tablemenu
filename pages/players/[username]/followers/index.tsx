@@ -1,4 +1,5 @@
 import UserListRow, { UserListEntry } from "@/components/players/UserListRow";
+import { NOT_SYSTEM_USER } from "@data/users";
 import { authOptions } from "@/lib/authOptions";
 import { FONT_SANS, FONT_SERIF, TEXT_DIM, TEXT_FAINT } from "@/styles/theme";
 import { Box, Typography } from "@mui/material";
@@ -124,7 +125,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const rows = await prisma.following.findMany({
-    where: { followingUserId: profileUser.id },
+    where: { followingUserId: profileUser.id, user: NOT_SYSTEM_USER },
     orderBy: { addedAt: "desc" },
     select: {
       user: {

@@ -1,5 +1,6 @@
 import { authOptions } from "@/lib/authOptions";
 import prisma from "@data/db";
+import { isSystemUsername } from "@data/users";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 
@@ -33,9 +34,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (action === "follow") {
       const target = await prisma.users.findUnique({
         where: { id: Number(followingUserId) },
-        select: { id: true },
+        select: { id: true, username: true },
       });
       if (!target) return res.status(404).json({ error: "User not found." });
+      // Bot/system accounts are hidden from every player list; don't let a
+      // hand-crafted request befriend one anyway.
+      if (isSystemUsername(target.username)) {
+        return res.status(404).json({ error: "User not found." });
+      }
 
       // Idempotent: re-following is a no-op, not a unique-constraint 500.
       await prisma.following.upsert({
