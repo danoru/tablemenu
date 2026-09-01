@@ -66,13 +66,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const currentUserId = Number((session.user as any).id);
 
   try {
+    // This endpoint is polled every 5s by every open room page — keep the
+    // payload to exactly what the suggestion cards render. Full game rows
+    // (description + five string arrays) don't belong here; the pool route
+    // exists for callers that need them.
     const room = await prisma.rooms.findUnique({
       where: { code: code.toUpperCase() },
       include: {
         host: { select: { id: true, username: true } },
         invites: { include: { user: { select: { id: true, username: true } } } },
-        gameSuggs: { include: { game: true, room: false } },
-        votes: true,
+        gameSuggs: {
+          select: {
+            gameId: true,
+            suggestedBy: true,
+            game: {
+              select: {
+                id: true,
+                name: true,
+                imageUrl: true,
+                minPlayers: true,
+                maxPlayers: true,
+                minPlaytime: true,
+                maxPlaytime: true,
+              },
+            },
+          },
+        },
+        votes: { select: { gameId: true, userId: true, interested: true } },
         sessions: {
           where: { status: "ACTIVE" },
           select: { id: true, attendance: { select: { userId: true, present: true } } },
