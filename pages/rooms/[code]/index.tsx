@@ -1,7 +1,7 @@
 import LogGamesModal from "@/components/modals/LogGamesModal";
 import RoomQuickGenModal from "@/components/modals/RoomQuickGenModal";
 import RoomSuggestions from "@/components/rooms/RoomSuggestions";
-import { getUserLibrary } from "@/data/games";
+import { getOwnedGamesSlim, type SlimGame } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import { avatarColor, gameColor, initials } from "@/lib/helpers";
 import {
@@ -38,7 +38,6 @@ import {
   Snackbar,
   Typography,
 } from "@mui/material";
-import { LibraryGame } from "@pages/api/games/library";
 import { GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import { useRouter } from "next/router";
@@ -61,7 +60,7 @@ type Props =
       preview: false;
       initialRoom: RoomData;
       currentUserId: number;
-      library: LibraryGame[];
+      library: SlimGame[];
       username: string;
     };
 
@@ -70,18 +69,25 @@ function RoomPreview({ room }: { room: PreviewRoom }) {
   const next = encodeURIComponent(`/rooms/${room.code}`);
   const [joining, setJoining] = React.useState(false);
   const [joinError, setJoinError] = React.useState("");
+  const [requested, setRequested] = React.useState(room.viewerStatus === "PENDING");
 
-  async function handleAcceptInvite() {
+  async function handleRequestJoin() {
     setJoining(true);
     setJoinError("");
     try {
       const res = await fetch(`/api/rooms/${room.code}/join`, { method: "POST" });
-      if (res.ok) {
-        router.reload();
-      } else {
-        const data = await res.json().catch(() => ({}));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
         setJoinError(data.error ?? "Couldn't join the room. Try again.");
+        return;
       }
+      // An invite-only room only records the request — reloading would drop
+      // the viewer back onto this same locked preview with no explanation.
+      if (data.status === "PENDING") {
+        setRequested(true);
+        return;
+      }
+      router.reload();
     } catch {
       setJoinError("Couldn't join the room. Try again.");
     } finally {
@@ -177,15 +183,32 @@ function RoomPreview({ room }: { room: PreviewRoom }) {
             </>
           )}
 
-          {(room.viewerStatus === "PENDING" || room.viewerStatus === "DECLINED") && (
+          {requested && (
+            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM }}>
+              Your request is with {room.hostUsername}. You'll get in as soon as they approve it.
+            </Typography>
+          )}
+
+          {!requested && room.viewerStatus === "DECLINED" && (
+            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM }}>
+              {room.hostUsername} declined this request. Ask them directly if that's a mistake.
+            </Typography>
+          )}
+
+          {!requested && room.viewerStatus === "NONE" && (
             <>
+              <Typography
+                sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM, mb: "16px" }}
+              >
+                This table is invite-only — {room.hostUsername} approves who sits down.
+              </Typography>
               <Button
                 disabled={joining}
                 variant="contained"
-                onClick={handleAcceptInvite}
+                onClick={handleRequestJoin}
                 sx={{ fontSize: "14px", padding: "10px 22px", width: "100%" }}
               >
-                {joining ? "Joining…" : "Accept invite & join"}
+                {joining ? "Sending…" : "Ask to join"}
               </Button>
               {joinError && (
                 <Typography
@@ -196,12 +219,6 @@ function RoomPreview({ room }: { room: PreviewRoom }) {
               )}
             </>
           )}
-
-          {room.viewerStatus === "NONE" && (
-            <Typography sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM }}>
-              This table is invite-only. Ask {room.hostUsername} for an invite.
-            </Typography>
-          )}
         </Box>
       </Box>
     </>
@@ -211,7 +228,7 @@ function RoomPreview({ room }: { room: PreviewRoom }) {
 interface AuthedRoomPageProps {
   initialRoom: RoomData;
   currentUserId: number;
-  library: LibraryGame[];
+  library: SlimGame[];
   username: string;
 }
 
@@ -254,6 +271,8 @@ function AuthenticatedRoomPage({
     message: string;
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
+
+  const [requestLoadingId, setRequestLoadingId] = React.useState<number | null>(null);
 
   const isHost = room.hostId === currentUserId;
 
@@ -304,8 +323,44 @@ function AuthenticatedRoomPage({
     }
   }
 
+  const pendingRequests = room.members.filter((m) => m.status === "PENDING");
+
+  async function handleRequest(userId: number, action: "approve" | "decline") {
+    setRequestLoadingId(userId);
+    try {
+      const res = await fetch(`/api/rooms/${code}/members`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSnackbar({
+          open: true,
+          message: data.error ?? "Couldn't update that request.",
+          severity: "error",
+        });
+        return;
+      }
+      setSnackbar({ open: true, message: data.message, severity: "success" });
+      await refreshRoom();
+    } catch {
+      setSnackbar({ open: true, message: "Couldn't update that request.", severity: "error" });
+    } finally {
+      setRequestLoadingId(null);
+    }
+  }
+
   function handleCopyCode() {
     navigator.clipboard.writeText(room.code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  // The invite panel offers a link, so copy a link. Sending only the six
+  // characters left the recipient with nowhere to type them.
+  function handleCopyLink() {
+    navigator.clipboard.writeText(`${window.location.origin}/rooms/${room.code}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -817,6 +872,121 @@ function AuthenticatedRoomPage({
             </Box>
 
             <Box>
+              {isHost && pendingRequests.length > 0 && (
+                <Box sx={{ mb: "24px" }}>
+                  <Typography
+                    sx={{
+                      fontFamily: FONT_SERIF,
+                      fontSize: "20px",
+                      fontWeight: 700,
+                      color: "text.primary",
+                      mb: "16px",
+                    }}
+                  >
+                    Asking to join
+                    <Box
+                      component="span"
+                      sx={{
+                        ml: "8px",
+                        fontFamily: FONT_SANS,
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        color: BRICK,
+                        border: `1.5px solid ${BRICK}`,
+                        borderRadius: "999px",
+                        padding: "2px 8px",
+                        verticalAlign: "middle",
+                      }}
+                    >
+                      {pendingRequests.length}
+                    </Box>
+                  </Typography>
+                  <Box
+                    sx={{
+                      backgroundColor: "background.paper",
+                      border: BORDER_INK,
+                      borderRadius: "13px",
+                      boxShadow: SHADOW_HARD,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {pendingRequests.map((member, i) => (
+                      <Box key={member.userId}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            padding: "12px 16px",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: "34px",
+                              height: "34px",
+                              borderRadius: "50%",
+                              background: avatarColor(member.username),
+                              border: BORDER_INK,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Typography
+                              sx={{
+                                fontFamily: FONT_SERIF,
+                                fontSize: "13px",
+                                fontWeight: 700,
+                                color: "rgba(255,251,240,0.9)",
+                                userSelect: "none",
+                              }}
+                            >
+                              {member.username.slice(0, 1).toUpperCase()}
+                            </Typography>
+                          </Box>
+                          <Typography
+                            sx={{
+                              flex: 1,
+                              minWidth: 0,
+                              fontFamily: FONT_SANS,
+                              fontSize: "14px",
+                              fontWeight: 500,
+                              color: "text.primary",
+                            }}
+                          >
+                            {member.username}
+                          </Typography>
+                          <Button
+                            disabled={requestLoadingId === member.userId}
+                            variant="contained"
+                            onClick={() => handleRequest(member.userId, "approve")}
+                            sx={{ fontSize: "12px", padding: "5px 14px" }}
+                          >
+                            {requestLoadingId === member.userId ? (
+                              <CircularProgress size={12} />
+                            ) : (
+                              "Approve"
+                            )}
+                          </Button>
+                          <Button
+                            disabled={requestLoadingId === member.userId}
+                            variant="outlined"
+                            onClick={() => handleRequest(member.userId, "decline")}
+                            sx={{ fontSize: "12px", padding: "5px 14px" }}
+                          >
+                            Decline
+                          </Button>
+                        </Box>
+                        {i < pendingRequests.length - 1 && (
+                          <Divider sx={{ borderColor: "divider", mx: "16px" }} />
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
               <Typography
                 sx={{
                   fontFamily: FONT_SERIF,
@@ -1007,10 +1177,10 @@ function AuthenticatedRoomPage({
                   fullWidth
                   startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
                   variant="outlined"
-                  onClick={handleCopyCode}
+                  onClick={handleCopyLink}
                   sx={{ mt: "10px", fontSize: "12px", padding: "7px" }}
                 >
-                  {copied ? "Copied!" : "Copy room code"}
+                  {copied ? "Copied!" : "Copy invite link"}
                 </Button>
               </Box>
             </Box>
@@ -1126,13 +1296,32 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const currentUserId = Number((session.user as any).id);
   const username = (session.user as any).username ?? "";
 
+  // Slim selects, mirroring the API GET this page polls: the suggestion card
+  // renders seven game fields, so full game rows (description + five string
+  // arrays) never load, and vote rows carry only what the counts need.
   const queryArgs = {
     where: { code: code.toUpperCase() },
     include: {
       host: { select: { id: true, username: true } },
       invites: { include: { user: { select: { id: true, username: true } } } },
-      gameSuggs: { include: { game: true } },
-      votes: true,
+      gameSuggs: {
+        select: {
+          gameId: true,
+          suggestedBy: true,
+          game: {
+            select: {
+              id: true,
+              name: true,
+              imageUrl: true,
+              minPlayers: true,
+              maxPlayers: true,
+              minPlaytime: true,
+              maxPlaytime: true,
+            },
+          },
+        },
+      },
+      votes: { select: { gameId: true, userId: true, interested: true } },
       sessions: {
         where: { status: "ACTIVE" as const },
         select: { id: true, attendance: { select: { userId: true, present: true } } },
@@ -1149,6 +1338,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const myInvite = room.invites.find((inv) => inv.userId === currentUserId);
   const isMember = myInvite?.status === "ACCEPTED";
   if (!isMember) {
+    // The join API refuses inactive rooms; the auto-join below must match, or
+    // an old link keeps enrolling people into an archived table. Existing
+    // members can still open it to read the history.
+    if (!room.isActive) return { notFound: true };
+
     // INVITE_ONLY rooms must not silently absorb any authenticated viewer.
     // Show the locked preview; PENDING invitees get an accept affordance.
     if (room.visibility === "INVITE_ONLY") {
@@ -1177,25 +1371,45 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (!room) return { notFound: true };
   }
 
-  const library = await getUserLibrary(currentUserId);
-
-  const lastClosedSession = await prisma.roomSessions.findFirst({
-    where: { roomId: room.id, status: "CLOSED" },
-    orderBy: { closedAt: "desc" },
-    include: {
-      gamePlayed: {
-        include: { games: { select: { gameId: true } } },
+  // This page only renders game names from the viewer's library ("Add from my
+  // library" and the log modal's picker), so the slim shape is enough.
+  const [library, lastClosedSession, wishlistEntries] = await Promise.all([
+    getOwnedGamesSlim(currentUserId),
+    prisma.roomSessions.findFirst({
+      where: { roomId: room.id, status: "CLOSED" },
+      orderBy: { closedAt: "desc" },
+      include: {
+        gamePlayed: {
+          include: { games: { select: { gameId: true } } },
+        },
       },
-    },
-  });
+    }),
+    // Same wishlist rollup the API GET makes — without it, "wishlisted"
+    // badges were missing from first paint until the first 5s poll.
+    prisma.userGames.findMany({
+      where: {
+        gameId: { in: room.gameSuggs.map((s) => s.gameId) },
+        userId: { in: room.invites.map((inv) => inv.userId) },
+        isWishlist: true,
+      },
+      select: { gameId: true, user: { select: { username: true } } },
+    }),
+  ]);
 
   const lastSessionGameIds =
     lastClosedSession?.gamePlayed.flatMap((gs) => gs.games.map((g) => g.gameId)) ?? [];
 
+  const wishlistMap = new Map<number, string[]>();
+  for (const entry of wishlistEntries) {
+    const existing = wishlistMap.get(entry.gameId) ?? [];
+    existing.push(entry.user.username);
+    wishlistMap.set(entry.gameId, existing);
+  }
+
   return {
     props: {
       preview: false as const,
-      initialRoom: buildRoomData(room, currentUserId, lastSessionGameIds),
+      initialRoom: buildRoomData(room, currentUserId, lastSessionGameIds, wishlistMap),
       currentUserId,
       library,
       username,
@@ -1206,7 +1420,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 function buildRoomData(
   room: any,
   currentUserId: number,
-  lastSessionGameIds: number[] = []
+  lastSessionGameIds: number[] = [],
+  wishlistMap: Map<number, string[]> = new Map()
 ): RoomData {
   const members = room.invites.map((inv: any) => ({
     userId: inv.user.id,
@@ -1232,6 +1447,7 @@ function buildRoomData(
       vetoCount,
       myVote: myVoteRecord ? myVoteRecord.interested : null,
       bringing: sugg.suggestedBy !== null,
+      wishlistedBy: wishlistMap.get(sugg.game.id) ?? [],
     };
   });
 
