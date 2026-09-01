@@ -13,7 +13,10 @@ import {
 } from "@/styles/theme";
 import StatCard from "@/components/ui/StatCard";
 import GameArt from "@/components/games/GameArt";
-import { getUserLibrary } from "@/data/games";
+import JoinRoomForm from "@/components/rooms/JoinRoomForm";
+import FriendActivityFeed from "@/components/players/FriendActivityFeed";
+import { getFriendActivity, type FriendActivityEvent } from "@/services/friendActivity";
+import type { SlimGame } from "@/data/games";
 import { authOptions } from "@/lib/authOptions";
 import { loginRedirect } from "@/lib/redirect";
 import CasinoIcon from "@mui/icons-material/Casino";
@@ -21,7 +24,6 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import { Box, Button, Divider, Typography } from "@mui/material";
-import { LibraryGame } from "@pages/api/games/library";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -76,23 +78,29 @@ interface DashboardProps {
     isHost: boolean;
     hostUsername: string;
   }[];
-  library: LibraryGame[];
+  /** The five most recently added games — the full library never ships here. */
+  recentGames: SlimGame[];
+  libraryCount: number;
   nightsHosted: number;
   username: string;
+  friendActivity: FriendActivityEvent[];
+  /** Distinguishes "you follow nobody" from "your friends have been quiet". */
+  followingCount: number;
 }
 
 export default function DashboardPage({
   activeRooms,
-  library,
+  recentGames,
+  libraryCount,
   nightsHosted,
   username,
+  friendActivity,
+  followingCount,
 }: DashboardProps) {
   const router = useRouter();
 
-  const recentGames = library.slice(0, 5);
-
   const stats = {
-    gamesOwned: library.length,
+    gamesOwned: libraryCount,
     nightsHosted: nightsHosted,
     activeRooms: activeRooms.length,
   };
@@ -273,6 +281,37 @@ export default function DashboardPage({
                 gap: "12px",
               }}
             >
+              <SectionHeader title="Your tables" />
+
+              <Box
+                sx={{
+                  backgroundColor: "background.paper",
+                  border: BORDER_INK,
+                  borderRadius: "13px",
+                  boxShadow: SHADOW_HARD,
+                  padding: "18px",
+                  mb: "4px",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: FONT_SANS,
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    color: "text.primary",
+                    mb: "2px",
+                  }}
+                >
+                  Got a room code?
+                </Typography>
+                <Typography
+                  sx={{ fontFamily: FONT_SANS, fontSize: "12px", color: TEXT_FAINT, mb: "12px" }}
+                >
+                  Enter the code your host shared to join their table.
+                </Typography>
+                <JoinRoomForm compact />
+              </Box>
+
               {activeRooms.length === 0 ? (
                 <Box
                   sx={{
@@ -388,43 +427,53 @@ export default function DashboardPage({
           </Box>
 
           <Box sx={{ mt: "32px" }}>
-            <SectionHeader title="Friend activity" />
-            <Box
-              sx={{
-                backgroundColor: "background.paper",
-                border: "2px solid rgba(51,39,26,0.15)",
-                borderRadius: "13px",
-                padding: "40px 24px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-              }}
-            >
-              <GroupsIcon sx={{ fontSize: "32px", color: TEXT_FAINT }} />
-              <Typography
+            <SectionHeader
+              title="Friend activity"
+              action={friendActivity.length > 0 ? "Find players" : undefined}
+              onAction={() => router.push("/players")}
+            />
+            {friendActivity.length === 0 ? (
+              <Box
                 sx={{
-                  fontFamily: FONT_SANS,
-                  fontSize: "14px",
-                  color: TEXT_FAINT,
-                  textAlign: "center",
+                  backgroundColor: "background.paper",
+                  border: "2px solid rgba(51,39,26,0.15)",
+                  borderRadius: "13px",
+                  padding: "40px 24px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
                 }}
               >
-                Follow other players to see their activity here
-              </Typography>
-              <Button
-                variant="outlined"
-                onClick={() => router.push("/players")}
-                sx={{
-                  fontSize: "13px",
-                  padding: "8px 18px",
-                  mt: "4px",
-                }}
-              >
-                Find players
-              </Button>
-            </Box>
+                <GroupsIcon sx={{ fontSize: "32px", color: TEXT_FAINT }} />
+                <Typography
+                  sx={{
+                    fontFamily: FONT_SANS,
+                    fontSize: "14px",
+                    color: TEXT_FAINT,
+                    textAlign: "center",
+                  }}
+                >
+                  {followingCount === 0
+                    ? "Follow other players to see their activity here"
+                    : "Nothing from your friends yet — check back after their next game night."}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={() => router.push("/players")}
+                  sx={{
+                    fontSize: "13px",
+                    padding: "8px 18px",
+                    mt: "4px",
+                  }}
+                >
+                  Find players
+                </Button>
+              </Box>
+            ) : (
+              <FriendActivityFeed events={friendActivity} />
+            )}
           </Box>
         </Box>
       </Box>
@@ -442,29 +491,39 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { default: prisma } = await import("@data/db");
 
   // Every active table you're at, not just the ones you host — a member who
-  // joined by link has no other way back to the room.
-  const [activeRooms, sessionCount] = await Promise.all([
-    prisma.rooms.findMany({
-      where: {
-        isActive: true,
-        invites: { some: { userId, status: "ACCEPTED" } },
-      },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        code: true,
-        type: true,
-        playerCount: true,
-        createdAt: true,
-        hostId: true,
-        host: { select: { username: true } },
-      },
-    }),
-    prisma.roomSessions.count({ where: { hostId: userId, status: "CLOSED" } }),
-  ]);
-
-  const library = await getUserLibrary(userId);
+  // joined by link has no other way back to the room. The library queries are
+  // deliberately slim: this page renders five recent games and a count, so it
+  // never loads (or serializes) full game records.
+  const [activeRooms, sessionCount, friendActivity, followingCount, recentRows, libraryCount] =
+    await Promise.all([
+      prisma.rooms.findMany({
+        where: {
+          isActive: true,
+          invites: { some: { userId, status: "ACCEPTED" } },
+        },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          type: true,
+          playerCount: true,
+          createdAt: true,
+          hostId: true,
+          host: { select: { username: true } },
+        },
+      }),
+      prisma.roomSessions.count({ where: { hostId: userId, status: "CLOSED" } }),
+      getFriendActivity(userId),
+      prisma.following.count({ where: { userId } }),
+      prisma.userGames.findMany({
+        where: { userId, isWishlist: false },
+        orderBy: { addedAt: "desc" },
+        take: 5,
+        select: { game: { select: { id: true, name: true, imageUrl: true } } },
+      }),
+      prisma.userGames.count({ where: { userId, isWishlist: false } }),
+    ]);
 
   return {
     props: {
@@ -474,9 +533,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         isHost: hostId === userId,
         hostUsername: host.username,
       })),
-      library,
+      recentGames: recentRows.map((r) => ({
+        gameId: r.game.id,
+        name: r.game.name,
+        imageUrl: r.game.imageUrl,
+      })),
+      libraryCount,
       nightsHosted: sessionCount,
       username,
+      friendActivity,
+      followingCount,
     },
   };
 };
