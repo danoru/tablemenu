@@ -1002,9 +1002,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   if (!game) return { notFound: true };
 
+  // Filter to the viewer's own plays in the database — fetching every session
+  // of the game and filtering in JS scaled with total app usage.
   const rawSessions = currentUserId
     ? await prisma.gameSessionGames.findMany({
-        where: { gameId: id },
+        where: { gameId: id, gameSession: { players: { some: { userId: currentUserId } } } },
         include: {
           gameSession: {
             include: {

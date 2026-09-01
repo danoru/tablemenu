@@ -37,9 +37,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!game) return res.status(404).json({ error: "Not found" });
 
+    // Only sessions the viewer actually played in. Without the relational
+    // filter this returned every GameSessions row for the game — other
+    // players' dates, durations, and free-text notes — to any signed-in user,
+    // and grew with total app usage rather than the viewer's history.
     const sessions = userId
       ? await prisma.gameSessionGames.findMany({
-          where: { gameId },
+          where: { gameId, gameSession: { players: { some: { userId } } } },
           include: {
             gameSession: {
               include: { players: { where: { userId } } },
