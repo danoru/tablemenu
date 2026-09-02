@@ -749,6 +749,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   });
 
   return {
-    props: serialized.json as any,
+    props: {
+      ...(serialized.json as any),
+      session: session ?? null,
+    },
   };
 };

@@ -409,6 +409,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const userGames = await getUserLibrary(user.id);
   return {
     props: {
+      session: session ?? null,
       // Case-insensitive: usernames are citext, so /players/AnnaM is annam's own library.
       isSelf: !!currentUsername && currentUsername.toLowerCase() === username.toLowerCase(),
       userGames,

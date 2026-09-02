@@ -694,6 +694,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
+      session: session ?? null,
       username,
       room: {
         id: room.id,

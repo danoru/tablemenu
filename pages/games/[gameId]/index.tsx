@@ -378,7 +378,7 @@ export default function GameDetailPage({ game, isSelf, isInLibrary, friendActivi
                 border: BORDER_INK,
               }}
             >
-              <GameArt game={game} size={200} />
+              <GameArt priority game={game} size={200} />
             </Box>
 
             <Box sx={{ flex: 1, textAlign: { xs: "center", sm: "left" } }}>
@@ -1070,6 +1070,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
+      session: session ?? null,
       isSelf: !!currentUserId,
       isInLibrary,
       friendActivity,

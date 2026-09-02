@@ -794,6 +794,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const library = await getUserLibrary(currentUserId);
 
   return {
-    props: { library, username: (session.user as any).username ?? "", userId: currentUserId },
+    props: {
+      session: session ?? null,
+      library,
+      username: (session.user as any).username ?? "",
+      userId: currentUserId,
+    },
   };
 };

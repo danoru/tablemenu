@@ -1280,6 +1280,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (!room) return { notFound: true };
     return {
       props: {
+        session: session ?? null,
         preview: true as const,
         room: {
           name: room.name,
@@ -1348,6 +1349,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (room.visibility === "INVITE_ONLY") {
       return {
         props: {
+          session: session ?? null,
           preview: true as const,
           room: {
             name: room.name,
@@ -1408,6 +1410,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
+      session: session ?? null,
       preview: false as const,
       initialRoom: buildRoomData(room, currentUserId, lastSessionGameIds, wishlistMap),
       currentUserId,

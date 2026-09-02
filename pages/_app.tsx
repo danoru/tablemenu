@@ -1,10 +1,7 @@
-import createEmotionCache from "@/createEmotionCache";
 import Layout from "@components/layout/Layout";
-import { CacheProvider, EmotionCache } from "@emotion/react";
+import { AppCacheProvider } from "@mui/material-nextjs/v16-pagesRouter";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import theme from "@styles/theme";
 import { Decimal } from "decimal.js";
 import type { AppProps } from "next/app";
@@ -12,36 +9,26 @@ import Head from "next/head";
 import { SessionProvider } from "next-auth/react";
 import * as superjson from "superjson";
 
-const clientSideEmotionCache = createEmotionCache();
+export default function App(props: AppProps) {
+  const { Component, pageProps } = props;
 
-interface MyAppProps extends AppProps {
-  emotionCache?: EmotionCache;
-}
-
-export default function App({
-  Component,
-  emotionCache = clientSideEmotionCache,
-  pageProps,
-}: MyAppProps) {
   return (
-    <SessionProvider session={pageProps.session}>
-      <CacheProvider value={emotionCache}>
+    <AppCacheProvider {...props}>
+      <SessionProvider session={pageProps.session}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <LocalizationProvider dateAdapter={AdapterMoment}>
-            <Layout>
-              <Head>
-                <meta charSet="utf-8" />
-                <meta content="initial-scale=1.0, width=device-width" name="viewport" />
-                <link href="/favicon.ico" rel="shortcut icon" />
-                <title>Tablekeeper</title>
-              </Head>
-              <Component {...pageProps} />
-            </Layout>
-          </LocalizationProvider>
+          <Layout>
+            <Head>
+              <meta charSet="utf-8" />
+              <meta content="initial-scale=1.0, width=device-width" name="viewport" />
+              <link href="/images/logo.svg" rel="icon" type="image/svg+xml" />
+              <title>Tablekeeper</title>
+            </Head>
+            <Component {...pageProps} />
+          </Layout>
         </ThemeProvider>
-      </CacheProvider>
-    </SessionProvider>
+      </SessionProvider>
+    </AppCacheProvider>
   );
 }
 

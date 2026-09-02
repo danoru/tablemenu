@@ -354,6 +354,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return loginRedirect(context.resolvedUrl);
   }
   return {
-    props: { username: (session.user as any).username ?? "" },
+    props: {
+      session: session ?? null,
+      username: (session.user as any).username ?? "",
+    },
   };
 };

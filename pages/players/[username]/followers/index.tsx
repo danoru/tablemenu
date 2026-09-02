@@ -165,6 +165,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
+      session: session ?? null,
       profileUsername: profileUser.username,
       isAuthenticated: !!currentUserId,
       currentUsername,

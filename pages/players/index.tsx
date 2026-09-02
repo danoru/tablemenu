@@ -390,6 +390,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
   return {
     props: {
+      session: session ?? null,
       ...(serialized.json as any),
       currentUserId,
       currentUsername,

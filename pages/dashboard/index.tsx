@@ -527,6 +527,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
+      session: session ?? null,
       activeRooms: activeRooms.map(({ host, hostId, ...r }) => ({
         ...r,
         createdAt: r.createdAt.toISOString(),
