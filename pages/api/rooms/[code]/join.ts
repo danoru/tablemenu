@@ -50,10 +50,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     // which is what the visibility toggle has always promised. Never promote
     // your own PENDING row here — that would let a requester wave themselves
     // through the door they just knocked on.
+    if (existingInvite?.status === "DECLINED") {
+      return res.status(403).json({ error: "The host declined your request to join" });
+    }
     if (room.visibility === "INVITE_ONLY") {
-      if (existingInvite?.status === "DECLINED") {
-        return res.status(403).json({ error: "The host declined your request to join" });
-      }
       if (existingInvite?.status === "PENDING") {
         return res
           .status(200)

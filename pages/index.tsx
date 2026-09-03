@@ -373,8 +373,8 @@ export default function HomePage() {
               </Box>
               <Typography sx={styles.modeTitle}>Tonight, in 10 seconds</Typography>
               <Typography sx={styles.modeDesc}>
-                Tell us how many players and how much time you have. We'll pick the perfect game
-                from your library — no account needed.
+                Tell us how many players and how much time you have. We'll spin up the perfect game
+                from your library before the snacks are open.
               </Typography>
             </Box>
 

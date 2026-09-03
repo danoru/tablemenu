@@ -98,6 +98,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           designers: body.designers ?? [],
           publishers: body.publishers ?? [],
           countries: body.countries ?? [],
+          yearPublished: body.yearPublished ?? null,
         },
       });
 
@@ -109,6 +110,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
 
     if (existingUserGame) {
+      // A "Want to Play" row is not in the library yet; adding it should move
+      // it in rather than report success and leave it on the wishlist.
+      if (existingUserGame.isWishlist) {
+        await prisma.userGames.update({
+          where: { id: existingUserGame.id },
+          data: { isWishlist: false },
+        });
+      }
       return res.status(200).json({
         userGameId: existingUserGame.id,
         gameId,

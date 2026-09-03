@@ -20,11 +20,20 @@ import React from "react";
 
 import GameArt from "../games/GameArt";
 
+// Favourites and well-rated games get better odds, as the landing page
+// promises; everything else still has a real chance.
+function pickWeight(g: LibraryGame): number {
+  let weight = 1;
+  if (g.isFavorite) weight += 2;
+  if ((g.userStars ?? 0) >= 4) weight += 1;
+  return weight;
+}
+
 function weightedPick(games: LibraryGame[]): LibraryGame {
-  const total = games.length;
+  const total = games.reduce((sum, g) => sum + pickWeight(g), 0);
   let rand = Math.random() * total;
   for (const g of games) {
-    rand -= 1;
+    rand -= pickWeight(g);
     if (rand <= 0) return g;
   }
   return games[games.length - 1];
@@ -248,7 +257,9 @@ export default function QuickGenModal({
             <Typography
               sx={{ fontFamily: FONT_SANS, fontSize: "14px", fontWeight: 500, color: "error.main" }}
             >
-              No games match those filters.
+              {library.length === 0
+                ? "Your library is empty. Add a few games first and come back to spin."
+                : "No games match those filters."}
             </Typography>
           )}
           {(result || spinning) && (
