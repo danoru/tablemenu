@@ -239,6 +239,34 @@ export default function DashboardPage({
                   overflow: "hidden",
                 }}
               >
+                {recentGames.length === 0 && (
+                  <Box sx={{ padding: "28px 20px", textAlign: "center" }}>
+                    <Typography
+                      sx={{
+                        fontFamily: FONT_SERIF,
+                        fontStyle: "italic",
+                        fontSize: "18px",
+                        fontWeight: 700,
+                        color: "text.primary",
+                        mb: "6px",
+                      }}
+                    >
+                      Nothing on the shelf yet
+                    </Typography>
+                    <Typography
+                      sx={{ fontFamily: FONT_SANS, fontSize: "13px", color: TEXT_DIM, mb: "16px" }}
+                    >
+                      Search BoardGameGeek or import your collection to get started.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      onClick={() => router.push(`/players/${username}/library`)}
+                      sx={{ fontSize: "13px", padding: "8px 18px" }}
+                    >
+                      Add your first game
+                    </Button>
+                  </Box>
+                )}
                 {recentGames.map((game, i) => (
                   <Box key={game.gameId}>
                     <Box

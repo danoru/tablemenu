@@ -1346,7 +1346,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     // INVITE_ONLY rooms must not silently absorb any authenticated viewer.
     // Show the locked preview; PENDING invitees get an accept affordance.
-    if (room.visibility === "INVITE_ONLY") {
+    // A DECLINED row is the host's decision; reopening the link must not
+    // upsert it back to ACCEPTED (join.ts applies the same rule).
+    if (room.visibility === "INVITE_ONLY" || myInvite?.status === "DECLINED") {
       return {
         props: {
           session: session ?? null,

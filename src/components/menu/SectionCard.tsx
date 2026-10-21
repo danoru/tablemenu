@@ -254,7 +254,9 @@ export default function SectionCard({
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: twoColumn ? { xs: "1fr", sm: "1fr 1fr" } : "1fr",
+            gridTemplateColumns: twoColumn
+              ? { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }
+              : "minmax(0, 1fr)",
             columnGap: "32px",
             rowGap: "18px",
           }}

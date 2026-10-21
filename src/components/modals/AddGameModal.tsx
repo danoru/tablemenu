@@ -165,7 +165,27 @@ export default function AddGameModal({ open, onClose, onAdded }: AddGameModalPro
             : `${cleanText(gameName)} added to your library!`,
           severity: "success",
         });
-        if (!addData.alreadyInLibrary) onAdded(game);
+        // The BGG payload has no gameId; the grid links by it, so build the
+        // library row from the ids the API just returned.
+        if (!addData.alreadyInLibrary) {
+          onAdded({
+            ...game,
+            bggId: game.bggId ?? result.bggId,
+            userGameId: addData.userGameId,
+            gameId: addData.gameId,
+            addedAt: new Date().toISOString(),
+            weight: 1,
+            notes: null,
+            isFavorite: false,
+            isWishlist: false,
+            userStars: null,
+            categories: game.categories ?? [],
+            mechanics: game.mechanics ?? [],
+            designers: game.designers ?? [],
+            publishers: game.publishers ?? [],
+            yearPublished: game.yearPublished ?? null,
+          });
+        }
       } else {
         setSnackbar({
           open: true,

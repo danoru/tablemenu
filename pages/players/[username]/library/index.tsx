@@ -317,7 +317,50 @@ export default function UserLibraryPage({ isSelf, profileUsername, userGames }: 
             ))}
           </Box>
 
-          {filtered.length === 0 && (
+          {library.length === 0 && (
+            <Box sx={{ textAlign: "center", py: "64px" }}>
+              <Typography
+                sx={{
+                  fontFamily: FONT_SERIF,
+                  fontStyle: "italic",
+                  fontSize: "22px",
+                  fontWeight: 700,
+                  color: "text.primary",
+                }}
+              >
+                {isSelf ? "Your shelf is empty" : "Nothing on this shelf yet"}
+              </Typography>
+              <Typography
+                sx={{ fontFamily: FONT_SANS, fontSize: "14px", color: TEXT_DIM, mt: "8px" }}
+              >
+                {isSelf
+                  ? "Search BoardGameGeek for a game, or import your whole collection in one go."
+                  : `${profileUsername} hasn't added any games.`}
+              </Typography>
+              {isSelf && (
+                <Box sx={{ display: "flex", gap: "10px", justifyContent: "center", mt: "20px" }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => setAddOpen(true)}
+                    sx={{ fontSize: "14px", padding: "10px 20px" }}
+                  >
+                    Add a game
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<DownloadIcon />}
+                    onClick={() => setImportOpen(true)}
+                    sx={{ fontSize: "14px", padding: "10px 20px" }}
+                  >
+                    Import from BGG
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {library.length > 0 && filtered.length === 0 && (
             <Box sx={{ textAlign: "center", py: "64px" }}>
               <Typography sx={{ fontFamily: FONT_SERIF, fontSize: "20px", color: TEXT_DIM }}>
                 No games match "{search}"

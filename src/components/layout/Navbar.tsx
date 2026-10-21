@@ -24,7 +24,7 @@ interface NavPage {
   variant?: "tab" | "primary" | "muted";
 }
 
-function getPages(session: any, onSignOut: () => void): NavPage[] {
+function getPages(session: any, username: string | undefined, onSignOut: () => void): NavPage[] {
   if (session) {
     return [
       // Rooms live on the dashboard; without this entry a member who joined by
@@ -33,16 +33,22 @@ function getPages(session: any, onSignOut: () => void): NavPage[] {
       { id: 2, title: "Games", link: "/games", variant: "tab" },
       { id: 3, title: "Menu", link: "/menu", variant: "tab" },
       { id: 4, title: "Players", link: "/players", variant: "tab" },
-      { id: 5, title: "Sign out", action: onSignOut, variant: "muted" },
-    ];
+      // Settings used to be reachable only through an "Edit" button on your
+      // own profile page.
+      ...(username
+        ? [{ id: 5, title: "Settings", link: `/players/${username}/settings`, variant: "muted" }]
+        : []),
+      { id: 6, title: "Sign out", action: onSignOut, variant: "muted" },
+    ] as NavPage[];
   }
 
+  // Menu is login-gated, so advertising it to visitors just bounced them to
+  // the sign-in form.
   return [
-    { id: 1, title: "Menu", link: "/menu", variant: "tab" },
-    { id: 2, title: "Games", link: "/games", variant: "tab" },
-    { id: 3, title: "Players", link: "/players", variant: "tab" },
-    { id: 4, title: "Sign in", link: "/login", variant: "muted" },
-    { id: 5, title: "Create account", link: "/register", variant: "primary" },
+    { id: 1, title: "Games", link: "/games", variant: "tab" },
+    { id: 2, title: "Players", link: "/players", variant: "tab" },
+    { id: 3, title: "Sign in", link: "/login", variant: "muted" },
+    { id: 4, title: "Create account", link: "/register", variant: "primary" },
   ];
 }
 
@@ -67,8 +73,8 @@ export default function Navbar() {
     signOut({ callbackUrl: "/" });
   }
 
-  const pages = getPages(session, handleSignOut);
   const username: string | undefined = (session?.user as any)?.username;
+  const pages = getPages(session, username, handleSignOut);
 
   function isActive(link?: string) {
     if (!link) return false;
@@ -288,7 +294,7 @@ export default function Navbar() {
 
                 return (
                   <Box key={page.id}>
-                    {!session && index === 3 && <Divider sx={{ my: "4px" }} />}
+                    {!session && index === 2 && <Divider sx={{ my: "4px" }} />}
                     <MenuItem
                       onClick={() => handlePageClick(page)}
                       sx={{
