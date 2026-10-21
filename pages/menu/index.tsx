@@ -615,7 +615,7 @@ export default function MenuPage({ library, username, userId }: Props) {
                     sx={{
                       position: "relative",
                       display: "grid",
-                      gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                      gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
                       columnGap: "52px",
                       rowGap: "30px",
                       "&::before": {
